@@ -1,56 +1,46 @@
 <?php
 include "connectdb.php";
 
-$sql = "SELECT * FROM category ORDER BY cat_id DESC";
-$result = mysqli_query($conn, $sql);
+if (isset($_POST['submit'])) {
+    $cat_name = $_POST['cat_name'];
+
+    $sql = "INSERT INTO category (cat_name) VALUES ('$cat_name')";
+    $result = mysqli_query($conn, $sql);
+
+    if ($result) {
+        header("Location: list_category.php?msg=เพิ่มหมวดหมู่สำเร็จ");
+        exit;
+    } else {
+        echo "<div class='alert alert-danger'>Error: " . mysqli_error($conn) . "</div>";
+    }
+}
 ?>
 
 <!doctype html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>รายการหมวดหมู่สินค้า</title>
+  <title>เพิ่มหมวดหมู่สินค้า</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
 <div class="container mt-5">
-
-  <?php if (isset($_GET['msg'])): ?>
-    <div class="alert alert-success text-center"><?= $_GET['msg'] ?></div>
-  <?php endif; ?>
-
   <div class="card shadow-lg rounded-4">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between">
-      <h4 class="mb-0">รายการหมวดหมู่</h4>
-      <a href="add_category.php" class="btn btn-success btn-sm">+ เพิ่มหมวดหมู่</a>
-      
+    <div class="card-header bg-info text-white text-center">
+      <h4>ฟอร์มเพิ่มหมวดหมู่สินค้า</h4>
     </div>
-    <div class="card-body p-3">
-      <table class="table table-bordered table-striped text-center align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>ID</th>
-            <th>ชื่อหมวดหมู่</th>
-            <th>การจัดการ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-            <tr>
-              <td><?= $row['cat_id'] ?></td>
-              <td><?= $row['cat_name'] ?></td>
-              <td>
-                <a href="delete_category.php?delete_id=<?= $row['cat_id'] ?>" 
-                   class="btn btn-sm btn-danger"
-                   onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?');">
-                   ลบ
-                </a>
-              </td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
+    <div class="card-body p-4">
+      <form action="" method="post">
+        <div class="mb-3">
+          <label class="form-label">ชื่อหมวดหมู่</label>
+          <input type="text" name="cat_name" class="form-control" required>
+        </div>
+        <div class="text-center">
+          <button type="submit" name="submit" class="btn btn-success px-4">บันทึก</button>
+          <a href="list_category.php" class="btn btn-secondary px-4">กลับไปหน้ารายการ</a>
+        </div>
+      </form>
     </div>
   </div>
 </div>
