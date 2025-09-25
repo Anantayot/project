@@ -45,4 +45,28 @@ $cat_result = mysqli_query($conn, "SELECT * FROM category");
         </div>
 
         <div class="mb-3">
-          <label class="form-label">ห
+          <label class="form-label">หมวดหมู่</label>
+          <select name="cat_id" class="form-select" required>
+            <option value="">-- เลือกหมวดหมู่ --</option>
+            <?php while ($row = mysqli_fetch_assoc($cat_result)) { ?>
+              <option value="<?= $row['cat_id'] ?>"><?= $row['cat_name'] ?></option>
+            <?php } ?>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">รูปภาพ</label>
+          <input type="file" name="p_img" class="form-control">
+        </div>
+
+        <div class="text-center">
+          <button type="submit" name="submit" class="btn btn-success px-4">บันทึก</button>
+          <button type="reset" class="btn btn-secondary px-4">ล้าง</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
