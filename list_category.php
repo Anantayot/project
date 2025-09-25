@@ -21,13 +21,38 @@ $result = mysqli_query($conn, $sql);
   <?php endif; ?>
 
   <div class="card shadow-lg rounded-4">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+    <div class="card-header bg-secondary text-white d-flex justify-content-between">
       <h4 class="mb-0">รายการหมวดหมู่</h4>
-      <div>
-        <a href="list_product.php" class="btn btn-primary btn-sm me-2">📦 รายการสินค้า</a>
-        <a href="add_category.php" class="btn btn-success btn-sm">+ เพิ่มหมวดหมู่</a>
-      </div>
+      <a href="add_category.php" class="btn btn-success btn-sm">+ เพิ่มหมวดหมู่</a>
     </div>
     <div class="card-body p-3">
       <table class="table table-bordered table-striped text-center align-middle">
-        <thead cl
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>ชื่อหมวดหมู่</th>
+            <th>การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+              <td><?= $row['cat_id'] ?></td>
+              <td><?= $row['cat_name'] ?></td>
+              <td>
+                <a href="delete_category.php?delete_id=<?= $row['cat_id'] ?>" 
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่นี้?');">
+                   ลบ
+                </a>
+              </td>
+            </tr>
+          <?php } ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
