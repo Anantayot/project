@@ -1,38 +1,40 @@
 <?php
-// PHP logic for session start and login process will go here
-// ...
+session_start(); // 1. ต้องเริ่ม Session ก่อนเสมอ
+include('../connectdb.php'); // เชื่อมต่อ DB ที่เช็คแล้วว่าใช้ได้
+
+$error_message = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // ป้องกัน SQL Injection
+    $username = mysqli_real_escape_string($conn, $_POST['a_user']);
+    $password = mysqli_real_escape_string($conn, $_POST['a_pass']); 
+    
+    // 2. สร้าง SQL Query เพื่อตรวจสอบผู้ใช้และรหัสผ่าน
+    $sql = "SELECT a_id FROM admin WHERE a_user = '$username' AND a_pass = '$password'"; 
+    
+    $result = mysqli_query($conn, $sql);
+
+    if (mysqli_num_rows($result) == 1) {
+        $admin = mysqli_fetch_assoc($result);
+        
+        // 3. Login สำเร็จ: สร้าง Session และ Redirect
+        $_SESSION['a_id'] = $admin['a_id']; 
+        header('Location: dashboard.php'); 
+        exit;
+    } else {
+        // 4. Login ล้มเหลว: ตั้งค่าข้อความแจ้งเตือน
+        $error_message = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง โปรดลองอีกครั้ง";
+    }
+}
+// หาก Login ล้มเหลว หรือเข้ามาครั้งแรก จะแสดงหน้า Login 
 ?>
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="card shadow-lg" style="width: 100%; max-width: 400px;">
-            <div class="card-header bg-dark text-white text-center">
-                <h4>เข้าสู่ระบบผู้ดูแลระบบ</h4>
-            </div>
-            <div class="card-body">
-                <form action="index.php" method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">ชื่อผู้ใช้งาน</label>
-                        <input type="text" class="form-control" id="username" name="a_user" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">รหัสผ่าน</label>
-                        <input type="password" class="form-control" id="password" name="a_pass" required>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
-                    </div>
-                </form>
-            </div>
+
+<div class="card-body">
+    <?php if ($error_message): ?>
+        <div class="alert alert-danger" role="alert">
+            <?php echo $error_message; ?>
         </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <?php endif; ?>
+    <form action="index.php" method="POST">
+        </form>
+</div>
