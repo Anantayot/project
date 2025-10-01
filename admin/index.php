@@ -1,6 +1,10 @@
 <?php
+// เพิ่ม 2 บรรทัดนี้เพื่อเปิดการแสดงผลข้อผิดพลาด
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
-include '../connectdb.php';
+include '../connectdb.php'; // <--- ปัญหามักจะเกิดจากบรรทัดนี้
 
 if (isset($_POST['email'])) {
     $email = $_POST['email'];
