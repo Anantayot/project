@@ -1,22 +1,31 @@
 <?php 
-    include 'includes/connectdb.php'; // ไฟล์เชื่อมต่อฐานข้อมูล
-    include 'includes/header.php'; 
+include 'includes/connectdb.php';
+include 'includes/header.php'; 
 
-    // ในระบบจริง จะต้องมีการดึงข้อมูลสินค้าจากฐานข้อมูล
-    // ตัวอย่าง:
-    // $stmt = $conn->prepare("SELECT * FROM products INNER JOIN categories ON products.category_id = categories.category_id");
-    // $stmt->execute();
-    // $products = $stmt->fetchAll();
+// --- ส่วน PHP สำหรับดึงข้อมูล ---
+$products = [];
+$search_term = $_GET['search'] ?? '';
 
-    // ข้อมูลตัวอย่างสำหรับแสดงผล (แทนการเชื่อมต่อ DB จริง)
-    $products = [
-        ['id' => 1, 'name' => 'เสื้อยืดคอกลมสีขาว', 'category' => 'เสื้อผ้า', 'price' => 250.00, 'stock' => 50],
-        ['id' => 2, 'name' => 'กางเกงยีนส์ขายาว', 'category' => 'เสื้อผ้า', 'price' => 890.00, 'stock' => 20],
-        ['id' => 3, 'name' => 'นาฬิกาข้อมือ', 'category' => 'เครื่องประดับ', 'price' => 1500.00, 'stock' => 10],
-    ];
+try {
+    $sql = "SELECT p.*, c.name AS category_name 
+            FROM products p
+            INNER JOIN categories c ON p.category_id = c.category_id
+            WHERE p.name LIKE :search_term OR c.name LIKE :search_term 
+            ORDER BY p.product_id DESC";
+    
+    $stmt = $conn->prepare($sql);
+    $search_param = '%' . $search_term . '%';
+    $stmt->bindParam(':search_term', $search_param);
+    $stmt->execute();
+    $products = $stmt->fetchAll();
 
-    // โค้ดสำหรับรับค่าค้นหา (ถ้ามี)
-    $search_term = $_GET['search'] ?? ''; 
+} catch (PDOException $e) {
+    // จัดการข้อผิดพลาดในการดึงข้อมูล
+    // echo "Error: " . $e->getMessage();
+}
+
+// โค้ดสำหรับจัดการการลบสินค้า (ต้องทำในไฟล์แยก เช่น delete_product.php)
+// ... 
 ?>
 
 <h1 class="mb-4"><i class="bi bi-box-seam"></i> จัดการสินค้า</h1>
@@ -25,10 +34,10 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
             <form class="d-flex" action="manage_products.php" method="GET">
-                <input class="form-control me-2" type="search" placeholder="ค้นหาสินค้า" name="search" value="<?= htmlspecialchars($search_term) ?>">
-                <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i> ค้นหา</button>
+                <input class="form-control me-2" type="search" placeholder="ค้นหาสินค้าหรือประเภท..." name="search" value="<?= htmlspecialchars($search_term) ?>">
+                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> ค้นหา</button>
             </form>
-            <a href="product_form.php" class="btn btn-primary">
+            <a href="product_form.php" class="btn btn-success">
                 <i class="bi bi-plus-circle"></i> เพิ่มสินค้าใหม่
             </a>
         </div>
@@ -36,8 +45,8 @@
 </div>
 
 <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        รายการสินค้าทั้งหมด
+    <div class="card-header card-header-custom">
+        รายการสินค้าทั้งหมด (<?= count($products) ?> รายการ)
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -56,24 +65,25 @@
                     <?php if (count($products) > 0): ?>
                         <?php foreach ($products as $product): ?>
                             <tr>
-                                <td><?= $product['id'] ?></td>
+                                <td><?= $product['product_id'] ?></td>
                                 <td><?= htmlspecialchars($product['name']) ?></td>
-                                <td><?= htmlspecialchars($product['category']) ?></td>
-                                <td><?= number_format($product['price'], 2) ?> บาท</td>
-                                <td><span class="badge <?= ($product['stock'] > 0) ? 'bg-success' : 'bg-danger' ?>"><?= $product['stock'] ?></span></td>
+                                <td><?= htmlspecialchars($product['category_name']) ?></td>
+                                <td><?= number_format($product['price'], 2) ?></td>
+                                <td><span class="badge <?= ($product['stock_quantity'] > 0) ? 'bg-success' : 'bg-danger' ?>"><?= $product['stock_quantity'] ?></span></td>
                                 <td>
-                                    <a href="product_form.php?id=<?= $product['id'] ?>" class="btn btn-sm btn-warning me-1">
+                                    <a href="product_form.php?id=<?= $product['product_id'] ?>" class="btn btn-sm btn-warning me-1">
                                         <i class="bi bi-pencil-square"></i> แก้ไข
                                     </a>
-                                    <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $product['id'] ?>, '<?= htmlspecialchars($product['name']) ?>')">
+                                    <a href="delete_product.php?id=<?= $product['product_id'] ?>" class="btn btn-sm btn-danger" 
+                                       onclick="return confirm('คุณต้องการลบสินค้า <?= htmlspecialchars($product['name']) ?> ใช่หรือไม่?');">
                                         <i class="bi bi-trash"></i> ลบ
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center">ไม่พบข้อมูลสินค้า</td>
+                            <td colspan="6" class="text-center">ไม่พบข้อมูลสินค้า<?= $search_term ? " สำหรับการค้นหา: **$search_term**" : "" ?></td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -81,15 +91,5 @@
         </div>
     </div>
 </div>
-
-<script>
-function confirmDelete(id, name) {
-    if (confirm(`คุณต้องการลบสินค้า "${name}" ใช่หรือไม่?`)) {
-        // ในระบบจริง: เชื่อมไปยังไฟล์ PHP ที่ทำการลบสินค้า (เช่น delete_product.php?id=...)
-        console.log('ลบสินค้า ID:', id); 
-        // window.location.href = 'delete_product.php?id=' + id;
-    }
-}
-</script>
 
 <?php include 'includes/footer.php'; ?>
