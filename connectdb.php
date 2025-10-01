@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 $host = "localhost";
 $user = "root";
 $pwd = "note071245"; // ตรวจสอบรหัสผ่านนี้ว่าถูกต้อง
-$dbname = "snekker_shop";
+$dbname = "ihavejib";
 $conn = mysqli_connect($host, $user, $pwd, $dbname);
 
 // *** ส่วนตรวจสอบสถานะการเชื่อมต่อ ***
