@@ -1,33 +1,22 @@
 <?php
-include 'includes/connectdb.php'; // เชื่อมต่อ DB และเริ่ม Session
+session_start();
+include '../connectdb.php';
 
-$error = '';
+if (isset($_POST['email'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+    // ควรมีการเข้ารหัส Password ในฐานข้อมูลจริง เช่น password_hash() และ password_verify()
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ? AND role = 'admin'");
+    $stmt->execute([$email, $password]);
+    $admin = $stmt->fetch();
 
-    // 1. ค้นหาผู้ใช้ด้วย Email
-    $stmt = $conn->prepare("SELECT user_id, password, first_name, role FROM users WHERE email = :email AND role = 'admin'");
-    $stmt->bindParam(':email', $email);
-    $stmt->execute();
-    $user = $stmt->fetch();
-
-    if ($user && password_verify($password, $user['password'])) {
-        // 2. ตรวจสอบรหัสผ่านและ Role
-        // ในระบบจริง คุณควรใช้ password_verify($password, $user['password'])
-        // ตัวอย่างนี้สมมติว่ารหัสผ่านถูก Hash มาแล้ว
-
-        // 3. ตั้งค่า Session
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['user_role'] = $user['role'];
-        $_SESSION['user_first_name'] = $user['first_name'];
-
-        // Redirect ไปหน้า Dashboard
+    if ($admin) {
+        $_SESSION['admin_login'] = $admin['email'];
         header('Location: dashboard.php');
-        exit();
+        exit;
     } else {
-        $error = "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือคุณไม่ใช่ผู้ดูแลระบบ";
+        $error = "อีเมลหรือรหัสผ่านไม่ถูกต้อง!";
     }
 }
 ?>
@@ -36,52 +25,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            background-color: #0d6efd; /* Primary color background */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-            padding: 15px;
-        }
-    </style>
+    <title>เข้าสู่ระบบผู้ดูแล</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-
-<div class="card login-card shadow-lg">
-    <div class="card-body">
-        <h3 class="card-title text-center mb-4"><i class="bi bi-shield-lock-fill"></i> ผู้ดูแลระบบ</h3>
-        
-        <?php if ($error): ?>
-            <div class="alert alert-danger" role="alert">
-                <?= $error ?>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center" style="margin-top: 100px;">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">เข้าสู่ระบบหลังร้าน</h3>
+                        <?php if (isset($error)): ?>
+                            <div class="alert alert-danger"><?php echo $error; ?></div>
+                        <?php endif; ?>
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">อีเมล</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">รหัสผ่าน</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">เข้าสู่ระบบ</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-        <?php endif; ?>
-
-        <form method="POST" action="index.php">
-            <div class="mb-3">
-                <label for="email" class="form-label">อีเมลผู้ดูแล</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">รหัสผ่าน</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-lg">เข้าสู่ระบบ</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
