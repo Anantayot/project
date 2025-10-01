@@ -14,14 +14,14 @@ $result_categories = mysqli_query($conn, $sql_categories);
 <html lang="th">
 <head>
     <meta charset="utf-8">
-    <title>หน้าแรก - Snekker Shop</title>
+    <title>หน้าแรก - IHAVEJIB</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="index.php">SNEKKER SHOP</a>
+    <a class="navbar-brand" href="index.php">IHAVEJIB</a>
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item dropdown">
