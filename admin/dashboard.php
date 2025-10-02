@@ -141,7 +141,6 @@ $(document).ready(function() {
     $('#myTable').DataTable({
         responsive: true,
         paging: true,           // เปิดการแบ่งหน้า
-        searching: true,        // เปิด search
         info: true,             // แสดงข้อมูลจำนวนรายการ
         lengthChange: false,    // ปิด select เปลี่ยนจำนวนรายการต่อหน้า
         language: {
