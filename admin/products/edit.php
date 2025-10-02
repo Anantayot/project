@@ -20,9 +20,26 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     $price = floatval($_POST['price']);
     $stock = intval($_POST['stock']);
     $cat = intval($_POST['category_id']);
+    $desc = $_POST['description'];
 
-    $stmt = $conn->prepare("UPDATE product SET p_name=?, p_price=?, p_stock=?, cat_id=? WHERE p_id=?");
-    $stmt->bind_param("sdiii",$name,$price,$stock,$cat,$id);
+    // ✅ จัดการอัปโหลดรูป
+    $image = $product['p_image']; // ค่าเดิม
+    if(!empty($_FILES['image']['name'])){
+        $targetDir = "../uploads/";
+        if(!is_dir($targetDir)) mkdir($targetDir,0777,true);
+
+        $fileName = time()."_".basename($_FILES['image']['name']);
+        $targetFile = $targetDir.$fileName;
+
+        if(move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)){
+            $image = $fileName;
+        }
+    }
+
+    $stmt = $conn->prepare("UPDATE product 
+        SET p_name=?, p_price=?, p_stock=?, cat_id=?, p_description=?, p_image=? 
+        WHERE p_id=?");
+    $stmt->bind_param("sdiissi",$name,$price,$stock,$cat,$desc,$image,$id);
 
     if($stmt->execute()){
         header("Location: index.php");
@@ -44,9 +61,9 @@ $cats = $conn->query("SELECT * FROM category");
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<div class="container mt-4" style="max-width:600px;">
+<div class="container mt-4" style="max-width:700px;">
 <h3>แก้ไขสินค้า</h3>
-<form method="post" class="mt-3">
+<form method="post" enctype="multipart/form-data" class="mt-3">
   <div class="mb-3">
     <label>ชื่อสินค้า</label>
     <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($product['p_name']) ?>" required>
@@ -68,6 +85,18 @@ $cats = $conn->query("SELECT * FROM category");
         </option>
       <?php } ?>
     </select>
+  </div>
+  <div class="mb-3">
+    <label>รายละเอียดสินค้า</label>
+    <textarea name="description" rows="4" class="form-control"><?= htmlspecialchars($product['p_description']) ?></textarea>
+  </div>
+  <div class="mb-3">
+    <label>รูปภาพสินค้า</label><br>
+    <?php if(!empty($product['p_image'])){ ?>
+      <img src="../uploads/<?= htmlspecialchars($product['p_image']) ?>" width="100" class="img-thumbnail mb-2"><br>
+    <?php } ?>
+    <input type="file" name="image" class="form-control">
+    <small class="text-muted">ถ้าไม่เลือกไฟล์ใหม่ จะใช้รูปเดิม</small>
   </div>
   <button class="btn btn-success">💾 บันทึก</button>
   <a href="index.php" class="btn btn-secondary">↩ ยกเลิก</a>

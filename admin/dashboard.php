@@ -4,13 +4,15 @@ if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit();
 }
-include "connectdb.php";
 
-// นับสรุปข้อมูล
-$totalProducts = $conn->query("SELECT COUNT(*) AS total FROM product")->fetch_assoc()['total'];
+// เรียกไฟล์เชื่อมต่อฐานข้อมูล
+include "connectdb.php";   // ปรับ path ให้ตรงกับโครงสร้างจริง
+
+// ดึงข้อมูลสรุป
+$totalProducts   = $conn->query("SELECT COUNT(*) AS total FROM product")->fetch_assoc()['total'];
 $totalCategories = $conn->query("SELECT COUNT(*) AS total FROM category")->fetch_assoc()['total'];
-$totalCustomers = $conn->query("SELECT COUNT(*) AS total FROM customers")->fetch_assoc()['total'];
-$totalOrders = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc()['total'];
+$totalCustomers  = $conn->query("SELECT COUNT(*) AS total FROM customers")->fetch_assoc()['total'];
+$totalOrders     = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc()['total'];
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -31,21 +33,21 @@ $totalOrders = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>ยินดีต้อนรับ <?= $_SESSION['admin'] ?></h2>
+        <h2>ยินดีต้อนรับ <?= htmlspecialchars($_SESSION['admin']) ?></h2>
         <a href="logout.php" class="btn btn-danger">ออกจากระบบ</a>
     </div>
 
     <!-- เมนู -->
     <div class="mb-4">
         <div class="btn-group" role="group">
-        <a href="products/index.php" class="btn btn-primary">สินค้า</a>
-    <a href="categories/index.php" class="btn btn-primary">ประเภทสินค้า</a>
-    <a href="customers/index.php" class="btn btn-primary">ลูกค้า</a>
-    <a href="orders/index.php" class="btn btn-primary">ออเดอร์</a>
+            <a href="products/index.php" class="btn btn-primary">สินค้า</a>
+            <a href="categories/index.php" class="btn btn-primary">ประเภทสินค้า</a>
+            <a href="customers/index.php" class="btn btn-primary">ลูกค้า</a>
+            <a href="orders/index.php" class="btn btn-primary">ออเดอร์</a>
         </div>
     </div>
 
-    <!-- Cards สรุปข้อมูล -->
+    <!-- Cards -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
             <div class="card text-center shadow-sm">
@@ -93,7 +95,9 @@ $totalOrders = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>รูปภาพ</th>
                         <th>ชื่อสินค้า</th>
+                        <th>รายละเอียด</th>
                         <th>ราคา</th>
                         <th>สต็อก</th>
                         <th>ประเภท</th>
@@ -101,7 +105,9 @@ $totalOrders = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc
                 </thead>
                 <tbody>
                     <?php
-                    $res = $conn->query("SELECT p.p_id, p.p_name, p.p_price, p.p_stock, c.cat_name AS category
+                    $res = $conn->query("SELECT p.p_id, p.p_name, p.p_price, p.p_stock, 
+                                                p.p_image, p.p_description, 
+                                                c.cat_name AS category
                                          FROM product p 
                                          LEFT JOIN category c ON p.cat_id=c.cat_id
                                          ORDER BY p.p_id DESC LIMIT 5");
@@ -109,7 +115,15 @@ $totalOrders = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_assoc
                     ?>
                     <tr>
                         <td><?= $row['p_id'] ?></td>
-                        <td><?= $row['p_name'] ?></td>
+                        <td>
+                            <?php if (!empty($row['p_image'])): ?>
+                                <img src="../admin/uploads/<?= htmlspecialchars($row['p_image']) ?>" width="60" height="60" class="rounded">
+                            <?php else: ?>
+                                <span class="text-muted">ไม่มีรูป</span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= htmlspecialchars($row['p_name']) ?></td>
+                        <td><?= mb_strimwidth(strip_tags($row['p_description']), 0, 50, "...") ?></td>
                         <td><?= number_format($row['p_price'],2) ?></td>
                         <td><?= $row['p_stock'] ?></td>
                         <td><?= $row['category'] ?></td>

@@ -32,7 +32,9 @@ include("../connectdb.php");
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
+                    <th>รูปภาพ</th>
                     <th>ชื่อสินค้า</th>
+                    <th>รายละเอียด</th>
                     <th>ราคา</th>
                     <th>สต๊อก</th>
                     <th>ประเภท</th>
@@ -49,7 +51,15 @@ include("../connectdb.php");
                 while($row = mysqli_fetch_assoc($result)){
                     echo "<tr>
                             <td>".htmlspecialchars($row['p_id'])."</td>
+                            <td>";
+                                if(!empty($row['p_image'])){
+                                    echo "<img src='../uploads/".htmlspecialchars($row['p_image'])."' width='60' class='img-thumbnail'>";
+                                } else {
+                                    echo "<span class='text-muted'>ไม่มีรูป</span>";
+                                }
+                    echo    "</td>
                             <td>".htmlspecialchars($row['p_name'])."</td>
+                            <td>".nl2br(htmlspecialchars($row['p_description']))."</td>
                             <td>".number_format($row['p_price'],2)."</td>
                             <td>".htmlspecialchars($row['p_stock'])."</td>
                             <td>".htmlspecialchars($row['cat_name'])."</td>
@@ -78,28 +88,28 @@ include("../connectdb.php");
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    $('#myTable').DataTable({
-        responsive: true,
-        "language": {
-            "lengthMenu": "แสดง _MENU_ แถวต่อหน้า",
-            "zeroRecords": "ไม่พบข้อมูล",
-            "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
-            "infoEmpty": "ไม่มีข้อมูล",
-            "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
-            "search": "ค้นหา:",
-            "paginate": {
-                "first": "หน้าแรก",
-                "last": "หน้าสุดท้าย",
-                "next": "ถัดไป",
-                "previous": "ก่อนหน้า"
-            }
-        },
-        "columnDefs": [
-            { "orderable": false, "targets": 5 } // ปิด sorting คอลัมน์จัดการ
-        ]
-    });
+$('#myTable').DataTable({
+    responsive: true,
+    "language": {
+        "lengthMenu": "แสดง _MENU_ แถวต่อหน้า",
+        "zeroRecords": "ไม่พบข้อมูล",
+        "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+        "infoEmpty": "ไม่มีข้อมูล",
+        "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+        "search": "ค้นหา:",
+        "paginate": {
+            "first": "หน้าแรก",
+            "last": "หน้าสุดท้าย",
+            "next": "ถัดไป",
+            "previous": "ก่อนหน้า"
+        }
+    },
+    "columnDefs": [
+        { "orderable": false, "targets": [1,7] }, // ปิด sort ที่คอลัมน์รูปภาพ + จัดการ
+        { responsivePriority: 1, targets: 2 }     // ✅ บังคับให้ "ชื่อสินค้า" โชว์ตลอด
+    ]
 });
+
 </script>
 
 </body>
