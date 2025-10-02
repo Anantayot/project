@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label class="form-label">ที่อยู่</label>
                 <textarea name="address" class="form-control"><?= htmlspecialchars($cus['address']) ?></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">บันทึก</button>
+            <a href="index.php"><button type="submit" class="btn btn-primary">บันทึก</button></a>
         </form>
     </div>
 </div>
