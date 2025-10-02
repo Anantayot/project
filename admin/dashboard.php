@@ -140,11 +140,15 @@ $totalOrders     = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_a
 $(document).ready(function() {
     $('#myTable').DataTable({
         responsive: true,
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json"
+        paging: true,           // เปิดการแบ่งหน้า
+        searching: true,        // เปิด search
+        info: true,             // แสดงข้อมูลจำนวนรายการ
+        lengthChange: false,    // ปิด select เปลี่ยนจำนวนรายการต่อหน้า
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json"
         },
-        "paging": true,
-        "searching": true
+        dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>', 
+        // dom แบบนี้จะแยกแถว pagination ให้ชัดเจน
     });
 });
 </script>
