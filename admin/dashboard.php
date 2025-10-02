@@ -139,7 +139,6 @@ $totalOrders     = $conn->query("SELECT COUNT(*) AS total FROM orders")->fetch_a
 <script>
 $(document).ready(function() {
     $('#myTable').DataTable({
-        responsive: true,
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json"
         },
