@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ssssi", $name, $email, $phone, $address, $id);
 
     if ($stmt->execute()) {
-        header("Location: customers.php");
+        header("Location: index.php");
         exit();
     } else {
         echo "❌ Error: " . $stmt->error;
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label class="form-label">ที่อยู่</label>
                 <textarea name="address" class="form-control"><?= htmlspecialchars($cus['address']) ?></textarea>
             </div>
-            <a href="index.php"><button type="submit" class="btn btn-primary">บันทึก</button></a>
+            <button type="submit" class="btn btn-primary">บันทึก</button>
         </form>
     </div>
 </div>
