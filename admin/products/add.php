@@ -3,14 +3,24 @@ session_start();
 if(!isset($_SESSION['admin'])) header("Location: login.php");
 include "../connectdb.php";
 
+// ประมวลผลการเพิ่มสินค้า
 if ($_SERVER["REQUEST_METHOD"]=="POST") {
     $name  = trim($_POST['name']);
     $price = floatval($_POST['price']);
     $stock = intval($_POST['stock']);
     $cat   = intval($_POST['category_id']);
+    $desc  = trim($_POST['description']);
 
-    $stmt = $conn->prepare("INSERT INTO product (p_name,p_price,p_stock,cat_id) VALUES (?,?,?,?)");
-    $stmt->bind_param("sdii",$name,$price,$stock,$cat);
+    // อัปโหลดรูปภาพ
+    $image_name = null;
+    if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $image_name = uniqid('prod_').'.'.$ext;
+        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/".$image_name);
+    }
+
+    $stmt = $conn->prepare("INSERT INTO product (p_name,p_price,p_stock,cat_id,p_description,p_image) VALUES (?,?,?,?,?,?)");
+    $stmt->bind_param("sdiiss",$name,$price,$stock,$cat,$desc,$image_name);
 
     if($stmt->execute()){
         header("Location: index.php");
@@ -20,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
     }
 }
 
+// ดึงหมวดหมู่
 $cats = $conn->query("SELECT * FROM category");
 ?>
 
@@ -33,7 +44,7 @@ $cats = $conn->query("SELECT * FROM category");
 <body class="bg-light">
 <div class="container mt-4" style="max-width:600px;">
 <h3>เพิ่มสินค้า</h3>
-<form method="post" class="mt-3">
+<form method="post" enctype="multipart/form-data" class="mt-3">
   <div class="mb-3">
     <label>ชื่อสินค้า</label>
     <input type="text" name="name" class="form-control" required>
@@ -53,6 +64,14 @@ $cats = $conn->query("SELECT * FROM category");
         <option value="<?= $c['cat_id'] ?>"><?= htmlspecialchars($c['cat_name']) ?></option>
       <?php } ?>
     </select>
+  </div>
+  <div class="mb-3">
+    <label>รายละเอียดสินค้า</label>
+    <textarea name="description" class="form-control" rows="4"></textarea>
+  </div>
+  <div class="mb-3">
+    <label>รูปภาพ</label>
+    <input type="file" name="image" class="form-control" accept="image/*">
   </div>
   <button class="btn btn-success">💾 บันทึก</button>
   <a href="index.php" class="btn btn-secondary">↩ ยกเลิก</a>
