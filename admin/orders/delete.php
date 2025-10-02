@@ -14,7 +14,7 @@ $conn->query("DELETE FROM order_details WHERE order_id=$id");
 // ลบออเดอร์
 $sql = "DELETE FROM orders WHERE order_id=$id";
 if ($conn->query($sql)) {
-    header("Location: orders.php");
+    header("Location: index.php");
     exit();
 } else {
     echo "เกิดข้อผิดพลาด: " . $conn->error;
