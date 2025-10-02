@@ -46,14 +46,16 @@ $items = $conn->query("
 
     <p><b>วันที่สั่ง:</b> <?= $order['order_date'] ?></p>
     <p><b>สถานะ:</b> 
-    <?php 
-    switch($order['status']) {
-        case 'รอดำเนินการ': echo "<span class='text-warning'>รอดำเนินการ</span>"; break;
-        case 'จัดส่งแล้ว': echo "<span class='text-primary'>จัดส่งแล้ว</span>"; break;
-        case 'เสร็จสิ้น': echo "<span class='text-success'>เสร็จสิ้น</span>"; break;
-        default: echo htmlspecialchars($order['status']);
-    }
-    ?>
+<?php 
+switch($order['status']) {
+    case 'รอดำเนินการ': echo "<span class='text-warning'>รอดำเนินการ</span>"; break;
+    case 'จัดส่งแล้ว': echo "<span class='text-primary'>จัดส่งแล้ว</span>"; break;
+    case 'เสร็จสิ้น': echo "<span class='text-success'>เสร็จสิ้น</span>"; break;
+    default: echo htmlspecialchars($order['status']);
+}
+?>
+<a href="order_edit.php?id=<?= $order['order_id'] ?>" class="btn btn-sm btn-outline-primary ms-2">✏️ แก้ไข</a>
+</p>
     </p>
     <p><b>ลูกค้า:</b> <?= htmlspecialchars($order['name']) ?> (<?= htmlspecialchars($order['email']) ?> / <?= htmlspecialchars($order['phone']) ?>)</p>
     <p><b>ที่อยู่จัดส่ง:</b> <?= htmlspecialchars($order['shipping_address']) ?></p>
