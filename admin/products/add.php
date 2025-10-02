@@ -12,11 +12,17 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
     $desc  = trim($_POST['description']);
 
     // อัปโหลดรูปภาพ
-    $image_name = null;
-    if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
-        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $image_name = uniqid('prod_').'.'.$ext;
-        move_uploaded_file($_FILES['image']['tmp_name'], "../admin/uploads/".$image_name);
+    $image = $product['p_image']; // ค่าเดิม
+    if(!empty($_FILES['image']['name'])){
+        $targetDir = "../uploads/";
+        if(!is_dir($targetDir)) mkdir($targetDir,0777,true);
+
+        $fileName = time()."_".basename($_FILES['image']['name']);
+        $targetFile = $targetDir.$fileName;
+
+        if(move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)){
+            $image = $fileName;
+        }
     }
 
     $stmt = $conn->prepare("INSERT INTO product (p_name,p_price,p_stock,cat_id,p_description,p_image) VALUES (?,?,?,?,?,?)");

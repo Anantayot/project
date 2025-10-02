@@ -25,7 +25,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     // ✅ จัดการอัปโหลดรูป
     $image = $product['p_image']; // ค่าเดิม
     if(!empty($_FILES['image']['name'])){
-        $targetDir = "../admin/uploads/";
+        $targetDir = "../uploads/";
         if(!is_dir($targetDir)) mkdir($targetDir,0777,true);
 
         $fileName = time()."_".basename($_FILES['image']['name']);
@@ -93,7 +93,7 @@ $cats = $conn->query("SELECT * FROM category");
   <div class="mb-3">
     <label>รูปภาพสินค้า</label><br>
     <?php if(!empty($product['p_image'])){ ?>
-      <img src="../admin/uploads/<?= htmlspecialchars($product['p_image']) ?>" width="100" class="img-thumbnail mb-2"><br>
+      <img src="../uploads/<?= htmlspecialchars($product['p_image']) ?>" width="100" class="img-thumbnail mb-2"><br>
     <?php } ?>
     <input type="file" name="image" class="form-control">
     <small class="text-muted">ถ้าไม่เลือกไฟล์ใหม่ จะใช้รูปเดิม</small>
