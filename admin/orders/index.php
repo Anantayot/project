@@ -63,7 +63,7 @@ $result = $conn->query($sql);
                     <td><a href="order_detail.php?id=<?= $row['order_id'] ?>" class="btn btn-info btn-sm">🔍 ดู</a></td>
                     <td>
                         <a href="order_edit.php?id=<?= $row['order_id'] ?>" class="btn btn-warning btn-sm">✏️ แก้ไข</a>
-                        <a href="delete_order.php?id=<?= $row['order_id'] ?>" class="btn btn-danger btn-sm" 
+                        <a href="delete.php?id=<?= $row['order_id'] ?>" class="btn btn-danger btn-sm" 
                            onclick="return confirm('ลบคำสั่งซื้อนี้หรือไม่?')">🗑️ ลบ</a>
                     </td>
                 </tr>
