@@ -52,4 +52,4 @@ $cats = $conn->query("SELECT * FROM category");
 </head>
 <body class="bg-light">
 <div class="container mt-4" style="max-width:600px;">
-<h3>เพ
+<h3>
