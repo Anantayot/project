@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
     $desc  = trim($_POST['description']);
 
     // อัปโหลดรูปภาพ
-    $image = $product['p_image']; // ค่าเดิม
+    $image = null; // กำหนดค่าเริ่มต้นเป็น null
     if(!empty($_FILES['image']['name'])){
         $targetDir = "../uploads/";
         if(!is_dir($targetDir)) mkdir($targetDir,0777,true);
@@ -22,11 +22,14 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
 
         if(move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)){
             $image = $fileName;
+        } else {
+            echo "❌ ไม่สามารถอัปโหลดรูปภาพได้";
+            exit();
         }
     }
 
     $stmt = $conn->prepare("INSERT INTO product (p_name,p_price,p_stock,cat_id,p_description,p_image) VALUES (?,?,?,?,?,?)");
-    $stmt->bind_param("sdiiss",$name,$price,$stock,$cat,$desc,$image_name);
+    $stmt->bind_param("sdiiss", $name, $price, $stock, $cat, $desc, $image);
 
     if($stmt->execute()){
         header("Location: index.php");
@@ -49,39 +52,4 @@ $cats = $conn->query("SELECT * FROM category");
 </head>
 <body class="bg-light">
 <div class="container mt-4" style="max-width:600px;">
-<h3>เพิ่มสินค้า</h3>
-<form method="post" enctype="multipart/form-data" class="mt-3">
-  <div class="mb-3">
-    <label>ชื่อสินค้า</label>
-    <input type="text" name="name" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label>ราคา</label>
-    <input type="number" step="0.01" name="price" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label>คงเหลือ</label>
-    <input type="number" name="stock" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label>ประเภท</label>
-    <select name="category_id" class="form-select" required>
-      <?php while($c=$cats->fetch_assoc()){ ?>
-        <option value="<?= $c['cat_id'] ?>"><?= htmlspecialchars($c['cat_name']) ?></option>
-      <?php } ?>
-    </select>
-  </div>
-  <div class="mb-3">
-    <label>รายละเอียดสินค้า</label>
-    <textarea name="description" class="form-control" rows="4"></textarea>
-  </div>
-  <div class="mb-3">
-    <label>รูปภาพ</label>
-    <input type="file" name="image" class="form-control" accept="image/*">
-  </div>
-  <button class="btn btn-success">💾 บันทึก</button>
-  <a href="index.php" class="btn btn-secondary">↩ ยกเลิก</a>
-</form>
-</div>
-</body>
-</html>
+<h3>เพ
