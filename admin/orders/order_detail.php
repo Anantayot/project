@@ -54,7 +54,7 @@ switch($order['status']) {
     default: echo htmlspecialchars($order['status']);
 }
 ?>
-<a href="order_edit.php?id=<?= $order['order_id'] ?>" class="btn btn-sm btn-outline-primary ms-2">✏️ แก้ไข</a>
+<a href="edit.php?id=<?= $order['order_id'] ?>" class="btn btn-sm btn-outline-primary ms-2">✏️ แก้ไข</a>
 </p>
     </p>
     <p><b>ลูกค้า:</b> <?= htmlspecialchars($order['name']) ?> (<?= htmlspecialchars($order['email']) ?> / <?= htmlspecialchars($order['phone']) ?>)</p>
