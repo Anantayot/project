@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"]=="POST") {
     if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $image_name = uniqid('prod_').'.'.$ext;
-        move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/".$image_name);
+        move_uploaded_file($_FILES['image']['tmp_name'], "../admin/uploads/".$image_name);
     }
 
     $stmt = $conn->prepare("INSERT INTO product (p_name,p_price,p_stock,cat_id,p_description,p_image) VALUES (?,?,?,?,?,?)");
