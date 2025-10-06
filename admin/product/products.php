@@ -1,135 +1,147 @@
 <?php
-include __DIR__ . "/../partials/connectdb.php";
-
-$pageTitle = "จัดการสินค้า";
-ob_start();
-
-// 🔹 ดึงข้อมูลสินค้าทั้งหมด (JOIN กับหมวดหมู่)
-$sql = "SELECT p.*, c.cat_name 
-        FROM product p
-        LEFT JOIN category c ON p.cat_id = c.cat_id
-        ORDER BY p.p_id DESC";
-$products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+session_start(); 
+if(!isset($_SESSION['admin'])){
+    header("location:../index.php");
+    exit();
+}
+include("../connectdb.php");
 ?>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>จัดการสินค้า</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+</head>
+<body class="bg-dark text-light">
 
-<!-- 🔹 ส่วนหัว -->
-<h3 class="mb-4 text-center fw-bold text-white">
-  <i class="bi bi-box-seam"></i> จัดการสินค้า
-</h3>
-
-<div class="card shadow-lg border-0" 
-     style="background: linear-gradient(145deg, #161b22, #0e1116); border:1px solid #2c313a;">
-  <div class="card-body">
-
-    <!-- 🔍 ช่องค้นหาสินค้า -->
+<div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-      <h4 class="text-light fw-semibold mb-0"><i class="bi bi-list-ul"></i> รายการสินค้า</h4>
-      <div class="d-flex align-items-center gap-2">
-        <input type="text" id="customSearch" class="form-control form-control-sm text-light" 
-               style="background:#161b22; border:1px solid #2c313a; width:250px;" 
-               placeholder="🔍 ค้นหาชื่อสินค้า / หมวดหมู่...">
-        <a href="product_add.php" class="btn btn-success btn-sm">
-          <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
-        </a>
-      </div>
+        <h3><i class="bi bi-box-seam"></i> จัดการสินค้า</h3>
+        <div>
+            <a href="../dashboard.php" class="btn btn-secondary">กลับ</a>
+            <a href="add.php" class="btn btn-success">+ เพิ่มสินค้า</a>
+        </div>
     </div>
 
-    <!-- ตารางสินค้า -->
-    <div class="table-responsive">
-      <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0" 
-             style="border-radius:10px; overflow:hidden;">
-        <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
-          <tr>
-            <th>#</th>
-            <th>รูปภาพ</th>
-            <th>ชื่อสินค้า</th>
-            <th>ราคา (฿)</th>
-            <th>หมวดหมู่</th>
-            <th>สต็อก</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if(empty($products)): ?>
-            <tr>
-              <td colspan="7" class="text-center text-muted py-4">
-                <i class="bi bi-info-circle"></i> ยังไม่มีข้อมูลสินค้าในระบบ
-              </td>
-            </tr>
-          <?php else: ?>
-            <?php foreach($products as $index => $p): ?>
-            <tr>
-              <td><?= $index + 1 ?></td>
-              <td>
-                <?php 
-                  $imagePath = __DIR__ . "/../uploads/" . $p['p_image'];
-                  $imageURL  = "../uploads/" . htmlspecialchars($p['p_image']);
-                  if (!empty($p['p_image']) && file_exists($imagePath)): 
-                ?>
-                  <img src="<?= $imageURL ?>" width="60" class="rounded border border-secondary shadow-sm">
-                <?php else: ?>
-                  <span class="text-muted">ไม่มีรูป</span>
-                <?php endif; ?>
-              </td>
-              <td class="text-start text-white"><?= htmlspecialchars($p['p_name']) ?></td>
-              <td class="text-success fw-semibold"><?= number_format($p['p_price'], 2) ?></td>
-              <td class="text-info"><?= htmlspecialchars($p['cat_name'] ?? '-') ?></td>
-              <td class="text-warning"><?= htmlspecialchars($p['p_stock']) ?></td>
-              <td>
-                <a href="product_edit.php?id=<?= $p['p_id'] ?>" class="btn btn-warning btn-sm me-1">
-                  <i class="bi bi-pencil-square"></i>
-                </a>
-                <a href="product_delete.php?id=<?= $p['p_id'] ?>" 
-                   class="btn btn-danger btn-sm"
-                   onclick="return confirm('ยืนยันการลบสินค้านี้หรือไม่?')">
-                  <i class="bi bi-trash"></i>
-                </a>
-              </td>
-            </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
+    <!-- 🔍 ช่องค้นหา + หมวดหมู่ -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <input type="text" id="searchBox" class="form-control text-light" 
+               style="background:#161b22;border:1px solid #2c313a;width:250px;" 
+               placeholder="🔍 ค้นหาสินค้า...">
+        <select id="categoryFilter" class="form-select bg-dark text-light border-secondary" style="width:200px;">
+            <option value="">ทั้งหมด</option>
+            <?php
+            $catQuery = mysqli_query($conn, "SELECT * FROM category ORDER BY cat_name ASC");
+            while($cat = mysqli_fetch_assoc($catQuery)){
+                echo "<option value='".htmlspecialchars($cat['cat_name'])."'>".htmlspecialchars($cat['cat_name'])."</option>";
+            }
+            ?>
+        </select>
     </div>
-  </div>
+
+    <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover display responsive nowrap" id="myTable" style="width:100%">
+            <thead style="background:#00b14a;color:#111;">
+                <tr>
+                    <th>ID</th>
+                    <th>รูปภาพ</th>
+                    <th>ชื่อสินค้า</th>
+                    <th>รายละเอียด</th>
+                    <th>ราคา</th>
+                    <th>สต๊อก</th>
+                    <th>ประเภท</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $sql = "SELECT p.*, c.cat_name 
+                        FROM product p 
+                        LEFT JOIN category c ON p.cat_id = c.cat_id
+                        ORDER BY p_id DESC";
+                $result = mysqli_query($conn, $sql);
+                while($row = mysqli_fetch_assoc($result)){
+                    echo "<tr>
+                            <td>".htmlspecialchars($row['p_id'])."</td>
+                            <td>";
+                                if(!empty($row['p_image'])){
+                                    echo "<img src='../uploads/".htmlspecialchars($row['p_image'])."' width='60' class='img-thumbnail'>";
+                                } else {
+                                    echo "<span class='text-muted'>ไม่มีรูป</span>";
+                                }
+                    echo    "</td>
+                            <td>".htmlspecialchars($row['p_name'])."</td>
+                            <td>".nl2br(htmlspecialchars($row['p_description']))."</td>
+                            <td class='text-success'>".number_format($row['p_price'],2)."</td>
+                            <td class='text-warning'>".htmlspecialchars($row['p_stock'])."</td>
+                            <td class='text-info'>".htmlspecialchars($row['cat_name'])."</td>
+                            <td>
+                                <a href='edit.php?id={$row['p_id']}' class='btn btn-warning btn-sm'>แก้ไข</a>
+                                <a href='delete.php?id={$row['p_id']}' class='btn btn-danger btn-sm' 
+                                   onclick=\"return confirm('ลบสินค้า?');\">ลบ</a>
+                            </td>
+                          </tr>";
+                }
+                mysqli_close($conn);
+                ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- 🔹 Vanilla DataTables -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-datatables@1.8.10/dist/vanilla-dataTables.min.css">
-<script src="https://cdn.jsdelivr.net/npm/vanilla-datatables@1.8.10/dist/vanilla-dataTables.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // ✅ สร้าง DataTable โดยปิด searchable ของระบบ
-  const dataTable = new DataTable("#dataTable", {
-    searchable: false, // ปิด search เดิม
-    sortable: true,
-    perPage: 10,
-    perPageSelect: [5, 10, 25, 50],
-    labels: {
-      perPage: "{select} รายการต่อหน้า",
-      noRows: "ไม่มีข้อมูลสินค้า",
-      info: "แสดง {start} ถึง {end} จากทั้งหมด {rows} รายการ"
-    }
-  });
-
-  const customSearch = document.querySelector("#customSearch");
-
-  // ✅ ฟังก์ชันกรองข้อมูลด้วย JS
-  customSearch.addEventListener("input", (e) => {
-    const keyword = e.target.value.toLowerCase();
-
-    // loop ตรวจทุกแถวใน tbody
-    document.querySelectorAll("#dataTable tbody tr").forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(keyword) ? "" : "none";
+$(document).ready(function(){
+    const table = $('#myTable').DataTable({
+        responsive: true,
+        language: {
+            lengthMenu: "แสดง _MENU_ แถวต่อหน้า",
+            zeroRecords: "ไม่พบข้อมูล",
+            info: "แสดงหน้า _PAGE_ จาก _PAGES_",
+            infoEmpty: "ไม่มีข้อมูล",
+            infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+            search: "ค้นหา:",
+            paginate: {
+                first: "หน้าแรก",
+                last: "หน้าสุดท้าย",
+                next: "ถัดไป",
+                previous: "ก่อนหน้า"
+            }
+        },
+        columnDefs: [
+            { orderable: false, targets: [1,7] },
+            { responsivePriority: 1, targets: 2 }
+        ]
     });
-  });
+
+    // 🔍 ช่องค้นหาสินค้า
+    $('#searchBox').on('keyup', function(){
+        table.search(this.value).draw();
+    });
+
+    // 🏷️ กรองตามหมวดหมู่
+    $('#categoryFilter').on('change', function(){
+        const cat = this.value;
+        if (cat) {
+            table.column(6).search('^' + cat + '$', true, false).draw();
+        } else {
+            table.column(6).search('').draw();
+        }
+    });
 });
 </script>
 
-
-<?php
-$pageContent = ob_get_clean();
-include __DIR__ . "/../partials/layout.php";
-?>
+</body>
+</html>
