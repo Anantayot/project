@@ -132,11 +132,6 @@ $(document).ready(function() {
   // ❌ ซ่อนช่องค้นหาเดิม
   $('.dataTables_filter').hide();
 
-  // 🔍 ใช้งานช่องค้นหาเอง
-  $('#customSearch').on('input', function() {
-    table.search(this.value).draw();
-  });
-
   // 🎨 ปรับสไตล์ dropdown
   $(".dataTables_length select")
     .addClass("form-select form-select-sm bg-dark text-light border-secondary");
