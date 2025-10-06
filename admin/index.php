@@ -161,7 +161,7 @@ body {
   <aside id="sidebar">
     <div class="brand"><i class="bi bi-laptop"></i> MyCommiss</div>
     <ul>
-      <li><a href="dashboard.php" class="active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+      <li><a href="index.php" class="active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
       <li><a href="product/products.php"><i class="bi bi-box-seam me-2"></i> จัดการสินค้า</a></li>
       <li><a href="categories/categories.php"><i class="bi bi-tags me-2"></i> ประเภทสินค้า</a></li>
       <li><a href="customer/customers.php"><i class="bi bi-people me-2"></i> ลูกค้า</a></li>
