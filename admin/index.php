@@ -22,9 +22,13 @@ $total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchCo
       background: #0d1117;
       font-family: "Prompt", sans-serif;
     }
+    .main-panel {
+      background: #0d1117;
+      min-height: 100vh;
+    }
     .content-wrapper {
       background: transparent;
-      padding: 20px;
+      padding: 40px 30px; /* เพิ่มระยะห่างด้านใน */
     }
     .card-custom {
       background: linear-gradient(145deg, #161b22, #0e1116);
@@ -51,7 +55,7 @@ $total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchCo
       font-weight: 700;
       border-left: 5px solid #00d25b;
       padding-left: 10px;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     .not-clickable {
       cursor: default !important;
@@ -63,7 +67,6 @@ $total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchCo
     }
     .not-clickable:hover {
       transform: none !important;
-      pointer-events: none !important;
       box-shadow: 0 0 25px rgba(255, 70, 70, 0.5),
                   inset 0 0 15px rgba(255, 80, 80, 0.3);
       border-color: #e74c3c;
@@ -72,89 +75,89 @@ $total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchCo
 </head>
 
 <body class="sidebar-dark">
-<div class="container-scroller">
+  <div class="container-scroller">
+    
+    <!-- Sidebar -->
+    <?php include "partials/sidebar.php"; ?>
 
-  <!-- 🔹 Sidebar -->
-  <?php include "partials/sidebar.php"; ?>
+    <div class="container-fluid page-body-wrapper">
+      <div class="main-panel">
+        <div class="content-wrapper">
 
-  <div class="container-fluid page-body-wrapper">
-    <div class="main-panel">
-      <div class="content-wrapper">
+          <h3 class="section-title"><i class="bi bi-speedometer2"></i> แผงควบคุมระบบหลังบ้าน</h3>
 
-        <h3 class="section-title"><i class="bi bi-speedometer2"></i> แผงควบคุมระบบหลังบ้าน</h3>
-
-        <!-- 🔹 แถวสรุปจำนวนข้อมูล -->
-        <div class="row g-3">
-          <div class="col-md-3 col-sm-6">
-            <a href="product/products.php" class="text-decoration-none">
-              <div class="card card-custom text-center p-3">
-                <div class="card-body">
-                  <i class="bi bi-box-seam display-5 text-primary"></i>
-                  <h4 class="mt-3">สินค้า</h4>
-                  <h2><?= $total_products ?></h2>
+          <!-- 🔹 แถวสรุปข้อมูล -->
+          <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+              <a href="product/products.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <div class="card-body">
+                    <i class="bi bi-box-seam display-5 text-primary"></i>
+                    <h4 class="mt-3">สินค้า</h4>
+                    <h2><?= $total_products ?></h2>
+                  </div>
                 </div>
-              </div>
-            </a>
+              </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+              <a href="categories/categories.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <div class="card-body">
+                    <i class="bi bi-tags display-5 text-info"></i>
+                    <h4 class="mt-3">ประเภทสินค้า</h4>
+                    <h2><?= $total_categories ?></h2>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+              <a href="customer/customers.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <div class="card-body">
+                    <i class="bi bi-people display-5 text-success"></i>
+                    <h4 class="mt-3">ลูกค้า</h4>
+                    <h2><?= $total_customers ?></h2>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+              <a href="order/orders.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <div class="card-body">
+                    <i class="bi bi-bag-check display-5 text-warning"></i>
+                    <h4 class="mt-3">คำสั่งซื้อ</h4>
+                    <h2><?= $total_orders ?></h2>
+                  </div>
+                </div>
+              </a>
+            </div>
           </div>
 
-          <div class="col-md-3 col-sm-6">
-            <a href="categories/categories.php" class="text-decoration-none">
-              <div class="card card-custom text-center p-3">
+          <!-- 🔹 รายได้รวม -->
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="card card-custom text-center p-4 not-clickable">
                 <div class="card-body">
-                  <i class="bi bi-tags display-5 text-info"></i>
-                  <h4 class="mt-3">ประเภทสินค้า</h4>
-                  <h2><?= $total_categories ?></h2>
+                  <i class="bi bi-cash-stack display-5 text-danger"></i>
+                  <h4 class="mt-3 text-white">รายได้รวมทั้งหมด</h4>
+                  <h2 class="text-success"><?= number_format($total_income, 2) ?> ฿</h2>
                 </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <a href="customer/customers.php" class="text-decoration-none">
-              <div class="card card-custom text-center p-3">
-                <div class="card-body">
-                  <i class="bi bi-people display-5 text-success"></i>
-                  <h4 class="mt-3">ลูกค้า</h4>
-                  <h2><?= $total_customers ?></h2>
-                </div>
-              </div>
-            </a>
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <a href="order/orders.php" class="text-decoration-none">
-              <div class="card card-custom text-center p-3">
-                <div class="card-body">
-                  <i class="bi bi-bag-check display-5 text-warning"></i>
-                  <h4 class="mt-3">คำสั่งซื้อ</h4>
-                  <h2><?= $total_orders ?></h2>
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-
-        <!-- 🔹 รายได้รวม -->
-        <div class="row mt-4">
-          <div class="col-md-12">
-            <div class="card card-custom text-center p-4 not-clickable">
-              <div class="card-body">
-                <i class="bi bi-cash-stack display-5 text-danger"></i>
-                <h4 class="mt-3 text-white">รายได้รวมทั้งหมด</h4>
-                <h2 class="text-success"><?= number_format($total_income, 2) ?> ฿</h2>
               </div>
             </div>
           </div>
-        </div>
 
-      </div> <!-- /content-wrapper -->
-    </div> <!-- /main-panel -->
-  </div> <!-- /page-body-wrapper -->
+        </div> <!-- /content-wrapper -->
+      </div> <!-- /main-panel -->
+    </div> <!-- /page-body-wrapper -->
 
-</div> <!-- /container-scroller -->
+  </div> <!-- /container-scroller -->
 
-<script src="template_corona/assets/vendors/js/vendor.bundle.base.js"></script>
-<script src="template_corona/assets/js/off-canvas.js"></script>
-<script src="template_corona/assets/js/template.js"></script>
+  <script src="template_corona/assets/vendors/js/vendor.bundle.base.js"></script>
+  <script src="template_corona/assets/js/off-canvas.js"></script>
+  <script src="template_corona/assets/js/template.js"></script>
 </body>
 </html>
