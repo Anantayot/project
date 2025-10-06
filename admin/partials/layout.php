@@ -19,6 +19,7 @@ body {
   color: #fff;
   overflow-x: hidden;
   font-family: 'Prompt', sans-serif;
+  margin: 0;
 }
 
 /* 🟩 Sidebar */
@@ -32,6 +33,11 @@ body {
   transition: all 0.3s ease;
   box-shadow: 0 0 25px rgba(0,0,0,0.6);
   z-index: 1050;
+}
+
+/* เมื่อ Sidebar ย่อ (สำหรับมือถือ) */
+#sidebar.collapsed {
+  left: -250px;
 }
 
 /* โลโก้ */
@@ -56,6 +62,7 @@ body {
 #sidebar ul li a {
   display: flex;
   align-items: center;
+  gap: 8px;
   padding: 12px 20px;
   color: #b0b9c4;
   text-decoration: none;
@@ -96,17 +103,73 @@ body {
   transform: translateY(-2px);
 }
 
+/* 🟧 Navbar สำหรับมือถือ */
+.navbar {
+  background: #161b22;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  z-index: 1100;
+}
+.navbar .toggle-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+}
+.navbar h5 {
+  color: #fff;
+  margin: 0;
+  font-weight: 600;
+}
+
 /* Content */
 .main-content {
   margin-left: 250px;
   padding: 30px;
   transition: margin-left 0.3s ease;
 }
-</style>
 
+/* ปรับเมื่อ Sidebar ย่อ */
+#sidebar.collapsed ~ .main-content {
+  margin-left: 0;
+}
+
+/* ✅ Responsive */
+@media (max-width: 991px) {
+  #sidebar {
+    left: -250px;
+  }
+  #sidebar.show {
+    left: 0;
+  }
+  .main-content {
+    margin-left: 0;
+    padding-top: 80px;
+  }
+  .navbar {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar {
+    display: none !important;
+  }
+}
+  </style>
+</head>
 
 <body>
 
+<!-- 🟩 Sidebar -->
 <aside id="sidebar">
   <div class="brand"><i class="bi bi-laptop"></i> MyCommiss</div>
   <ul>
@@ -119,24 +182,36 @@ body {
   <a href="../logout.php" class="logout-btn"><i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ</a>
 </aside>
 
-
-<!-- Navbar (มือถือเท่านั้น) -->
+<!-- 🟧 Navbar (มือถือเท่านั้น) -->
 <nav class="navbar d-lg-none">
   <button class="toggle-btn" id="menuToggle"><i class="bi bi-list"></i></button>
   <h5 class="text-white m-0"><?= $pageTitle ?? '' ?></h5>
 </nav>
 
-<!-- Main Content -->
+<!-- 🟦 Main Content -->
 <div class="main-content">
   <?= $pageContent ?? '' ?>
 </div>
 
-<!-- Script -->
+<!-- 🧩 Script -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-document.getElementById('menuToggle').addEventListener('click', function(){
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+  const sidebar = document.getElementById('sidebar');
+  const menuToggle = document.getElementById('menuToggle');
+
+  // Toggle sidebar (มือถือ)
+  if(menuToggle){
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+    });
+  }
+
+  // ปิด sidebar เมื่อคลิกนอกพื้นที่ (มือถือ)
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth < 992 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.remove('show');
+    }
+  });
 </script>
 
 </body>
