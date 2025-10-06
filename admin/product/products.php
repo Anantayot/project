@@ -12,6 +12,12 @@ $sql = "SELECT p.*, c.cat_name
 $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<!-- ✅ เรียกใช้ DataTables CSS -->
+<link rel="stylesheet" 
+      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" 
+      href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
 <!-- 🔹 ส่วนหัว -->
 <h3 class="mb-4 text-center fw-bold text-white">
   <i class="bi bi-box-seam"></i> จัดการสินค้า
@@ -31,8 +37,9 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- ตารางสินค้า -->
     <div class="table-responsive">
-      <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0" 
-             style="border-radius:10px; overflow:hidden;">
+      <table id="dataTable" 
+             class="table table-dark table-striped text-center align-middle mb-0 display nowrap" 
+             style="border-radius:10px; overflow:hidden; width:100%;">
         <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111;">
           <tr>
             <th>#</th>
@@ -91,13 +98,24 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 DataTable -->
+<!-- ✅ เรียกใช้ DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+<!-- 🔹 ตั้งค่า DataTable -->
 <script>
 $(document).ready(() => {
   $('#dataTable').DataTable({
     language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json' },
     pageLength: 10,
-    responsive: true
+    responsive: true,
+    columnDefs: [
+      { targets: [0,1,5,6], className: 'text-center' },
+      { targets: [2,3,4], className: 'align-middle' }
+    ]
   });
 });
 </script>
