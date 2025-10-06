@@ -45,88 +45,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <i class="bi bi-plus-circle"></i> เพิ่มสินค้าใหม่
 </h3>
 
-<style>
-  /* 🌙 โทนมืด + สีตัวอักษรชัด */
-  .form-control,
-  .form-select,
-  textarea {
-    background-color: #1e2633 !important;
-    color: #f8fafc !important;
-    border: 1px solid #2c313a !important;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-  }
-
-  .form-control::placeholder {
-    color: #94a3b8 !important;
-  }
-
-  .form-control:focus,
-  .form-select:focus,
-  textarea:focus {
-    background-color: #242c3a !important;
-    color: #fff !important;
-    border-color: #22c55e !important;
-    box-shadow: 0 0 8px rgba(34,197,94,0.3);
-  }
-
-  label.form-label {
-    color: #e2e8f0 !important;
-    font-weight: 500;
-  }
-
-  select option {
-    background-color: #1e2633;
-    color: #f8fafc;
-  }
-
-  .btn-success {
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    border: none;
-    transition: 0.3s;
-  }
-
-  .btn-success:hover {
-    background: linear-gradient(90deg, #16a34a, #15803d);
-    transform: scale(1.03);
-  }
-
-  /* 🖼️ Preview รูป */
-  #preview {
-    display: none;
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-top: 10px;
-    border: 2px solid #22c55e;
-  }
-
-  /* Card Form */
-  .form-card {
-    background: linear-gradient(145deg, #161b22, #0e1116);
-    border: 1px solid #2c313a;
-    color: #fff;
-    border-radius: 15px;
-  }
-</style>
-
 <form method="post" enctype="multipart/form-data" 
-      class="card p-4 shadow-lg border-0 form-card">
-
+      class="card p-4 shadow-lg border-0"
+      style="background:linear-gradient(145deg,#161b22,#0e1116);border:1px solid #2c313a;color:#fff;">
+  
   <div class="mb-3">
     <label class="form-label">ชื่อสินค้า</label>
-    <input type="text" name="name" class="form-control" placeholder="เช่น รองเท้าวิ่ง Nike Air" required>
+    <input type="text" name="name" class="form-control" required>
   </div>
 
   <div class="row">
     <div class="col-md-6 mb-3">
       <label class="form-label">ราคา (฿)</label>
-      <input type="number" name="price" class="form-control" step="0.01" placeholder="0.00" required>
+      <input type="number" name="price" class="form-control" step="0.01" required>
     </div>
     <div class="col-md-6 mb-3">
       <label class="form-label">สต็อก</label>
-      <input type="number" name="stock" class="form-control" placeholder="จำนวนสินค้า" required>
+      <input type="number" name="stock" class="form-control" required>
     </div>
   </div>
 
@@ -142,42 +77,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   <div class="mb-3">
     <label class="form-label">รายละเอียด</label>
-    <textarea name="description" rows="3" class="form-control" placeholder="รายละเอียดสินค้าเพิ่มเติม..."></textarea>
+    <textarea name="description" rows="3" class="form-control"></textarea>
   </div>
 
   <div class="mb-3">
     <label class="form-label">รูปภาพ</label>
-    <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImage(event)">
-    <img id="preview" alt="ตัวอย่างรูปภาพ">
+    <input type="file" name="image" class="form-control">
   </div>
 
   <div class="text-end">
-    <button type="submit" class="btn btn-success px-4">
+    <button type="submit" class="btn btn-success">
       <i class="bi bi-check-circle"></i> บันทึก
     </button>
-    <a href="products.php" class="btn btn-secondary px-4">
+    <a href="products.php" class="btn btn-secondary">
       <i class="bi bi-x-circle"></i> ยกเลิก
     </a>
   </div>
 </form>
-
-<script>
-  // 🖼️ ฟังก์ชันแสดงภาพตัวอย่างก่อนอัปโหลด
-  function previewImage(event) {
-    const preview = document.getElementById('preview');
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    } else {
-      preview.style.display = 'none';
-    }
-  }
-</script>
 
 <?php
 $pageContent = ob_get_clean();
