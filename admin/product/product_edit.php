@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $image = $p['p_image']; // เก็บชื่อเดิมไว้ก่อน
   if (!empty($_FILES['image']['name'])) {
     $image = time() . "_" . basename($_FILES['image']['name']); // กันชื่อซ้ำ
-    $targetDir = __DIR__ . "/../../uploads/"; // ไปที่โฟลเดอร์ uploads ใน admin
+    $targetDir = __DIR__ . "../uploads/"; // ไปที่โฟลเดอร์ uploads ใน admin
     if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
     move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image);
   }

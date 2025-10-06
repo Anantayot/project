@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $image = "";
   if (!empty($_FILES['image']['name'])) {
     $image = basename($_FILES['image']['name']);
-    $targetDir = __DIR__ . "/../uploads/"; // ชี้ไปโฟลเดอร์ uploads นอก /product/
+    $targetDir = __DIR__ . "../uploads/"; // ชี้ไปโฟลเดอร์ uploads นอก /product/
   if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
 
   move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image);
