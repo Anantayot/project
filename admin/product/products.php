@@ -21,20 +21,14 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
      style="background: linear-gradient(145deg, #161b22, #0e1116); border:1px solid #2c313a;">
   <div class="card-body">
 
-    <!-- 🔍 ช่องค้นหา + ปุ่มเพิ่มสินค้า -->
+    <!-- ปุ่มเพิ่มสินค้า -->
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
       <h4 class="text-light fw-semibold mb-0">
         <i class="bi bi-list-ul"></i> รายการสินค้า
       </h4>
-      <div class="d-flex align-items-center gap-2">
-        <input type="text" id="customSearch" 
-               class="form-control form-control-sm text-light"
-               style="background:#161b22; border:1px solid #2c313a; width:250px;"
-               placeholder="🔍 ค้นหาชื่อสินค้า / หมวดหมู่...">
-        <a href="product_add.php" class="btn btn-success btn-sm">
-          <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
-        </a>
-      </div>
+      <a href="product_add.php" class="btn btn-success btn-sm">
+        <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
+      </a>
     </div>
 
     <!-- ตารางสินค้า -->
@@ -103,7 +97,7 @@ $pageContent = ob_get_clean();
 include __DIR__ . "/../partials/layout.php";
 ?>
 
-<!-- ✅ โหลดสคริปต์ DataTables หลัง Layout เพื่อป้องกัน jQuery ยังไม่พร้อม -->
+<!-- ✅ โหลดสคริปต์ DataTables หลัง Layout -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -113,8 +107,7 @@ $(document).ready(function() {
   const table = $('#dataTable').DataTable({
     language: {
       url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json',
-      search: "", // ปิด search ของระบบ
-      searchPlaceholder: "",
+      searchPlaceholder: "🔍 ค้นหาชื่อสินค้า / หมวดหมู่...",
       lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
       zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
       info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
@@ -125,14 +118,20 @@ $(document).ready(function() {
     responsive: true,
     order: [[0, "asc"]],
     columnDefs: [
-      { orderable: false, targets: [1, 6] } // ปิด sort ของรูปภาพ/ปุ่มจัดการ
+      { orderable: false, targets: [1, 6] }
     ]
   });
 
-  // ❌ ซ่อนช่องค้นหาเดิม
-  $('.dataTables_filter').hide();
+  // 🎨 ปรับสไตล์ช่องค้นหาให้เข้ากับธีม
+  $(".dataTables_filter input")
+    .addClass("form-control form-control-sm ms-2")
+    .css({
+      "width": "250px",
+      "background": "#161b22",
+      "color": "#fff",
+      "border": "1px solid #2c313a"
+    });
 
-  // 🎨 ปรับสไตล์ dropdown
   $(".dataTables_length select")
     .addClass("form-select form-select-sm bg-dark text-light border-secondary");
 });
