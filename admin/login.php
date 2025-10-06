@@ -153,10 +153,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <form method="post">
       <div class="form-group mb-3">
-        <input type="text" name="username" class="form-control" placeholder="ชื่อผู้ใช้ (admin)" required>
+        <input type="text" name="username" class="form-control" placeholder="ชื่อผู้ใช้" required>
       </div>
       <div class="form-group mb-3">
-        <input type="password" name="password" class="form-control" placeholder="รหัสผ่าน (1234)" required>
+        <input type="password" name="password" class="form-control" placeholder="รหัสผ่าน" required>
       </div>
 
       <?php if ($error): ?>
