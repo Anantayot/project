@@ -1,82 +1,129 @@
-<nav id="sidebar" class="sidebar sidebar-offcanvas" style="background:#0d1117; min-height:100vh; border-right:1px solid #2c313a;">
-  <div class="sidebar-brand-wrapper text-center py-4 border-bottom border-secondary">
-    <h4 class="text-white fw-bold mb-0">
-      <i class="bi bi-laptop"></i> MyCommiss
-    </h4>
-  </div>
+<?php
+session_start();
+include __DIR__ . "/partials/connectdb.php";
 
-  <ul class="nav flex-column mt-3">
-    <li class="nav-item mb-1">
-      <a href="/admin/index.php" class="nav-link d-flex align-items-center <?= basename($_SERVER['PHP_SELF'])=='index.php'?'active':'' ?>">
-        <i class="bi bi-speedometer2 me-2"></i> <span>Dashboard</span>
-      </a>
-    </li>
+$total_products   = $conn->query("SELECT COUNT(*) FROM product")->fetchColumn();
+$total_categories = $conn->query("SELECT COUNT(*) FROM category")->fetchColumn();
+$total_customers  = $conn->query("SELECT COUNT(*) FROM customers")->fetchColumn();
+$total_orders     = $conn->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+$total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchColumn() ?? 0;
+?>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - MyCommiss Admin</title>
+  <link rel="stylesheet" href="template_corona/assets/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="template_corona/assets/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <li class="nav-item mb-1">
-      <a href="/admin/product/products.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'product')?'active':'' ?>">
-        <i class="bi bi-box-seam me-2"></i> <span>จัดการสินค้า</span>
-      </a>
-    </li>
-
-    <li class="nav-item mb-1">
-      <a href="/admin/categories/categories.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'categories')?'active':'' ?>">
-        <i class="bi bi-tags me-2"></i> <span>ประเภทสินค้า</span>
-      </a>
-    </li>
-
-    <li class="nav-item mb-1">
-      <a href="/admin/customer/customers.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'customer')?'active':'' ?>">
-        <i class="bi bi-people me-2"></i> <span>ลูกค้า</span>
-      </a>
-    </li>
-
-    <li class="nav-item mb-1">
-      <a href="/admin/order/orders.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'order')?'active':'' ?>">
-        <i class="bi bi-bag-check me-2"></i> <span>คำสั่งซื้อ</span>
-      </a>
-    </li>
-
-    <li class="nav-item mt-4 border-top border-secondary pt-2">
-      <a href="/admin/logout.php" class="nav-link text-danger d-flex align-items-center">
-        <i class="bi bi-box-arrow-right me-2"></i> <span>ออกจากระบบ</span>
-      </a>
-    </li>
-  </ul>
-</nav>
-
-<style>
-/* ✅ Sidebar Theme */
-#sidebar {
-  background: #0d1117 !important;
+  <style>
+body {
+  background: #0d1117;
+  font-family: "Prompt", sans-serif;
+}
+.main-panel {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  background: #0d1117;
   min-height: 100vh;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  transition: all 0.3s ease;
 }
-#sidebar .nav-link {
-  color: #b0b9c4 !important;
-  font-weight: 500;
-  border-radius: 10px;
-  margin: 4px 10px;
-  transition: 0.3s ease;
-  padding: 10px 18px;
+@media (max-width: 991px) {
+  .main-panel { margin-left: 0; width: 100%; }
 }
-#sidebar .nav-link:hover {
-  background: linear-gradient(145deg, rgba(0,210,91,0.25), rgba(0,210,91,0.15));
-  color: #00d25b !important;
-  transform: translateX(4px);
+.content-wrapper {
+  background: transparent;
+  padding: 30px;
 }
-#sidebar .nav-link.active {
-  background: linear-gradient(145deg, #00d25b, #00b14a);
-  color: #fff !important;
-  box-shadow: 0 0 12px rgba(0,210,91,0.4);
+.section-title {
+  color: #fff;
+  font-weight: 700;
+  border-left: 5px solid #00d25b;
+  padding-left: 10px;
+  margin-bottom: 1.5rem;
 }
-#sidebar .nav-link i {
-  font-size: 1.1rem;
+.card-custom {
+  background: linear-gradient(145deg, #161b22, #0e1116);
+  border: 1px solid #2c313a;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform .3s, box-shadow .3s;
 }
-#sidebar .text-danger {
-  font-weight: 600;
-  transition: 0.3s;
+.card-custom:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 }
-#sidebar .text-danger:hover {
-  color: #ff4d4d !important;
+.card-custom h4 { color: #c9d1d9; font-weight: 600; }
+.card-custom h2 { color: #00d25b; font-size: 2rem; font-weight: bold; }
+.not-clickable {
+  cursor: default !important;
+  pointer-events: none !important;
+  box-shadow: inset 0 0 12px rgba(255, 50, 50, 0.2);
 }
 </style>
+</head>
+
+<body class="sidebar-dark">
+  <div class="container-scroller">
+    <?php include "partials/sidebar.php"; ?>
+
+    <div class="container-fluid page-body-wrapper">
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <h3 class="section-title"><i class="bi bi-speedometer2"></i> แผงควบคุมระบบหลังบ้าน</h3>
+
+          <div class="row g-3">
+            <div class="col-md-3 col-sm-6">
+              <a href="product/products.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <i class="bi bi-box-seam display-5 text-primary"></i>
+                  <h4 class="mt-3">สินค้า</h4>
+                  <h2><?= $total_products ?></h2>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <a href="categories/categories.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <i class="bi bi-tags display-5 text-info"></i>
+                  <h4 class="mt-3">ประเภทสินค้า</h4>
+                  <h2><?= $total_categories ?></h2>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <a href="customer/customers.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <i class="bi bi-people display-5 text-success"></i>
+                  <h4 class="mt-3">ลูกค้า</h4>
+                  <h2><?= $total_customers ?></h2>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+              <a href="order/orders.php" class="text-decoration-none">
+                <div class="card card-custom text-center p-3">
+                  <i class="bi bi-bag-check display-5 text-warning"></i>
+                  <h4 class="mt-3">คำสั่งซื้อ</h4>
+                  <h2><?= $total_orders ?></h2>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <div class="card card-custom text-center p-4 not-clickable">
+                <i class="bi bi-cash-stack display-5 text-danger"></i>
+                <h4 class="mt-3 text-white">รายได้รวมทั้งหมด</h4>
+                <h2 class="text-success"><?= number_format($total_income, 2) ?> ฿</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

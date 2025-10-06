@@ -1,97 +1,114 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= $pageTitle ?? 'MyCommiss Admin' ?></title>
+<nav id="sidebar" class="sidebar sidebar-offcanvas" style="background:#0d1117; min-height:100vh; border-right:1px solid #2c313a;">
+  <div class="sidebar-brand-wrapper text-center py-4 border-bottom border-secondary d-flex justify-content-between align-items-center px-3">
+    <h4 class="text-white fw-bold mb-0">
+      <i class="bi bi-laptop"></i> MyCommiss
+    </h4>
+    <button class="btn btn-sm text-light d-lg-none" id="sidebarToggle">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="../template_corona/assets/vendors/css/vendor.bundle.base.css">
-  <link rel="stylesheet" href="../template_corona/assets/css/style.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-  @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap');
-  body {
-    background: #0d1117;
-    color: #fff;
-    overflow-x: hidden;
-    font-family: 'Prompt', sans-serif;
-  }
-  #sidebar {
-    background: #0d1117;
-    position: fixed;
-    top: 0; left: 0;
-    width: 250px;
-    height: 100vh;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 25px rgba(0,0,0,0.6);
-    z-index: 1050;
-  }
-  #sidebar .brand {
-    font-weight: 700;
-    font-size: 1.25rem;
-    text-align: center;
-    padding: 22px 0;
-    border-bottom: 1px solid #1f1f1f;
-    color: #fff;
-  }
-  #sidebar .brand i { color: #00d25b; }
-  #sidebar ul { list-style: none; padding: 0; margin: 25px 0; }
-  #sidebar ul li a {
-    display: flex; align-items: center;
-    padding: 12px 20px;
-    color: #b0b9c4; text-decoration: none;
-    border-radius: 10px; transition: 0.3s;
-    font-weight: 500; margin: 6px 10px;
-  }
-  #sidebar ul li a:hover {
-    background: linear-gradient(145deg, rgba(0,210,91,0.25), rgba(0,210,91,0.15));
-    color: #00d25b; transform: translateX(5px);
-  }
-  #sidebar ul li a.active {
-    background: linear-gradient(145deg, #00d25b, #00b14a);
-    color: #fff; box-shadow: 0 0 15px rgba(0,210,91,0.5);
-  }
-  .logout-btn {
-    display: block; width: 85%; margin: 25px auto;
-    padding: 12px 0; background: linear-gradient(145deg, #e74c3c, #c0392b);
-    border-radius: 10px; color: #fff; font-weight: 600;
-    text-align: center; transition: 0.3s;
-  }
-  .logout-btn:hover {
-    background: linear-gradient(145deg, #ff5240, #e74c3c);
-    box-shadow: 0 0 18px rgba(231,76,60,0.6);
-    transform: translateY(-2px);
-  }
-  .main-content { margin-left: 250px; padding: 30px; }
-  </style>
-</head>
-<body>
+  <ul class="nav flex-column mt-3">
+    <li class="nav-item mb-1">
+      <a href="/project/admin/index.php" class="nav-link d-flex align-items-center <?= basename($_SERVER['PHP_SELF'])=='index.php'?'active':'' ?>">
+        <i class="bi bi-speedometer2 me-2"></i> <span>Dashboard</span>
+      </a>
+    </li>
 
-<aside id="sidebar">
-  <div class="brand"><i class="bi bi-laptop"></i> MyCommiss</div>
-  <ul>
-    <li><a href="../index.php" class="<?= basename($_SERVER['PHP_SELF'])=='index.php'?'active':'' ?>"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-    <li><a href="../product/products.php" class="<?= strpos($_SERVER['PHP_SELF'],'product')?'active':'' ?>"><i class="bi bi-box-seam"></i> จัดการสินค้า</a></li>
-    <li><a href="../categories/categories.php" class="<?= strpos($_SERVER['PHP_SELF'],'categories')?'active':'' ?>"><i class="bi bi-tags"></i> ประเภทสินค้า</a></li>
-    <li><a href="../customer/customers.php" class="<?= strpos($_SERVER['PHP_SELF'],'customer')?'active':'' ?>"><i class="bi bi-people"></i> ลูกค้า</a></li>
-    <li><a href="../order/orders.php" class="<?= strpos($_SERVER['PHP_SELF'],'order')?'active':'' ?>"><i class="bi bi-bag-check"></i> คำสั่งซื้อ</a></li>
+    <li class="nav-item mb-1">
+      <a href="/project/admin/product/products.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'product')?'active':'' ?>">
+        <i class="bi bi-box-seam me-2"></i> <span>จัดการสินค้า</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a href="/project/admin/categories/categories.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'categories')?'active':'' ?>">
+        <i class="bi bi-tags me-2"></i> <span>ประเภทสินค้า</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a href="/project/admin/customer/customers.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'customer')?'active':'' ?>">
+        <i class="bi bi-people me-2"></i> <span>ลูกค้า</span>
+      </a>
+    </li>
+
+    <li class="nav-item mb-1">
+      <a href="/project/admin/order/orders.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'order')?'active':'' ?>">
+        <i class="bi bi-bag-check me-2"></i> <span>คำสั่งซื้อ</span>
+      </a>
+    </li>
+
+    <li class="nav-item mt-4 border-top border-secondary pt-2">
+      <a href="/project/admin/logout.php" class="nav-link text-danger d-flex align-items-center">
+        <i class="bi bi-box-arrow-right me-2"></i> <span>ออกจากระบบ</span>
+      </a>
+    </li>
   </ul>
-  <a href="../logout.php" class="logout-btn"><i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ</a>
-</aside>
+</nav>
 
-<!-- ✅ โหลด jQuery ก่อน $pageContent -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<style>
+/* ✅ Sidebar Theme */
+#sidebar {
+  background: #0d1117 !important;
+  min-height: 100vh;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  width: 250px;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+#sidebar .nav-link {
+  color: #b0b9c4 !important;
+  font-weight: 500;
+  border-radius: 10px;
+  margin: 4px 10px;
+  transition: 0.3s ease;
+  padding: 10px 18px;
+}
+#sidebar .nav-link:hover {
+  background: linear-gradient(145deg, rgba(0,210,91,0.25), rgba(0,210,91,0.15));
+  color: #00d25b !important;
+  transform: translateX(4px);
+}
+#sidebar .nav-link.active {
+  background: linear-gradient(145deg, #00d25b, #00b14a);
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(0,210,91,0.4);
+}
+#sidebar .nav-link i { font-size: 1.1rem; }
+#sidebar .text-danger { font-weight: 600; transition: 0.3s; }
+#sidebar .text-danger:hover { color: #ff4d4d !important; }
 
-<!-- เนื้อหาแต่ละหน้า -->
-<div class="main-content">
-  <?= $pageContent ?? '' ?>
-</div>
+/* 📱 Responsive Toggle */
+#sidebar.hidden {
+  transform: translateX(-100%);
+}
+#sidebarToggle {
+  background: transparent;
+  border: none;
+}
+@media (max-width: 991px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+  #sidebar.show {
+    transform: translateX(0);
+  }
+}
+</style>
 
 <script>
-document.getElementById('menuToggle')?.addEventListener('click', function(){
-  document.getElementById('sidebar').classList.toggle('collapsed');
+document.addEventListener("DOMContentLoaded", () => {
+  const sidebar = document.getElementById("sidebar");
+  const toggle = document.getElementById("sidebarToggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("show");
+    });
+  }
 });
 </script>
-</body>
-</html>
