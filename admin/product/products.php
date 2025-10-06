@@ -21,12 +21,17 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
      style="background: linear-gradient(145deg, #161b22, #0e1116); border:1px solid #2c313a;">
   <div class="card-body">
 
-    <!-- ปุ่มเพิ่มสินค้า -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- 🔍 ช่องค้นหาสินค้า -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
       <h4 class="text-light fw-semibold mb-0"><i class="bi bi-list-ul"></i> รายการสินค้า</h4>
-      <a href="product_add.php" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
-      </a>
+      <div class="d-flex align-items-center gap-2">
+        <input type="text" id="customSearch" class="form-control form-control-sm text-light" 
+               style="background:#161b22; border:1px solid #2c313a; width:250px;" 
+               placeholder="🔍 ค้นหาชื่อสินค้า / หมวดหมู่...">
+        <a href="product_add.php" class="btn btn-success btn-sm">
+          <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
+        </a>
+      </div>
     </div>
 
     <!-- ตารางสินค้า -->
@@ -89,13 +94,13 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 โหลด Vanilla-DataTables -->
+<!-- 🔹 Vanilla DataTables -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-datatables@1.8.10/dist/vanilla-dataTables.min.css">
 <script src="https://cdn.jsdelivr.net/npm/vanilla-datatables@1.8.10/dist/vanilla-dataTables.min.js"></script>
 
-<!-- 🔹 ตั้งค่า DataTable -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // สร้าง DataTable
   const dataTable = new DataTable("#dataTable", {
     searchable: true,
     fixedHeight: false,
@@ -103,26 +108,22 @@ document.addEventListener("DOMContentLoaded", () => {
     perPage: 10,
     perPageSelect: [5, 10, 25, 50],
     labels: {
-      placeholder: "🔍 ค้นหาชื่อสินค้า / หมวดหมู่...",
+      placeholder: "",
       perPage: "{select} รายการต่อหน้า",
       noRows: "ไม่มีข้อมูลสินค้า",
       info: "แสดง {start} ถึง {end} จากทั้งหมด {rows} รายการ"
     }
   });
 
-  // ปรับแต่งสีช่องค้นหาให้เข้ากับธีม
-  const searchInput = document.querySelector(".dataTable-input");
-  if (searchInput) {
-    searchInput.classList.add("form-control", "form-control-sm");
-    searchInput.style.background = "#161b22";
-    searchInput.style.color = "#fff";
-    searchInput.style.border = "1px solid #2c313a";
-  }
+  // 🔍 ซ่อนช่องค้นหาเดิมของ DataTables
+  const builtInSearch = document.querySelector(".dataTable-input");
+  if (builtInSearch) builtInSearch.parentElement.style.display = "none";
 
-  const selectMenu = document.querySelector(".dataTable-selector");
-  if (selectMenu) {
-    selectMenu.classList.add("form-select", "form-select-sm", "bg-dark", "text-light", "border-secondary");
-  }
+  // 🔍 ใช้ช่องค้นหาของเราเอง
+  const customSearch = document.querySelector("#customSearch");
+  customSearch.addEventListener("keyup", (e) => {
+    dataTable.search(e.target.value);
+  });
 });
 </script>
 
