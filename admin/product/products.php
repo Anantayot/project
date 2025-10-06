@@ -68,7 +68,9 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
                   <span class="text-muted">ไม่มีรูป</span>
                 <?php endif; ?>
               </td>
-              <td class="text-start text-white"><?= htmlspecialchars($p['p_name']) ?></td>
+              <td class="text-start text-white truncate-text" title="<?= htmlspecialchars($p['p_name']) ?>">
+                <?= htmlspecialchars($p['p_name']) ?>
+              </td>
               <td class="text-success fw-semibold"><?= number_format($p['p_price'], 2) ?></td>
               <td class="text-info"><?= htmlspecialchars($p['cat_name'] ?? '-') ?></td>
               <td class="text-warning"><?= htmlspecialchars($p['p_stock']) ?></td>
@@ -91,6 +93,29 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 </div>
+
+<!-- 🔹 CSS สำหรับตัดข้อความ -->
+<style>
+/* จำกัดความยาวชื่อสินค้า */
+.truncate-text {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* เมื่อ hover ให้เห็น tooltip และพื้นหลังอ่อนลง */
+.truncate-text:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive: จอเล็กตัดให้สั้นลงอีก */
+@media (max-width: 768px) {
+  .truncate-text {
+    max-width: 150px;
+  }
+}
+</style>
 
 <?php
 $pageContent = ob_get_clean();
@@ -125,14 +150,4 @@ $(document).ready(function() {
   // 🎨 ปรับสไตล์ช่องค้นหาให้เข้ากับธีม
   $(".dataTables_filter input")
     .addClass("form-control form-control-sm ms-2")
-    .css({
-      "width": "250px",
-      "background": "#161b22",
-      "color": "#fff",
-      "border": "1px solid #2c313a"
-    });
-
-  $(".dataTables_length select")
-    .addClass("form-select form-select-sm bg-dark text-light border-secondary");
-});
-</script>
+    .css(
