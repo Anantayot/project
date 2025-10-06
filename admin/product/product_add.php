@@ -13,7 +13,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $image = "";
   if (!empty($_FILES['image']['name'])) {
     $image = basename($_FILES['image']['name']);
-    move_uploaded_file($_FILES['image']['tmp_name'], "upload/" . $image);
+    $targetDir = __DIR__ . "/../uploads/"; // ชี้ไปโฟลเดอร์ uploads นอก /product/
+  if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
+
+  move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image);
+
   }
 
   $stmt = $conn->prepare("INSERT INTO product (p_name, p_price, p_stock, p_description, p_image, cat_id)
