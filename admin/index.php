@@ -2,7 +2,7 @@
 session_start();
 include __DIR__ . "/partials/connectdb.php";
 
-// ดึงข้อมูลสรุปจากฐานข้อมูล
+// ✅ ดึงข้อมูลสรุปจากฐานข้อมูล
 $total_products   = $conn->query("SELECT COUNT(*) FROM product")->fetchColumn();
 $total_categories = $conn->query("SELECT COUNT(*) FROM category")->fetchColumn();
 $total_customers  = $conn->query("SELECT COUNT(*) FROM customers")->fetchColumn();
@@ -14,9 +14,9 @@ $total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchCo
 <head>
   <meta charset="UTF-8">
   <title>Dashboard - MyCommiss Admin</title>
-  <link rel="stylesheet" href="template_corona/assets/vendors/css/vendor.bundle.base.css">
-  <link rel="stylesheet" href="template_corona/assets/css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap');
 body {
@@ -25,7 +25,7 @@ body {
   color: #fff;
 }
 
-/* ✅ Sidebar (เหมือนหน้าอื่น) */
+/* ✅ Sidebar */
 #sidebar {
   background: #0d1117;
   position: fixed;
@@ -73,7 +73,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* ✅ พื้นที่หลัก */
+/* ✅ Main Panel */
 .main-panel {
   margin-left: 250px;
   padding: 30px;
@@ -85,7 +85,7 @@ body {
   .main-panel { margin-left: 0; }
 }
 
-/* ✅ การ์ดและหัวข้อ */
+/* ✅ Title */
 .section-title {
   color: #fff;
   font-weight: 700;
@@ -93,12 +93,18 @@ body {
   padding-left: 10px;
   margin-bottom: 1.5rem;
 }
+
+/* ✅ Card Style */
 .card-custom {
   background: linear-gradient(145deg, #161b22, #0e1116);
   border: 1px solid #2c313a;
   border-radius: 15px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   transition: transform .3s, box-shadow .3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .card-custom:hover {
   transform: translateY(-4px);
@@ -107,13 +113,24 @@ body {
 .card-custom h4 { color: #c9d1d9; font-weight: 600; }
 .card-custom h2 { color: #00d25b; font-size: 2rem; font-weight: bold; }
 
-/* ✅ การ์ดรายได้รวม */
+/* ✅ Card รายได้รวม */
 .not-clickable {
   cursor: default !important;
   pointer-events: none !important;
   background: linear-gradient(145deg, #161b22, #101318);
   border: 1px solid #2c313a;
   box-shadow: inset 0 0 12px rgba(255,50,50,0.2);
+}
+
+/* ✅ Responsive Row Fix */
+.row.equal-height {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+.row.equal-height > [class*='col-'] {
+  flex: 1;
+  min-width: 250px;
 }
   </style>
 </head>
@@ -132,13 +149,13 @@ body {
     <a href="logout.php" class="logout-btn"><i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ</a>
   </aside>
 
-  <!-- ✅ เนื้อหาหลัก -->
+  <!-- ✅ Main Content -->
   <div class="main-panel">
     <div class="content-wrapper">
       <h3 class="section-title"><i class="bi bi-speedometer2"></i> แผงควบคุมระบบหลังบ้าน</h3>
 
       <!-- 🔹 แถวสรุปข้อมูล -->
-      <div class="row g-3">
+      <div class="row equal-height">
         <div class="col-md-3 col-sm-6">
           <a href="product/products.php" class="text-decoration-none">
             <div class="card card-custom text-center p-3">
@@ -189,23 +206,10 @@ body {
       </div>
 
       <!-- 🔹 การ์ดรายได้รวม -->
-      <div class="row mt-4">
-        <div class="col-md-12">
+      <div class="row mt-4 justify-content-center">
+        <div class="col-md-10">
           <div class="card card-custom text-center p-4 not-clickable">
             <div class="card-body">
               <i class="bi bi-cash-stack display-5 text-danger"></i>
               <h4 class="mt-3 text-white">รายได้รวมทั้งหมด</h4>
-              <h2 class="text-success"><?= number_format($total_income, 2) ?> ฿</h2>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script src="template_corona/assets/vendors/js/vendor.bundle.base.js"></script>
-  <script src="template_corona/assets/js/off-canvas.js"></script>
-  <script src="template_corona/assets/js/template.js"></script>
-</body>
-</html>
+              <h2 class="text-succ
