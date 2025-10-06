@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $image = "";
   if (!empty($_FILES['image']['name'])) {
     $image = basename($_FILES['image']['name']);
-    move_uploaded_file($_FILES['image']['tmp_name'], "../../assets/img/" . $image);
+    move_uploaded_file($_FILES['image']['tmp_name'], "upload/" . $image);
   }
 
   $stmt = $conn->prepare("INSERT INTO product (p_name, p_price, p_stock, p_description, p_image, cat_id)
