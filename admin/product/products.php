@@ -63,7 +63,7 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
                   $imageURL  = "../uploads/" . htmlspecialchars($p['p_image']);
                   if (!empty($p['p_image']) && file_exists($imagePath)): 
                 ?>
-                  <img src="<?= $imageURL ?>" width="60" class="rounded border border-secondary shadow-sm">
+                  <img src="<?= $imageURL ?>" width="60" class="rounded border border-secondary shadow-sm" alt="product">
                 <?php else: ?>
                   <span class="text-muted">ไม่มีรูป</span>
                 <?php endif; ?>
@@ -101,7 +101,7 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- ✅ CSS: ปรับสไตล์ให้เข้ากับธีม -->
 <style>
-/* --- โครงสร้างหลัก --- */
+/* 🔸 ควบคุมข้อความยาว */
 .truncate-text {
   max-width: 260px;
   white-space: nowrap;
@@ -112,25 +112,29 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   background: rgba(255,255,255,0.05);
 }
 
+/* 🔸 Scrollbar ตาราง */
 .table-responsive {
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: #2c313a #0d1117;
 }
 
-/* --- ปุ่มจัดการ --- */
+/* 🔸 ปุ่มในคอลัมน์ “จัดการ” */
 .table td:last-child {
   display: flex;
   justify-content: center;
   gap: 6px;
 }
-.btn-sm i { font-size: 1rem; vertical-align: middle; }
+.btn-sm i {
+  font-size: 1rem;
+  vertical-align: middle;
+}
 .table td, .table th {
   vertical-align: middle !important;
   padding: 10px 8px !important;
 }
 
-/* --- ช่องค้นหา & dropdown --- */
+/* 🔸 ช่องค้นหา */
 .dataTables_filter input {
   background: #161b22 !important;
   color: #fff !important;
@@ -138,8 +142,11 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   border-radius: 8px !important;
   padding: 6px 10px !important;
 }
-.dataTables_filter label { color: #ccc; }
+.dataTables_filter label {
+  color: #ccc;
+}
 
+/* 🔸 Dropdown แสดงรายการ */
 .dataTables_length select {
   background: #161b22 !important;
   color: #00d25b !important;
@@ -147,13 +154,11 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   border-radius: 6px !important;
 }
 
-/* --- Pagination ตกแต่งเข้าธีม --- */
+/* 🔸 Pagination เข้าธีม */
 .dataTables_wrapper .dataTables_paginate {
   margin-top: 15px;
   text-align: center;
 }
-
-/* ปุ่มทั้งหมด */
 .dataTables_wrapper .dataTables_paginate .paginate_button {
   background: #0d1117 !important;
   border: 1px solid #2c313a !important;
@@ -162,16 +167,12 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   margin: 0 3px;
   transition: all 0.2s ease;
 }
-
-/* Hover */
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
   background: linear-gradient(145deg, #00d25b, #00b14a) !important;
   color: #fff !important;
   border-color: #00b14a !important;
   box-shadow: 0 0 6px rgba(0,210,91,0.5);
 }
-
-/* Active */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
   background: linear-gradient(145deg, #00d25b, #00b14a) !important;
   color: #fff !important;
@@ -179,21 +180,19 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   box-shadow: 0 0 10px rgba(0,210,91,0.5);
   font-weight: 600;
 }
-
-/* Disabled */
 .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
   color: #555 !important;
   background: #161b22 !important;
   border: 1px solid #2c313a !important;
 }
 
-/* ปุ่มก่อนหน้า-ถัดไป */
+/* 🔸 ปุ่มก่อนหน้า-ถัดไป */
 .dataTables_wrapper .dataTables_paginate .previous,
 .dataTables_wrapper .dataTables_paginate .next {
   color: #00d25b !important;
 }
 
-/* Responsive */
+/* 🔸 Responsive: มือถือ */
 @media (max-width: 991px) {
   .truncate-text { max-width: 150px; }
   .table td, .table th { font-size: 0.85rem; }
@@ -231,7 +230,7 @@ $(document).ready(function() {
     ]
   });
 
-  // 🧩 เปิดใช้งาน Bootstrap Tooltip ทั้งหน้า
+  // 🧩 เปิด tooltip ทั้งหน้า
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 });
