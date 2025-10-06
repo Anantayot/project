@@ -50,15 +50,19 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       </p>
       <p><b>สถานะคำสั่งซื้อ:</b>
         <?php 
-          $statusColor = match($order['order_status']) {
-            'เสร็จสิ้น' => 'success',
-            'กำลังดำเนินการ' => 'warning',
-            'ยกเลิก' => 'danger',
-            default => 'secondary'
-          };
+          $status = $order['order_status'] ?? 'รอดำเนินการ';
+          if ($status == 'เสร็จสิ้น') {
+              $statusColor = 'success';
+          } elseif ($status == 'กำลังดำเนินการ') {
+              $statusColor = 'warning';
+          } elseif ($status == 'ยกเลิก') {
+              $statusColor = 'danger';
+          } else {
+              $statusColor = 'secondary';
+          }
         ?>
         <span class="badge bg-<?= $statusColor ?>">
-          <?= htmlspecialchars($order['order_status']) ?>
+          <?= htmlspecialchars($status) ?>
         </span>
       </p>
     </div>
@@ -93,7 +97,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
                  width="50" class="rounded">
           </td>
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
-          <td><?= $it['quantity'] ?></td>
+          <td><?= (int)$it['quantity'] ?></td>
           <td><?= number_format($it['price'], 2) ?></td>
           <td><?= number_format($it['subtotal'], 2) ?></td>
         </tr>
