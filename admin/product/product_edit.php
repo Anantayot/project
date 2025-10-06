@@ -2,7 +2,7 @@
 $pageTitle = "แก้ไขสินค้า";
 ob_start();
 
-include __DIR__ . "/../../admin/partials/connectdb.php";
+include __DIR__ . "/../partials/connectdb.php";
 
 $id = $_GET['id'] ?? null;
 if(!$id) die("❌ ไม่พบสินค้า");
@@ -14,26 +14,35 @@ $p = $product->fetch();
 $cats = $conn->query("SELECT * FROM category")->fetchAll();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $name = $_POST['name'];
-  $price = $_POST['price'];
-  $stock = $_POST['stock'];
+  $name   = $_POST['name'];
+  $price  = $_POST['price'];
+  $stock  = $_POST['stock'];
   $cat_id = $_POST['cat_id'];
-  $desc = $_POST['description'];
+  $desc   = $_POST['description'];
 
   // 🔹 จัดการอัปโหลดรูปภาพ
   $image = $p['p_image']; // เก็บชื่อเดิมไว้ก่อน
   if (!empty($_FILES['image']['name'])) {
     $image = time() . "_" . basename($_FILES['image']['name']); // กันชื่อซ้ำ
-    $targetDir = __DIR__ . "../uploads/"; // ไปที่โฟลเดอร์ uploads ใน admin
-    if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-    move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image);
+
+    // ✅ path โฟลเดอร์อัปโหลด (อยู่นอก /product/)
+    $targetDir = __DIR__ . "/../uploads/";
+
+    if (!is_dir($targetDir)) {
+      mkdir($targetDir, 0777, true);
+    }
+
+    if (!move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image)) {
+      die("❌ ไม่สามารถอัปโหลดรูปภาพได้");
+    }
   }
 
   // 🔹 อัปเดตฐานข้อมูล
   $stmt = $conn->prepare("UPDATE product 
                           SET p_name=?, p_price=?, p_stock=?, p_description=?, p_image=?, cat_id=? 
                           WHERE p_id=?");
-  $stmt->execute([$name,$price,$stock,$desc,$image,$cat_id,$id]);
+  $stmt->execute([$name, $price, $stock, $desc, $image, $cat_id, $id]);
+
   header("Location: products.php");
   exit;
 }
@@ -43,8 +52,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <i class="bi bi-pencil-square"></i> แก้ไขสินค้า
 </h3>
 
-<form method="post" enctype="multipart/form-data" class="card p-4 shadow-lg border-0"
+<form method="post" enctype="multipart/form-data"
+      class="card p-4 shadow-lg border-0"
       style="background:linear-gradient(145deg,#161b22,#0e1116);color:#fff;">
+  
   <div class="mb-3">
     <label class="form-label">ชื่อสินค้า</label>
     <input type="text" name="name" value="<?= htmlspecialchars($p['p_name']) ?>" class="form-control" required>
@@ -80,8 +91,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <div class="mb-3">
     <label class="form-label">รูปภาพ</label><br>
     <?php 
-      $imagePath = "../../uploads/" . htmlspecialchars($p['p_image']);
-      if (!empty($p['p_image']) && file_exists($imagePath)): ?>
+      $imagePath = "../uploads/" . htmlspecialchars($p['p_image']);
+      if (!empty($p['p_image']) && file_exists(__DIR__ . "/../uploads/" . $p['p_image'])): ?>
         <img src="<?= $imagePath ?>" width="100" class="rounded mb-2"><br>
       <?php else: ?>
         <span class="text-muted">ยังไม่มีรูปภาพ</span><br>

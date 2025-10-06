@@ -4,25 +4,38 @@ include __DIR__ . "/../partials/connectdb.php";
 $cats = $conn->query("SELECT * FROM category")->fetchAll();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $name = $_POST['name'];
-  $price = $_POST['price'];
-  $stock = $_POST['stock'];
+  $name   = $_POST['name'];
+  $price  = $_POST['price'];
+  $stock  = $_POST['stock'];
   $cat_id = $_POST['cat_id'];
-  $desc = $_POST['description'];
+  $desc   = $_POST['description'];
 
   $image = "";
   if (!empty($_FILES['image']['name'])) {
-    $image = basename($_FILES['image']['name']);
-    $targetDir = __DIR__ . "../uploads/"; // ชี้ไปโฟลเดอร์ uploads นอก /product/
-  if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
+    // 🔹 สร้างชื่อไฟล์ใหม่ ป้องกันชื่อซ้ำ
+    $image = time() . "_" . basename($_FILES['image']['name']);
 
-  move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image);
+    // 🔹 โฟลเดอร์เก็บรูป (อยู่นอก /product/)
+    $targetDir = __DIR__ . "/../uploads/";
 
+    // 🔹 ถ้าโฟลเดอร์ยังไม่มี ให้สร้าง
+    if (!is_dir($targetDir)) {
+      mkdir($targetDir, 0777, true);
+    }
+
+    // 🔹 ย้ายไฟล์จาก temp ไปยัง uploads/
+    if (!move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image)) {
+      die("❌ ไม่สามารถอัปโหลดรูปภาพได้");
+    }
   }
 
-  $stmt = $conn->prepare("INSERT INTO product (p_name, p_price, p_stock, p_description, p_image, cat_id)
-                          VALUES (?,?,?,?,?,?)");
-  $stmt->execute([$name,$price,$stock,$desc,$image,$cat_id]);
+  // 🔹 เพิ่มข้อมูลลงฐานข้อมูล
+  $stmt = $conn->prepare("
+    INSERT INTO product (p_name, p_price, p_stock, p_description, p_image, cat_id)
+    VALUES (?, ?, ?, ?, ?, ?)
+  ");
+  $stmt->execute([$name, $price, $stock, $desc, $image, $cat_id]);
+
   header("Location: products.php");
   exit;
 }
@@ -32,7 +45,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <i class="bi bi-plus-circle"></i> เพิ่มสินค้าใหม่
 </h3>
 
-<form method="post" enctype="multipart/form-data" class="card p-4 shadow-lg border-0">
+<form method="post" enctype="multipart/form-data" 
+      class="card p-4 shadow-lg border-0"
+      style="background:linear-gradient(145deg,#161b22,#0e1116);border:1px solid #2c313a;color:#fff;">
+  
   <div class="mb-3">
     <label class="form-label">ชื่อสินค้า</label>
     <input type="text" name="name" class="form-control" required>
@@ -70,8 +86,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   </div>
 
   <div class="text-end">
-    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> บันทึก</button>
-    <a href="products.php" class="btn btn-secondary"><i class="bi bi-x-circle"></i> ยกเลิก</a>
+    <button type="submit" class="btn btn-success">
+      <i class="bi bi-check-circle"></i> บันทึก
+    </button>
+    <a href="products.php" class="btn btn-secondary">
+      <i class="bi bi-x-circle"></i> ยกเลิก
+    </a>
   </div>
 </form>
 

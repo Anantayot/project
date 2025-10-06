@@ -57,10 +57,11 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
               <td><?= $index + 1 ?></td>
               <td>
                 <?php 
-                  $imagePath = "../uploads/" . htmlspecialchars($p['p_image']);
+                  $imagePath = __DIR__ . "/../uploads/" . $p['p_image'];
+                  $imageURL  = "../uploads/" . htmlspecialchars($p['p_image']);
                   if (!empty($p['p_image']) && file_exists($imagePath)): 
                 ?>
-                  <img src="<?= $imagePath ?>" width="60" class="rounded">
+                  <img src="<?= $imageURL ?>" width="60" class="rounded border border-secondary">
                 <?php else: ?>
                   <span class="text-muted">ไม่มีรูป</span>
                 <?php endif; ?>
