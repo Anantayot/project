@@ -11,40 +11,38 @@ include("../connectdb.php");
 <head>
     <meta charset="UTF-8">
     <title>จัดการสินค้า</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
 </head>
 <body class="bg-dark text-light">
 
 <div class="container mt-4">
+
+    <!-- 🔹 ส่วนหัว -->
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h3><i class="bi bi-box-seam"></i> จัดการสินค้า</h3>
         <div>
-            <a href="../dashboard.php" class="btn btn-secondary">กลับ</a>
+            <a href="../dashboard.php" class="btn btn-secondary">กลับไปหน้าแดชบอร์ด</a>
             <a href="add.php" class="btn btn-success">+ เพิ่มสินค้า</a>
         </div>
     </div>
 
-    <!-- 🔍 ช่องค้นหา + หมวดหมู่ -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <input type="text" id="searchBox" class="form-control text-light" 
-               style="background:#161b22;border:1px solid #2c313a;width:250px;" 
-               placeholder="🔍 ค้นหาสินค้า...">
-        <select id="categoryFilter" class="form-select bg-dark text-light border-secondary" style="width:200px;">
-            <option value="">ทั้งหมด</option>
-            <?php
-            $catQuery = mysqli_query($conn, "SELECT * FROM category ORDER BY cat_name ASC");
-            while($cat = mysqli_fetch_assoc($catQuery)){
-                echo "<option value='".htmlspecialchars($cat['cat_name'])."'>".htmlspecialchars($cat['cat_name'])."</option>";
-            }
-            ?>
-        </select>
+    <!-- 🔍 ช่องค้นหา -->
+    <div class="d-flex justify-content-end mb-3">
+        <input type="text" id="customSearch" 
+               class="form-control form-control-sm text-light"
+               style="background:#161b22; border:1px solid #2c313a; width:250px;"
+               placeholder="🔍 ค้นหาชื่อสินค้า / หมวดหมู่...">
     </div>
 
+    <!-- ตารางสินค้า -->
     <div class="table-responsive">
-        <table class="table table-dark table-striped table-hover display responsive nowrap" id="myTable" style="width:100%">
-            <thead style="background:#00b14a;color:#111;">
+        <table class="table table-dark table-striped table-hover display responsive nowrap" 
+               id="myTable" style="width:100%">
+            <thead style="background:#00b14a; color:#111;">
                 <tr>
                     <th>ID</th>
                     <th>รูปภาพ</th>
@@ -94,9 +92,9 @@ include("../connectdb.php");
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- Bootstrap 5 JS -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<!-- DataTables -->
+<!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
@@ -104,6 +102,7 @@ include("../connectdb.php");
 
 <script>
 $(document).ready(function(){
+    // ✅ สร้าง DataTable
     const table = $('#myTable').DataTable({
         responsive: true,
         language: {
@@ -121,24 +120,14 @@ $(document).ready(function(){
             }
         },
         columnDefs: [
-            { orderable: false, targets: [1,7] },
-            { responsivePriority: 1, targets: 2 }
+            { orderable: false, targets: [1,7] }, // ปิด sort ที่คอลัมน์รูปภาพและจัดการ
+            { responsivePriority: 1, targets: 2 } // ให้ชื่อสินค้าโชว์เสมอ
         ]
     });
 
-    // 🔍 ช่องค้นหาสินค้า
-    $('#searchBox').on('keyup', function(){
+    // 🔍 ทำให้ช่องค้นหาที่เราสร้างไว้กรองได้จริง
+    $('#customSearch').on('keyup', function(){
         table.search(this.value).draw();
-    });
-
-    // 🏷️ กรองตามหมวดหมู่
-    $('#categoryFilter').on('change', function(){
-        const cat = this.value;
-        if (cat) {
-            table.column(6).search('^' + cat + '$', true, false).draw();
-        } else {
-            table.column(6).search('').draw();
-        }
     });
 });
 </script>
