@@ -12,12 +12,6 @@ $sql = "SELECT p.*, c.cat_name
 $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!-- ✅ เรียกใช้ DataTables CSS -->
-<link rel="stylesheet" 
-      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" 
-      href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
-
 <!-- 🔹 ส่วนหัว -->
 <h3 class="mb-4 text-center fw-bold text-white">
   <i class="bi bi-box-seam"></i> จัดการสินค้า
@@ -27,19 +21,25 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
      style="background: linear-gradient(145deg, #161b22, #0e1116); border:1px solid #2c313a;">
   <div class="card-body">
 
-    <!-- ปุ่มเพิ่มสินค้า -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="text-light fw-semibold mb-0"><i class="bi bi-list-ul"></i> รายการสินค้า</h4>
-      <a href="product_add.php" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
-      </a>
+    <!-- 🔍 ค้นหา + ปุ่มเพิ่ม -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+      <h4 class="text-light fw-semibold mb-2">
+        <i class="bi bi-list-ul"></i> รายการสินค้า
+      </h4>
+
+      <div class="d-flex align-items-center gap-2">
+        <input type="text" id="searchBox" class="form-control form-control-sm bg-dark text-light border-secondary"
+               placeholder="🔍 ค้นหาสินค้า..." style="width:200px;">
+        <a href="product_add.php" class="btn btn-success">
+          <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
+        </a>
+      </div>
     </div>
 
     <!-- ตารางสินค้า -->
     <div class="table-responsive">
-      <table id="dataTable" 
-             class="table table-dark table-striped text-center align-middle mb-0 display nowrap" 
-             style="border-radius:10px; overflow:hidden; width:100%;">
+      <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0" 
+             style="border-radius:10px; overflow:hidden;">
         <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111;">
           <tr>
             <th>#</th>
@@ -98,24 +98,20 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- ✅ เรียกใช้ DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-
-<!-- 🔹 ตั้งค่า DataTable -->
+<!-- 🔹 DataTable + Search -->
 <script>
 $(document).ready(() => {
-  $('#dataTable').DataTable({
+  const table = $('#dataTable').DataTable({
     language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json' },
     pageLength: 10,
     responsive: true,
-    columnDefs: [
-      { targets: [0,1,5,6], className: 'text-center' },
-      { targets: [2,3,4], className: 'align-middle' }
-    ]
+    dom: 'rt<"d-flex justify-content-between align-items-center mt-3"lip>', // ปรับ layout ให้เรียบ
+    ordering: true
+  });
+
+  // ✅ ค้นหาแบบ custom
+  $('#searchBox').on('keyup', function () {
+    table.search(this.value).draw();
   });
 });
 </script>
