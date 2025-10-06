@@ -100,7 +100,6 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // สร้าง DataTable
   const dataTable = new DataTable("#dataTable", {
     searchable: true,
     fixedHeight: false,
@@ -119,11 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const builtInSearch = document.querySelector(".dataTable-input");
   if (builtInSearch) builtInSearch.parentElement.style.display = "none";
 
-  // 🔍 ใช้ช่องค้นหาของเราเอง
+  // ✅ ใช้ช่องค้นหาของเราเอง
   const customSearch = document.querySelector("#customSearch");
-  customSearch.addEventListener("keyup", (e) => {
-    dataTable.search(e.target.value);
-  });
+  if (customSearch) {
+    customSearch.addEventListener("keyup", (e) => {
+      dataTable.search(e.target.value);  // กรองข้อความ
+      dataTable.update();                // อัปเดตตาราง (สำคัญ!)
+    });
+  }
 });
 </script>
 
