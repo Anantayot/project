@@ -98,21 +98,22 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 DataTables Assets -->
-<link rel="stylesheet" 
-      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<?php
+$pageContent = ob_get_clean();
+include __DIR__ . "/../partials/layout.php";
+?>
+
+<!-- ✅ โหลดสคริปต์ DataTables หลัง Layout เพื่อป้องกัน jQuery ยังไม่พร้อม -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- 🔹 DataTables Setup -->
 <script>
 $(document).ready(function() {
-  // ✅ สร้าง DataTable
   const table = $('#dataTable').DataTable({
     language: {
       url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json',
-      search: "", // ปิด search ของระบบไว้
+      search: "", // ปิด search ของระบบ
       searchPlaceholder: "",
       lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
       zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
@@ -128,21 +129,16 @@ $(document).ready(function() {
     ]
   });
 
-  // ❌ ซ่อนช่องค้นหาเดิมของ DataTables
+  // ❌ ซ่อนช่องค้นหาเดิม
   $('.dataTables_filter').hide();
 
   // 🔍 ใช้งานช่องค้นหาเอง
-  $('#customSearch').on('keyup', function() {
+  $('#customSearch').on('input', function() {
     table.search(this.value).draw();
   });
 
-  // ปรับสไตล์ dropdown จำนวนแถว
+  // 🎨 ปรับสไตล์ dropdown
   $(".dataTables_length select")
     .addClass("form-select form-select-sm bg-dark text-light border-secondary");
 });
 </script>
-
-<?php
-$pageContent = ob_get_clean();
-include __DIR__ . "/../partials/layout.php";
-?>
