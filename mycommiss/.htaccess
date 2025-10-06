@@ -1,0 +1,3 @@
+# Ensure PHP is used and turn on UTF-8
+AddDefaultCharset utf-8
+Options -Indexes
