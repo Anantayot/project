@@ -17,8 +17,8 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   <i class="bi bi-box-seam"></i> จัดการสินค้า
 </h3>
 
-<div class="card shadow-lg border-0" 
-     style="background: linear-gradient(145deg, #161b22, #0e1116); border:1px solid #2c313a;">
+<div class="card shadow-lg border-0"
+     style="background: linear-gradient(145deg,#161b22,#0e1116); border:1px solid #2c313a;">
   <div class="card-body">
 
     <!-- ปุ่มเพิ่มสินค้า -->
@@ -33,7 +33,7 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- ตารางสินค้า -->
     <div class="table-responsive">
-      <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0" 
+      <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0"
              style="border-radius:10px; overflow:hidden;">
         <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
           <tr>
@@ -75,15 +75,20 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
               <td class="text-info"><?= htmlspecialchars($p['cat_name'] ?? '-') ?></td>
               <td class="text-warning"><?= htmlspecialchars($p['p_stock']) ?></td>
               <td>
-                <a href="product_edit.php?id=<?= $p['p_id'] ?>" 
-                   class="btn btn-warning btn-sm me-1" title="แก้ไข">
+                <button type="button" 
+                        class="btn btn-warning btn-sm"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="แก้ไขสินค้า"
+                        onclick="window.location='product_edit.php?id=<?= $p['p_id'] ?>'">
                   <i class="bi bi-pencil-square"></i>
-                </a>
-                <a href="product_delete.php?id=<?= $p['p_id'] ?>" 
-                   class="btn btn-danger btn-sm" title="ลบ"
-                   onclick="return confirm('ยืนยันการลบสินค้านี้หรือไม่?')">
+                </button>
+                <button type="button" 
+                        class="btn btn-danger btn-sm"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="ลบสินค้า"
+                        onclick="if(confirm('ยืนยันการลบสินค้านี้หรือไม่?')) window.location='product_delete.php?id=<?= $p['p_id'] ?>'">
                   <i class="bi bi-trash"></i>
-                </a>
+                </button>
               </td>
             </tr>
             <?php endforeach; ?>
@@ -94,26 +99,40 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 CSS สำหรับตัดข้อความ -->
+<!-- ✅ CSS -->
 <style>
-/* จำกัดความยาวชื่อสินค้า */
 .truncate-text {
-  max-width: 300px;
+  max-width: 260px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* เมื่อ hover ให้เห็น tooltip และพื้นหลังอ่อนลง */
 .truncate-text:hover {
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Responsive: จอเล็กตัดให้สั้นลงอีก */
-@media (max-width: 768px) {
-  .truncate-text {
-    max-width: 150px;
-  }
+.table-responsive {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2c313a #0d1117;
+}
+
+/* ปุ่มจัดการให้ชิดกัน */
+.table td:last-child {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-sm i { font-size: 1rem; vertical-align: middle; }
+.table td, .table th {
+  vertical-align: middle !important;
+  padding: 10px 8px !important;
+}
+
+@media (max-width: 991px) {
+  .truncate-text { max-width: 150px; }
+  .table td, .table th { font-size: 0.85rem; }
+  .table td:last-child { flex-wrap: wrap; gap: 4px; }
 }
 </style>
 
@@ -122,17 +141,18 @@ $pageContent = ob_get_clean();
 include __DIR__ . "/../partials/layout.php";
 ?>
 
-<!-- ✅ โหลดสคริปต์ DataTables หลัง Layout -->
+<!-- ✅ DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+<!-- ✅ ตั้งค่า DataTables -->
 <script>
 $(document).ready(function() {
   const table = $('#dataTable').DataTable({
     language: {
       url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json',
-      searchPlaceholder: "🔍 ค้นหาชื่อสินค้า / หมวดหมู่...",
+      searchPlaceholder: "🔍 ค้นหาชื่อสินค้า / หมวดหมู่ / ราคา...",
       lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
       zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
       info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
@@ -147,7 +167,21 @@ $(document).ready(function() {
     ]
   });
 
-  // 🎨 ปรับสไตล์ช่องค้นหาให้เข้ากับธีม
+  // 🎨 ปรับสไตล์ช่องค้นหาและ dropdown ให้เหมือนหน้า category
   $(".dataTables_filter input")
     .addClass("form-control form-control-sm ms-2")
-    .css(
+    .css({
+      "width": "250px",
+      "background": "#161b22",
+      "color": "#fff",
+      "border": "1px solid #2c313a"
+    });
+
+  $(".dataTables_length select")
+    .addClass("form-select form-select-sm bg-dark text-light border-secondary");
+
+  // 🧩 เปิดใช้งาน tooltip
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+});
+</script>
