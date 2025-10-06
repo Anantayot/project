@@ -3,15 +3,16 @@ $pageTitle = "จัดการคำสั่งซื้อ";
 include __DIR__ . "/../partials/connectdb.php";
 ob_start();
 
-$sql = "SELECT o.order_id, o.order_date, o.total_price, o.order_status, c.name AS customer_name 
-        FROM orders o 
-        LEFT JOIN customers c ON o.customer_id = c.customer_id 
-        ORDER BY o.order_id DESC";
-
-$result = $conn->query($sql);
-$orders = [];
-if ($result) {
-    $orders = $result->fetch_all(MYSQLI_ASSOC);
+try {
+    $sql = "SELECT o.order_id, o.order_date, o.total_price, o.order_status, c.name AS customer_name 
+            FROM orders o 
+            LEFT JOIN customers c ON o.customer_id = c.customer_id 
+            ORDER BY o.order_id DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("<div style='color:red;text-align:center;margin-top:20px;'>❌ SQL Error: " . htmlspecialchars($e->getMessage()) . "</div>");
 }
 ?>
 
@@ -48,6 +49,7 @@ if ($result) {
             <td>
               <?php
                 $status = $o['order_status'] ?? 'รอดำเนินการ';
+                // ใช้ if-else แทน match เพื่อให้รองรับ PHP 7.x
                 if ($status == 'เสร็จสิ้น') {
                     $badge = 'success';
                 } elseif ($status == 'กำลังดำเนินการ') {
