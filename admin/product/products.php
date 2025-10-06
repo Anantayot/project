@@ -100,34 +100,34 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ สร้าง DataTable โดยปิด searchable ของระบบ
   const dataTable = new DataTable("#dataTable", {
-    searchable: true,
-    fixedHeight: false,
+    searchable: false, // ปิด search เดิม
     sortable: true,
     perPage: 10,
     perPageSelect: [5, 10, 25, 50],
     labels: {
-      placeholder: "",
       perPage: "{select} รายการต่อหน้า",
       noRows: "ไม่มีข้อมูลสินค้า",
       info: "แสดง {start} ถึง {end} จากทั้งหมด {rows} รายการ"
     }
   });
 
-  // 🔍 ซ่อนช่องค้นหาเดิมของ DataTables
-  const builtInSearch = document.querySelector(".dataTable-input");
-  if (builtInSearch) builtInSearch.parentElement.style.display = "none";
-
-  // ✅ ใช้ช่องค้นหาของเราเอง
   const customSearch = document.querySelector("#customSearch");
-  if (customSearch) {
-    customSearch.addEventListener("keyup", (e) => {
-      dataTable.search(e.target.value);  // กรองข้อความ
-      dataTable.update();                // อัปเดตตาราง (สำคัญ!)
+
+  // ✅ ฟังก์ชันกรองข้อมูลด้วย JS
+  customSearch.addEventListener("input", (e) => {
+    const keyword = e.target.value.toLowerCase();
+
+    // loop ตรวจทุกแถวใน tbody
+    document.querySelectorAll("#dataTable tbody tr").forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(keyword) ? "" : "none";
     });
-  }
+  });
 });
 </script>
+
 
 <?php
 $pageContent = ob_get_clean();
