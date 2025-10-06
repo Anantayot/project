@@ -35,13 +35,13 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
              style="border-radius:10px; overflow:hidden;">
         <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
           <tr>
-            <th style="width:50px;">#</th>
+            <th>#</th>
             <th>รูปภาพ</th>
             <th>ชื่อสินค้า</th>
             <th>ราคา (฿)</th>
             <th>หมวดหมู่</th>
             <th>สต็อก</th>
-            <th style="width:120px;">จัดการ</th>
+            <th>จัดการ</th>
           </tr>
         </thead>
         <tbody>
@@ -71,12 +71,11 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
               <td class="text-info"><?= htmlspecialchars($p['cat_name'] ?? '-') ?></td>
               <td class="text-warning"><?= htmlspecialchars($p['p_stock']) ?></td>
               <td>
-                <a href="product_edit.php?id=<?= $p['p_id'] ?>" 
-                   class="btn btn-warning btn-sm me-1" title="แก้ไข">
+                <a href="product_edit.php?id=<?= $p['p_id'] ?>" class="btn btn-warning btn-sm me-1">
                   <i class="bi bi-pencil-square"></i>
                 </a>
                 <a href="product_delete.php?id=<?= $p['p_id'] ?>" 
-                   class="btn btn-danger btn-sm" title="ลบ"
+                   class="btn btn-danger btn-sm"
                    onclick="return confirm('ยืนยันการลบสินค้านี้หรือไม่?')">
                   <i class="bi bi-trash"></i>
                 </a>
@@ -90,48 +89,40 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 DataTables Assets -->
-<link rel="stylesheet" 
-      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<!-- 🔹 โหลด Vanilla-DataTables -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-datatables@1.8.10/dist/vanilla-dataTables.min.css">
+<script src="https://cdn.jsdelivr.net/npm/vanilla-datatables@1.8.10/dist/vanilla-dataTables.min.js"></script>
 
-<!-- 🔹 DataTables Setup -->
+<!-- 🔹 ตั้งค่า DataTable -->
 <script>
-$(document).ready(function() {
-  const table = $('#dataTable').DataTable({
-    language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json',
-      searchPlaceholder: "🔍 ค้นหาชื่อสินค้า / หมวดหมู่...",
-      sSearch: "",
-      lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
-      zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
-      info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-      infoEmpty: "ไม่มีข้อมูล",
-      infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)"
-    },
-    pageLength: 10,
-    responsive: true,
-    order: [[0, "asc"]],
-    columnDefs: [
-      { orderable: false, targets: [1, 6] } // ปิด sort ของรูปภาพ/ปุ่มจัดการ
-    ]
+document.addEventListener("DOMContentLoaded", () => {
+  const dataTable = new DataTable("#dataTable", {
+    searchable: true,
+    fixedHeight: false,
+    sortable: true,
+    perPage: 10,
+    perPageSelect: [5, 10, 25, 50],
+    labels: {
+      placeholder: "🔍 ค้นหาชื่อสินค้า / หมวดหมู่...",
+      perPage: "{select} รายการต่อหน้า",
+      noRows: "ไม่มีข้อมูลสินค้า",
+      info: "แสดง {start} ถึง {end} จากทั้งหมด {rows} รายการ"
+    }
   });
 
-  // ปรับสไตล์ช่องค้นหาให้เข้ากับธีม
-  $(".dataTables_filter input")
-    .addClass("form-control form-control-sm ms-2")
-    .css({
-      "width": "250px",
-      "background": "#161b22",
-      "color": "#fff",
-      "border": "1px solid #2c313a"
-    })
-    .attr("placeholder", "ค้นหาชื่อสินค้า / หมวดหมู่...");
-  
-  $(".dataTables_length select")
-    .addClass("form-select form-select-sm bg-dark text-light border-secondary");
+  // ปรับแต่งสีช่องค้นหาให้เข้ากับธีม
+  const searchInput = document.querySelector(".dataTable-input");
+  if (searchInput) {
+    searchInput.classList.add("form-control", "form-control-sm");
+    searchInput.style.background = "#161b22";
+    searchInput.style.color = "#fff";
+    searchInput.style.border = "1px solid #2c313a";
+  }
+
+  const selectMenu = document.querySelector(".dataTable-selector");
+  if (selectMenu) {
+    selectMenu.classList.add("form-select", "form-select-sm", "bg-dark", "text-light", "border-secondary");
+  }
 });
 </script>
 
