@@ -4,7 +4,7 @@ include __DIR__ . "/../partials/connectdb.php";
 $pageTitle = "จัดการสินค้า";
 ob_start();
 
-// 🔹 ดึงข้อมูลสินค้าทั้งหมด (JOIN กับหมวดหมู่)
+// ดึงข้อมูลสินค้าทั้งหมด (JOIN กับหมวดหมู่)
 $sql = "SELECT p.*, c.cat_name 
         FROM product p
         LEFT JOIN category c ON p.cat_id = c.cat_id
@@ -23,9 +23,7 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- ปุ่มเพิ่มสินค้า -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4 class="text-light fw-semibold mb-0">
-        <i class="bi bi-list-ul"></i> รายการสินค้า
-      </h4>
+      <h4 class="text-light fw-semibold mb-0"><i class="bi bi-list-ul"></i> รายการสินค้า</h4>
       <a href="product_add.php" class="btn btn-success">
         <i class="bi bi-plus-circle"></i> เพิ่มสินค้า
       </a>
@@ -92,9 +90,10 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 DataTables (with Search, Sort, Pagination, Thai Language) -->
+<!-- 🔹 โหลดสคริปต์ DataTables (เรียงลำดับให้ถูกต้อง) -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -105,12 +104,12 @@ $(document).ready(() => {
   $('#dataTable').DataTable({
     responsive: true,
     pageLength: 10,
+    ordering: true,   // ✅ เปิดเรียงข้อมูล
+    searching: true,  // ✅ เปิดค้นหา
     language: {
-      url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json',
-      search: "ค้นหา:",
-      lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
-      info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-      paginate: { next: "ถัดไป", previous: "ก่อนหน้า" }
+      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/th.json",
+      searchPlaceholder: "ค้นหาสินค้า...",
+      search: "🔍 "
     }
   });
 });
