@@ -2,7 +2,7 @@
 $host = 'localhost';
 $dbname = 'mycommiss';
 $username = 'root';
-$password = '';
+$password = 'note071245';
 
 try {
   $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
