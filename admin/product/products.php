@@ -40,7 +40,7 @@ $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             <td><?= $index+1 ?></td>
             <td>
               <?php if(!empty($p['p_image'])): ?>
-                <img src="../../assets/img/<?= htmlspecialchars($p['p_image']) ?>" width="60" class="rounded">
+                <img src="upload/<?= htmlspecialchars($p['p_image']) ?>" width="60" class="rounded">
               <?php else: ?>
                 <span class="text-muted">ไม่มีรูป</span>
               <?php endif; ?>
