@@ -1,50 +1,43 @@
-<!-- 🔹 sidebar.php -->
-<nav class="sidebar sidebar-offcanvas" id="sidebar" style="
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 260px;
-  background: #11161d;
-  border-right: 1px solid #1f252e;
-  box-shadow: 3px 0 10px rgba(0,0,0,0.5);
-  z-index: 1000;
-">
-  <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-    <h4 class="text-light mt-3">💻 MyCommiss</h4>
+<nav class="sidebar sidebar-offcanvas" id="sidebar" style="background:#0d1117; min-height:100vh;">
+  <div class="sidebar-brand-wrapper text-center py-4 border-bottom border-secondary">
+    <h4 class="text-white fw-bold mb-0"><i class="bi bi-laptop"></i> MyCommiss</h4>
   </div>
 
-  <ul class="nav flex-column mt-5">
-    <li class="nav-item">
-      <a class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='index.php') echo 'active'; ?>" href="/project/admin/index.php">
-        <i class="bi bi-speedometer2 me-2"></i> Dashboard
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link <?php if(str_contains($_SERVER['PHP_SELF'], 'product')) echo 'active'; ?>" href="/project/admin/product/products.php">
-        <i class="bi bi-box-seam me-2"></i> จัดการสินค้า
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link <?php if(str_contains($_SERVER['PHP_SELF'], 'categories')) echo 'active'; ?>" href="/project/admin/categories/categories.php">
-        <i class="bi bi-tags me-2"></i> ประเภทสินค้า
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link <?php if(str_contains($_SERVER['PHP_SELF'], 'customer')) echo 'active'; ?>" href="/project/admin/customer/customers.php">
-        <i class="bi bi-people me-2"></i> ลูกค้า
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link <?php if(str_contains($_SERVER['PHP_SELF'], 'order')) echo 'active'; ?>" href="/project/admin/order/orders.php">
-        <i class="bi bi-bag-check me-2"></i> คำสั่งซื้อ
+  <ul class="nav flex-column mt-3">
+  <li class="nav-item mb-1">
+    <a href="index.php" class="nav-link d-flex align-items-center <?= basename($_SERVER['PHP_SELF'])=='index.php'?'active':'' ?>">
+      <i class="bi bi-speedometer2 me-2"></i> <span>Dashboard</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-1">
+    <a href="product/products.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'product')?'active':'' ?>">
+      <i class="bi bi-box-seam me-2"></i> <span>จัดการสินค้า</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-1">
+    <a href="categories/categories.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'categories')?'active':'' ?>">
+      <i class="bi bi-tags me-2"></i> <span>ประเภทสินค้า</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-1">
+    <a href="customer/customers.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'customer')?'active':'' ?>">
+      <i class="bi bi-people me-2"></i> <span>ลูกค้า</span>
+    </a>
+  </li>
+
+  <li class="nav-item mb-1">
+    <a href="order/orders.php" class="nav-link d-flex align-items-center <?= strpos($_SERVER['PHP_SELF'],'order')?'active':'' ?>">
+      <i class="bi bi-bag-check me-2"></i> <span>คำสั่งซื้อ</span>
+    </a>
+  </li>
+</ul>
+    <li class="nav-item mt-4 border-top border-secondary">
+      <a href="logout.php" class="nav-link text-danger d-flex align-items-center">
+        <i class="bi bi-box-arrow-right me-2"></i> <span>ออกจากระบบ</span>
       </a>
     </li>
   </ul>
-
-  <div class="mt-auto p-3">
-    <a href="/project/admin/logout.php" class="btn btn-danger w-100">
-      <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
-    </a>
-  </div>
 </nav>
