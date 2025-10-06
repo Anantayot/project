@@ -7,7 +7,12 @@ $sql = "SELECT o.order_id, o.order_date, o.total_price, o.order_status, c.name A
         FROM orders o 
         LEFT JOIN customers c ON o.customer_id = c.customer_id 
         ORDER BY o.order_id DESC";
-$orders = $conn->query($sql)->fetchAll();
+
+$result = $conn->query($sql);
+$orders = [];
+if ($result) {
+    $orders = $result->fetch_all(MYSQLI_ASSOC);
+}
 ?>
 
 <h3 class="mb-4 fw-bold text-white text-center">
@@ -43,12 +48,15 @@ $orders = $conn->query($sql)->fetchAll();
             <td>
               <?php
                 $status = $o['order_status'] ?? 'รอดำเนินการ';
-                $badge = match($status) {
-                  'เสร็จสิ้น' => 'success',
-                  'กำลังดำเนินการ' => 'warning text-dark',
-                  'ยกเลิก' => 'danger',
-                  default => 'secondary'
-                };
+                if ($status == 'เสร็จสิ้น') {
+                    $badge = 'success';
+                } elseif ($status == 'กำลังดำเนินการ') {
+                    $badge = 'warning text-dark';
+                } elseif ($status == 'ยกเลิก') {
+                    $badge = 'danger';
+                } else {
+                    $badge = 'secondary';
+                }
               ?>
               <span class="badge bg-<?= $badge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($status) ?></span>
             </td>
