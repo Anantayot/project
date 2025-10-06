@@ -22,7 +22,7 @@ body {
   margin: 0;
 }
 
-/* 🟩 Sidebar */
+/* ================= Sidebar ================= */
 #sidebar {
   background: #0d1117;
   position: fixed;
@@ -30,14 +30,14 @@ body {
   left: 0;
   width: 250px;
   height: 100vh;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
   box-shadow: 0 0 25px rgba(0,0,0,0.6);
   z-index: 1050;
 }
 
-/* เมื่อ Sidebar ย่อ (สำหรับมือถือ) */
-#sidebar.collapsed {
-  left: -250px;
+/* เมื่อ Sidebar ซ่อน (มือถือ) */
+#sidebar.collapsed, #sidebar.hide {
+  left: -260px;
 }
 
 /* โลโก้ */
@@ -49,9 +49,7 @@ body {
   border-bottom: 1px solid #1f1f1f;
   color: #fff;
 }
-#sidebar .brand i {
-  color: #00d25b;
-}
+#sidebar .brand i { color: #00d25b; }
 
 /* เมนู */
 #sidebar ul {
@@ -103,7 +101,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* 🟧 Navbar สำหรับมือถือ */
+/* ================= Navbar มือถือ ================= */
 .navbar {
   background: #161b22;
   position: fixed;
@@ -111,7 +109,7 @@ body {
   left: 0;
   right: 0;
   height: 56px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
@@ -121,8 +119,8 @@ body {
 .navbar .toggle-btn {
   background: none;
   border: none;
-  color: #fff;
-  font-size: 1.5rem;
+  color: #00d25b;
+  font-size: 1.8rem;
 }
 .navbar h5 {
   color: #fff;
@@ -130,38 +128,48 @@ body {
   font-weight: 600;
 }
 
-/* Content */
+/* ================= Main Content ================= */
 .main-content {
   margin-left: 250px;
   padding: 30px;
   transition: margin-left 0.3s ease;
 }
 
-/* ปรับเมื่อ Sidebar ย่อ */
+/* ถ้า Sidebar ซ่อน */
 #sidebar.collapsed ~ .main-content {
   margin-left: 0;
 }
 
-/* ✅ Responsive */
+/* ================= Overlay (มือถือ) ================= */
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+.overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ================= Responsive ================= */
 @media (max-width: 991px) {
   #sidebar {
-    left: -250px;
+    left: -260px;
   }
   #sidebar.show {
     left: 0;
   }
-  .main-content {
-    margin-left: 0;
-    padding-top: 80px;
-  }
   .navbar {
     display: flex !important;
   }
-}
-
-@media (min-width: 992px) {
-  .navbar {
-    display: none !important;
+  .main-content {
+    margin-left: 0;
+    padding: 80px 20px 30px;
   }
 }
   </style>
@@ -188,6 +196,9 @@ body {
   <h5 class="text-white m-0"><?= $pageTitle ?? '' ?></h5>
 </nav>
 
+<!-- 🔲 Overlay (พื้นหลังมืดเมื่อเมนูเปิด) -->
+<div class="overlay" id="overlay"></div>
+
 <!-- 🟦 Main Content -->
 <div class="main-content">
   <?= $pageContent ?? '' ?>
@@ -196,22 +207,31 @@ body {
 <!-- 🧩 Script -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-  const sidebar = document.getElementById('sidebar');
-  const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+const overlay = document.getElementById('overlay');
 
-  // Toggle sidebar (มือถือ)
-  if(menuToggle){
-    menuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('show');
-    });
-  }
-
-  // ปิด sidebar เมื่อคลิกนอกพื้นที่ (มือถือ)
-  document.addEventListener('click', (e) => {
-    if (window.innerWidth < 992 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-      sidebar.classList.remove('show');
-    }
+// ✅ เปิด/ปิด Sidebar (มือถือ)
+if(menuToggle){
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('show');
   });
+}
+
+// ✅ คลิกพื้นหลังเพื่อปิด
+overlay.addEventListener('click', () => {
+  sidebar.classList.remove('show');
+  overlay.classList.remove('show');
+});
+
+// ✅ ปิด Sidebar อัตโนมัติเมื่อเปลี่ยนขนาดจอ
+window.addEventListener('resize', () => {
+  if(window.innerWidth >= 992){
+    sidebar.classList.remove('show');
+    overlay.classList.remove('show');
+  }
+});
 </script>
 
 </body>
