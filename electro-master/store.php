@@ -55,35 +55,35 @@ include("connectdb.php");
   display: block;
 }
 
-/* ✅ เนื้อหาผลิตภัณฑ์ */
+/* ✅ เนื้อหา */
 .product .product-body {
   padding: 15px;
   text-align: center;
 }
 
-/* ✅ ปุ่ม “หยิบใส่ตะกร้า” — ซ่อนตอนเริ่มต้น */
+/* ✅ ซ่อนปุ่มตอนปกติ */
 .add-to-cart {
   position: absolute;
-  bottom: -70px;
+  bottom: -80px; /* ซ่อนอยู่ใต้การ์ด */
   left: 0;
   width: 100%;
-  height: 70px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px); /* เบลอเล็กน้อย */
   text-align: center;
-  transition: all 0.4s ease;
   opacity: 0;
-  z-index: 3;
+  transition: all 0.4s ease-in-out;
   border-top: 1px solid #eee;
   border-radius: 0 0 10px 10px;
+  z-index: 10;
 }
 
-/* ✅ แสดงปุ่มเมื่อ hover การ์ด */
+/* ✅ แสดงปุ่มตอน hover */
 .product:hover .add-to-cart {
-  bottom: 0;
-  opacity: 1;
+  bottom: 0;        /* เลื่อนขึ้นมาด้านบน */
+  opacity: 1;       /* ค่อยๆ แสดง */
 }
 
-/* ✅ ปุ่มหยิบใส่ตะกร้า */
+/* ✅ ปุ่ม “หยิบใส่ตะกร้า” */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
@@ -93,20 +93,20 @@ include("connectdb.php");
   padding: 12px 0;
   font-weight: 600;
   border-radius: 50px;
-  transition: all 0.3s ease;
   font-size: 15px;
+  transition: all 0.3s ease;
 }
 .add-to-cart-btn:hover {
   background: #a3001b;
   transform: scale(1.05);
 }
 
-/* ✅ ลบปุ่มดูสินค้า / รายการโปรด ออก */
+/* ✅ ลบปุ่มอื่น */
 .product-btns {
   display: none !important;
 }
 
-/* ✅ layout spacing */
+/* ✅ ระยะ spacing */
 #store .col-md-4 {
   margin-bottom: 30px;
 }
@@ -114,6 +114,7 @@ include("connectdb.php");
   max-width: 95% !important;
 }
 </style>
+
 
 
 </head>
@@ -231,29 +232,29 @@ include("connectdb.php");
                       break;
                     }
                   }
-
-                  echo "
-<div class='col-md-4 col-xs-6'>
-  <div class='product'>
-    <a href=\"product.php?id={$row['p_id']}\" style=\"text-decoration:none;color:inherit;\">
-      <div class='product-img'>
-        <img src='{$imgPath}' alt='{$row['p_name']}' style='height:280px;object-fit:cover;width:100%;border-radius:6px;'>
-        <div class='product-label'><span class='new'>NEW</span></div>
-      </div>
-      <div class='product-body'>
-        <p class='product-category'>{$row['cat_name']}</p>
-        <h3 class='product-name'>{$row['p_name']}</h3>
-        <h4 class='product-price text-danger fw-bold'>".number_format($row['p_price'],2)." บาท</h4>
-      </div>
-    </a>
-    <div class='add-to-cart'>
-      <button class='add-to-cart-btn'>
-        <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
-      </button>
-    </div>
-  </div>
-</div>
-";
+				  echo "
+				  <div class='col-md-4 col-xs-6'>
+					<div class='product'>
+					  <a href=\"product.php?id={$row['p_id']}\" style=\"text-decoration:none;color:inherit;\">
+						<div class='product-img'>
+						  <img src='{$imgPath}' alt='{$row['p_name']}' style='height:280px;object-fit:cover;width:100%;border-radius:6px;'>
+						  <div class='product-label'><span class='new'>NEW</span></div>
+						</div>
+						<div class='product-body'>
+						  <p class='product-category'>{$row['cat_name']}</p>
+						  <h3 class='product-name'>{$row['p_name']}</h3>
+						  <h4 class='product-price text-danger fw-bold'>".number_format($row['p_price'],2)." บาท</h4>
+						</div>
+					  </a>
+					  <div class='add-to-cart'>
+						<button class='add-to-cart-btn'>
+						  <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
+						</button>
+					  </div>
+					</div>
+				  </div>
+				  ";
+				  
 
                 }
               } else {
