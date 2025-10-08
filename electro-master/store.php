@@ -19,7 +19,7 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
 
   <style>
-/* ✅ การ์ดสินค้า */
+/* ✅ โครงสร้างสินค้า */
 .product {
   position: relative;
   background: #fff;
@@ -30,14 +30,14 @@ include("connectdb.php");
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 480px;
+  min-height: 500px;
 }
 .product:hover {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   transform: translateY(-5px);
 }
 
-/* ✅ รูปภาพสินค้า */
+/* ✅ รูปสินค้า */
 .product .product-img {
   position: relative;
   overflow: hidden;
@@ -47,13 +47,14 @@ include("connectdb.php");
   width: 100%;
   height: 260px;
   object-fit: cover;
+  border-radius: 10px 10px 0 0;
   transition: transform 0.4s ease;
 }
 .product:hover .product-img img {
   transform: scale(1.05);
 }
 
-/* ✅ เนื้อหา */
+/* ✅ ข้อความสินค้า */
 .product .product-body {
   padding: 15px;
   text-align: center;
@@ -76,7 +77,7 @@ include("connectdb.php");
   font-weight: 700;
 }
 
-/* ✅ ปุ่มหยิบใส่ตะกร้า */
+/* ✅ ปุ่ม “หยิบใส่ตะกร้า” */
 .add-to-cart {
   position: absolute;
   left: 0;
@@ -110,25 +111,28 @@ include("connectdb.php");
   transform: scale(1.05);
 }
 
-/* ✅ Responsive layout */
+/* ✅ จัด grid layout */
 #store .row {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  justify-content: flex-start;
 }
 #store .col-md-4 {
-  flex: 1 1 calc(25% - 20px);
+  flex: 1 1 calc(25% - 20px); /* 4 คอลัมน์ desktop */
   max-width: calc(25% - 20px);
 }
+
+/* ✅ Responsive */
 @media (max-width: 991px) {
   #store .col-md-4 {
-    flex: 1 1 calc(50% - 20px);
+    flex: 1 1 calc(50% - 20px); /* 2 คอลัมน์ tablet */
     max-width: calc(50% - 20px);
   }
 }
 @media (max-width: 576px) {
   #store .col-md-4 {
-    flex: 1 1 100%;
+    flex: 1 1 100%; /* 1 คอลัมน์ mobile */
     max-width: 100%;
   }
   .product .product-img img {
@@ -136,6 +140,7 @@ include("connectdb.php");
   }
 }
 </style>
+
 </head>
 
 <body>
