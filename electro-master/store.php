@@ -30,7 +30,7 @@ include("connectdb.php");
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 480px;
+  height: 100%;
 }
 .product:hover {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
@@ -42,10 +42,14 @@ include("connectdb.php");
   position: relative;
   overflow: hidden;
   border-radius: 10px 10px 0 0;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .product .product-img img {
   width: 100%;
-  height: 260px;
+  height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
 }
@@ -69,6 +73,7 @@ include("connectdb.php");
   color: #333;
   font-weight: 600;
   margin-bottom: 8px;
+  min-height: 40px; /* กันชื่อยาวทำให้การ์ดสูงไม่เท่ากัน */
 }
 .product .product-body h4 {
   font-size: 17px;
@@ -110,16 +115,20 @@ include("connectdb.php");
   transform: scale(1.05);
 }
 
-/* ✅ Responsive layout */
+/* ✅ Layout หลัก */
 #store .row {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  justify-content: center; /* ให้การ์ดอยู่ตรงกลาง */
+  align-items: stretch;    /* ให้ทุกการ์ดสูงเท่ากัน */
 }
-/* ✅ แสดงสินค้า 3 ช่องต่อแถว */
+
+/* ✅ 3 ช่องต่อแถว (Desktop) */
 #store .col-md-4 {
   flex: 1 1 calc(33.333% - 20px);
   max-width: calc(33.333% - 20px);
+  display: flex;
 }
 
 /* ✅ Tablet (2 ช่อง) */
@@ -136,28 +145,12 @@ include("connectdb.php");
     flex: 1 1 100%;
     max-width: 100%;
   }
-  .product .product-img img {
-    height: 220px;
-  }
-}
-
-}
-@media (max-width: 991px) {
-  #store .col-md-4 {
-    flex: 1 1 calc(50% - 20px);
-    max-width: calc(50% - 20px);
-  }
-}
-@media (max-width: 576px) {
-  #store .col-md-4 {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
-  .product .product-img img {
+  .product .product-img {
     height: 220px;
   }
 }
 </style>
+
 </head>
 
 <body>
