@@ -9,7 +9,6 @@ include("connectdb.php");
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Electro - Store</title>
 
-  <!-- CSS -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
   <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css"/>
   <link type="text/css" rel="stylesheet" href="css/slick.css"/>
@@ -20,187 +19,123 @@ include("connectdb.php");
 </head>
 <body>
 
-  <!-- HEADER -->
-  <?php if (file_exists("header.php")) include("header.php"); ?>
-  <!-- /HEADER -->
+<?php if (file_exists("header.php")) include("header.php"); ?>
 
-  <!-- NAVIGATION -->
-  <nav id="navigation">
-    <div class="container">
-      <div id="responsive-nav">
-        <ul class="main-nav nav navbar-nav">
-          <li class="active"><a href="index.php">Home</a></li>
-          <li><a href="#">Hot Deals</a></li>
-          <li><a href="#">Categories</a></li>
-          <li><a href="#">Laptops</a></li>
-          <li><a href="#">Smartphones</a></li>
-          <li><a href="#">Cameras</a></li>
-          <li><a href="#">Accessories</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-  <!-- /NAVIGATION -->
-
-  <!-- BREADCRUMB -->
-  <div id="breadcrumb" class="section">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12">
-          <ul class="breadcrumb-tree">
-            <li><a href="index.php">Home</a></li>
-            <li class="active">All Products</li>
-          </ul>
-        </div>
-      </div>
+<nav id="navigation">
+  <div class="container">
+    <div id="responsive-nav">
+      <ul class="main-nav nav navbar-nav">
+        <li class="active"><a href="index.php">Home</a></li>
+        <li><a href="#">Hot Deals</a></li>
+        <li><a href="#">Categories</a></li>
+      </ul>
     </div>
   </div>
-  <!-- /BREADCRUMB -->
+</nav>
 
-  <!-- SECTION -->
-  <div class="section">
-    <div class="container">
-      <div class="row">
-        <!-- ASIDE -->
-        <div id="aside" class="col-md-3">
-          <div class="aside">
-            <h3 class="aside-title">CATEGORIES</h3>
-            <div class="checkbox-filter">
-              <?php
-              $cat_stmt = $conn->query("SELECT * FROM category");
-              while ($cat = $cat_stmt->fetch(PDO::FETCH_ASSOC)) {
-                echo "
-                <div class='input-checkbox'>
-                  <input type='checkbox' id='cat-{$cat['cat_id']}'>
-                  <label for='cat-{$cat['cat_id']}'>
-                    <span></span>
-                    {$cat['cat_name']}
-                  </label>
-                </div>
-                ";
-              }
-              ?>
-            </div>
-          </div>
-        </div>
-        <!-- /ASIDE -->
-
-        <!-- STORE -->
-        <div id="store" class="col-md-9">
-          <div class="store-filter clearfix">
-            <div class="store-sort">
-              <label>
-                SORT BY:
-                <select class="input-select">
-                  <option value="0">Latest</option>
-                  <option value="1">Price: Low to High</option>
-                  <option value="2">Price: High to Low</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <!-- PRODUCTS -->
-          <div class="row">
+<div class="section">
+  <div class="container">
+    <div class="row">
+      <div id="aside" class="col-md-3">
+        <div class="aside">
+          <h3 class="aside-title">CATEGORIES</h3>
+          <div class="checkbox-filter">
             <?php
-            try {
-              $stmt = $conn->query("
-                SELECT p.*, c.cat_name 
-                FROM product p 
-                LEFT JOIN category c ON p.cat_id = c.cat_id
-                ORDER BY p.p_id DESC
-              ");
-
-              if ($stmt->rowCount() > 0) {
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                  
-                  // ✅ ตรวจสอบ path รูปภาพ
-                  $imagePath = "admin/uploads/" . trim($row['p_image']);
-                  if (!empty($row['p_image']) && file_exists($imagePath)) {
-                    $img = $imagePath;
-                  } else {
-                    $img = "img/product01.png";
-                  }
-
-                  echo "
-                  <div class='col-md-4 col-xs-6'>
-                    <div class='product'>
-                      <a href='product.php?id={$row['p_id']}' style='text-decoration:none;color:inherit;'>
-                        <div class='product-img'>
-                          <img src='{$img}' alt='{$row['p_name']}' style='width:100%;height:250px;object-fit:cover;border-radius:6px;'>
-                          <div class='product-label'>
-                            <span class='new'>NEW</span>
-                          </div>
-                        </div>
-                        <div class='product-body'>
-                          <p class='product-category'>{$row['cat_name']}</p>
-                          <h3 class='product-name'>{$row['p_name']}</h3>
-                          <h4 class='product-price text-danger fw-bold'>
-                            " . number_format($row['p_price'], 2) . " บาท
-                          </h4>
-                        </div>
-                      </a>
-                      <div class='product-btns text-center mb-2'>
-                        <button class='add-to-wishlist'>
-                          <i class='fa fa-heart-o'></i>
-                          <span class='tooltipp'>เพิ่มในรายการโปรด</span>
-                        </button>
-                        <a href='product.php?id={$row['p_id']}' class='quick-view'>
-                          <i class='fa fa-eye'></i><span class='tooltipp'>ดูสินค้า</span>
-                        </a>
-                      </div>
-                      <div class='add-to-cart'>
-                        <button class='add-to-cart-btn'>
-                          <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  ";
-                }
-              } else {
-                echo "<p class='text-center'>ไม่มีสินค้าในระบบ</p>";
-              }
-            } catch (PDOException $e) {
-              echo "<p>❌ เกิดข้อผิดพลาด: {$e->getMessage()}</p>";
+            $cat_stmt = $conn->query("SELECT * FROM category");
+            while ($cat = $cat_stmt->fetch(PDO::FETCH_ASSOC)) {
+              echo "
+              <div class='input-checkbox'>
+                <input type='checkbox' id='cat-{$cat['cat_id']}'>
+                <label for='cat-{$cat['cat_id']}'>
+                  <span></span>{$cat['cat_name']}
+                </label>
+              </div>";
             }
             ?>
           </div>
-          <!-- /PRODUCTS -->
-
-          <div class="store-filter clearfix">
-            <span class="store-qty">สินค้าทั้งหมด</span>
-          </div>
         </div>
-        <!-- /STORE -->
+      </div>
+
+      <div id="store" class="col-md-9">
+        <div class="row">
+          <?php
+          try {
+            $stmt = $conn->query("
+              SELECT p.*, c.cat_name 
+              FROM product p 
+              LEFT JOIN category c ON p.cat_id = c.cat_id
+              ORDER BY p.p_id DESC
+            ");
+            if ($stmt->rowCount() > 0) {
+              while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+                // 🔍 ตรวจสอบ path รูปภาพจริง
+                $fileName = trim($row['p_image']);
+                $possiblePaths = [
+                  "admin/uploads/$fileName",
+                  "uploads/$fileName",
+                  "admin/product/uploads/$fileName"
+                ];
+
+                $img = "img/product01.png"; // ค่าเริ่มต้น
+                foreach ($possiblePaths as $path) {
+                  if (!empty($fileName) && file_exists($path)) {
+                    $img = $path;
+                    break;
+                  }
+                }
+
+                // 🔗 แสดงสินค้า
+                echo "
+                <div class='col-md-4 col-xs-6'>
+                  <div class='product'>
+                    <a href='product.php?id={$row['p_id']}' style='text-decoration:none;color:inherit;'>
+                      <div class='product-img'>
+                        <img src='{$img}' alt='{$row['p_name']}' style='width:100%;height:250px;object-fit:cover;border-radius:8px;'>
+                        <div class='product-label'><span class='new'>NEW</span></div>
+                      </div>
+                      <div class='product-body'>
+                        <p class='product-category'>{$row['cat_name']}</p>
+                        <h3 class='product-name'>{$row['p_name']}</h3>
+                        <h4 class='product-price text-danger fw-bold'>" . number_format($row['p_price'], 2) . " บาท</h4>
+                      </div>
+                    </a>
+                    <div class='product-btns text-center mb-2'>
+                      <button class='add-to-wishlist'><i class='fa fa-heart-o'></i></button>
+                      <a href='product.php?id={$row['p_id']}' class='quick-view'><i class='fa fa-eye'></i> ดูสินค้า</a>
+                    </div>
+                    <div class='add-to-cart'>
+                      <button class='add-to-cart-btn'><i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า</button>
+                    </div>
+                  </div>
+                </div>";
+              }
+            } else {
+              echo "<p class='text-center'>ไม่มีสินค้าในระบบ</p>";
+            }
+          } catch (PDOException $e) {
+            echo "<p>❌ Error: {$e->getMessage()}</p>";
+          }
+          ?>
+        </div>
       </div>
     </div>
   </div>
-  <!-- /SECTION -->
+</div>
 
-  <!-- FOOTER -->
-  <footer id="footer">
-    <div id="bottom-footer" class="section">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <span class="copyright">
-              Copyright &copy; <script>document.write(new Date().getFullYear());</script>
-              All rights reserved | Template by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-            </span>
-          </div>
-        </div>
-      </div>
+<footer id="footer">
+  <div id="bottom-footer" class="section">
+    <div class="container text-center">
+      <span>Copyright &copy; <script>document.write(new Date().getFullYear());</script> Electro Store</span>
     </div>
-  </footer>
-  <!-- /FOOTER -->
+  </div>
+</footer>
 
-  <!-- JS -->
-  <script src="js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/slick.min.js"></script>
-  <script src="js/nouislider.min.js"></script>
-  <script src="js/jquery.zoom.min.js"></script>
-  <script src="js/main.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/slick.min.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/jquery.zoom.min.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
