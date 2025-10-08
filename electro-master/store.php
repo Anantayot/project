@@ -24,10 +24,47 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ ซ่อนปุ่มหยิบใส่ตะกร้าเริ่มต้น */
+/* ✅ โครงสร้างการ์ดสินค้า */
+.product {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-height: 470px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.product:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+}
+
+/* ✅ รูปสินค้า */
+.product .product-img {
+  position: relative;
+  overflow: hidden;
+}
+.product .product-img img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+  display: block;
+}
+
+/* ✅ เนื้อหาผลิตภัณฑ์ */
+.product .product-body {
+  padding: 15px;
+  text-align: center;
+}
+
+/* ✅ ปุ่ม “หยิบใส่ตะกร้า” — ซ่อนตอนเริ่มต้น */
 .add-to-cart {
   position: absolute;
-  bottom: -70px; /* ซ่อนไว้ด้านล่าง */
+  bottom: -70px;
   left: 0;
   width: 100%;
   height: 70px;
@@ -42,11 +79,11 @@ include("connectdb.php");
 
 /* ✅ แสดงปุ่มเมื่อ hover การ์ด */
 .product:hover .add-to-cart {
-  bottom: 0;             /* เลื่อนขึ้นมาอยู่ด้านล่างของการ์ด */
-  opacity: 1;            /* ค่อยๆ แสดง */
+  bottom: 0;
+  opacity: 1;
 }
 
-/* ✅ ปุ่มภายใน */
+/* ✅ ปุ่มหยิบใส่ตะกร้า */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
@@ -64,24 +101,20 @@ include("connectdb.php");
   transform: scale(1.05);
 }
 
-/* ✅ ทำให้ product card สูงพอดี */
-.product {
-  position: relative;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  min-height: 470px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+/* ✅ ลบปุ่มดูสินค้า / รายการโปรด ออก */
+.product-btns {
+  display: none !important;
 }
-.product:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  transform: translateY(-5px);
+
+/* ✅ layout spacing */
+#store .col-md-4 {
+  margin-bottom: 30px;
+}
+.container {
+  max-width: 95% !important;
 }
 </style>
+
 
 </head>
 <body>
@@ -200,36 +233,28 @@ include("connectdb.php");
                   }
 
                   echo "
-                  <div class='col-md-4 col-xs-6'>
-                    <div class='product'>
-                      <a href=\"product.php?id={$row['p_id']}\" style=\"text-decoration:none;color:inherit;\">
-                        <div class='product-img'>
-                          <img src='{$imgPath}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;width:100%;border-radius:6px;'>
-                          <div class='product-label'><span class='new'>NEW</span></div>
-                        </div>
-                        <div class='product-body'>
-                          <p class='product-category'>{$row['cat_name']}</p>
-                          <h3 class='product-name'>{$row['p_name']}</h3>
-                          <h4 class='product-price text-danger fw-bold'>".number_format($row['p_price'],2)." บาท</h4>
-                        </div>
-                      </a>
-                      <div class='product-btns text-center mb-2'>
-                        <button class='add-to-wishlist'>
-                          <i class='fa fa-heart-o'></i>
-                          <span class='tooltipp'>เพิ่มในรายการโปรด</span>
-                        </button>
-                        <a href='product.php?id={$row['p_id']}' class='quick-view'>
-                          <i class='fa fa-eye'></i> ดูสินค้า
-                        </a>
-                      </div>
-                      <div class='add-to-cart'>
-                        <button class='add-to-cart-btn'>
-                          <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  ";
+<div class='col-md-4 col-xs-6'>
+  <div class='product'>
+    <a href=\"product.php?id={$row['p_id']}\" style=\"text-decoration:none;color:inherit;\">
+      <div class='product-img'>
+        <img src='{$imgPath}' alt='{$row['p_name']}' style='height:280px;object-fit:cover;width:100%;border-radius:6px;'>
+        <div class='product-label'><span class='new'>NEW</span></div>
+      </div>
+      <div class='product-body'>
+        <p class='product-category'>{$row['cat_name']}</p>
+        <h3 class='product-name'>{$row['p_name']}</h3>
+        <h4 class='product-price text-danger fw-bold'>".number_format($row['p_price'],2)." บาท</h4>
+      </div>
+    </a>
+    <div class='add-to-cart'>
+      <button class='add-to-cart-btn'>
+        <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
+      </button>
+    </div>
+  </div>
+</div>
+";
+
                 }
               } else {
                 echo "<p class='text-center'>ไม่มีสินค้าในระบบ</p>";
