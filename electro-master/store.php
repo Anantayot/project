@@ -22,6 +22,51 @@ include("connectdb.php");
   <link rel="stylesheet" href="css/font-awesome.min.css">
   <!-- Custom stylesheet -->
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
+  
+  <style>
+/* ✅ ลบขอบดำและทำให้ภาพกลมกลืนกับพื้นหลัง */
+.product {
+  background: #fff !important;         /* พื้นหลังการ์ดขาว */
+  border: 1px solid #e0e0e0;           /* เส้นขอบบางๆ */
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* ✅ เวลา hover ให้มีเงาเบาๆ */
+.product:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+}
+
+/* ✅ รูปภาพเต็มการ์ด ไม่มีขอบดำ */
+.product .product-img img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  background: #fff;
+}
+
+/* ✅ ปุ่ม "หยิบใส่ตะกร้า" ให้อยู่ขอบล่างพอดี */
+.add-to-cart {
+  background: #fff;
+  border-top: 1px solid #eee;
+}
+
+/* ✅ ปุ่มในล่างสุดไม่มีพื้นหลังดำ */
+.add-to-cart-btn {
+  background: #D10024;
+  color: #fff;
+  border-radius: 0 0 10px 10px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+.add-to-cart-btn:hover {
+  background: #a3001b;
+}
+</style>
+
 </head>
 <body>
 
