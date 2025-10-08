@@ -24,7 +24,7 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ การ์ดสินค้า */
+/* ✅ โครงสร้างการ์ดสินค้า */
 .product {
   position: relative;
   background: #fff;
@@ -32,9 +32,13 @@ include("connectdb.php");
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
+  min-height: 470px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .product:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   transform: translateY(-5px);
 }
 
@@ -45,7 +49,7 @@ include("connectdb.php");
 }
 .product .product-img img {
   width: 100%;
-  height: 250px;
+  height: 280px;
   object-fit: cover;
   border-radius: 10px 10px 0 0;
   display: block;
@@ -57,28 +61,39 @@ include("connectdb.php");
   text-align: center;
 }
 
-/* ✅ ปุ่ม "หยิบใส่ตะกร้า" ซ่อนอยู่ตอนแรก */
+/* ✅ ซ่อนปุ่มตอนปกติ */
 .add-to-cart {
   position: absolute;
-  bottom: -100%; /* ซ่อนไว้นอกกรอบ */
+  bottom: -80px; /* ซ่อนอยู่ใต้การ์ด */
   left: 0;
   width: 100%;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px); /* เบลอเล็กน้อย */
   text-align: center;
-  transition: all 0.4s ease;
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+  border-top: 1px solid #eee;
+  border-radius: 0 0 10px 10px;
   z-index: 10;
 }
 
-/* ✅ ปุ่มจริง */
+/* ✅ แสดงปุ่มตอน hover */
+.product:hover .add-to-cart {
+  bottom: 0;        /* เลื่อนขึ้นมาด้านบน */
+  opacity: 1;       /* ค่อยๆ แสดง */
+}
+
+/* ✅ ปุ่ม “หยิบใส่ตะกร้า” */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
   border: none;
   width: 90%;
   margin: 10px auto;
-  padding: 10px 0;
+  padding: 12px 0;
   font-weight: 600;
   border-radius: 50px;
+  font-size: 15px;
   transition: all 0.3s ease;
 }
 .add-to-cart-btn:hover {
@@ -86,27 +101,19 @@ include("connectdb.php");
   transform: scale(1.05);
 }
 
-/* ✅ เมื่อ hover ที่สินค้า ปุ่มจะเลื่อนขึ้นมา */
-.product:hover .add-to-cart {
-  bottom: 0;
-}
-
-/* ✅ เพิ่มเอฟเฟกต์การ fade-in */
-.product:hover .add-to-cart-btn {
-  animation: fadeUp 0.4s ease forwards;
-}
-@keyframes fadeUp {
-  0% { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* ✅ ลบขอบดำล่างของเทมเพลตเก่า */
-.product::after, .product::before {
+/* ✅ ลบปุ่มอื่น */
+.product-btns {
   display: none !important;
-  content: none !important;
+}
+
+/* ✅ ระยะ spacing */
+#store .col-md-4 {
+  margin-bottom: 30px;
+}
+.container {
+  max-width: 95% !important;
 }
 </style>
-
 
 
 
