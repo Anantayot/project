@@ -26,9 +26,7 @@ include("connectdb.php");
 <body>
 
   <!-- HEADER -->
-  <?php 
-  if (file_exists("header.php")) include("header.php"); 
-  ?>
+  <?php if (file_exists("header.php")) include("header.php"); ?>
   <!-- /HEADER -->
 
   <!-- NAVIGATION -->
@@ -71,7 +69,7 @@ include("connectdb.php");
         <!-- ASIDE -->
         <div id="aside" class="col-md-3">
           <div class="aside">
-            <h3 class="aside-title">Categories</h3>
+            <h3 class="aside-title">CATEGORIES</h3>
             <div class="checkbox-filter">
               <?php
               $cat_stmt = $conn->query("SELECT * FROM category");
@@ -97,7 +95,7 @@ include("connectdb.php");
           <div class="store-filter clearfix">
             <div class="store-sort">
               <label>
-                Sort By:
+                SORT BY:
                 <select class="input-select">
                   <option value="0">Latest</option>
                   <option value="1">Price: Low to High</option>
@@ -111,46 +109,49 @@ include("connectdb.php");
           <div class="row">
             <?php
             try {
-              $stmt = $conn->query("SELECT p.*, c.cat_name 
-                                    FROM product p 
-                                    LEFT JOIN category c ON p.cat_id = c.cat_id
-                                    ORDER BY p.p_id DESC");
+              $stmt = $conn->query("
+                SELECT p.*, c.cat_name 
+                FROM product p 
+                LEFT JOIN category c ON p.cat_id = c.cat_id
+                ORDER BY p.p_id DESC
+              ");
               if ($stmt->rowCount() > 0) {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
-                  // ✅ ตรวจสอบ path รูปให้ถูกต้อง
+                  // ตรวจสอบรูป
                   $imgPath = "admin/uploads/" . $row['p_image'];
                   if (!file_exists($imgPath) || empty($row['p_image'])) {
-                    $imgPath = "img/product01.png"; // รูปสำรอง
+                    $imgPath = "img/product01.png";
                   }
 
+                  // HTML แสดงสินค้า
                   echo "
                   <div class='col-md-4 col-xs-6'>
                     <div class='product'>
-                      <div class='product-img'>
-                        <a href='product.php?id={$row['p_id']}'>
+                      <a href='product.php?id={$row['p_id']}' style='text-decoration:none;color:inherit;'>
+                        <div class='product-img'>
                           <img src='{$imgPath}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;width:100%;'>
+                          <div class='product-label'>
+                            <span class='new'>NEW</span>
+                          </div>
+                        </div>
+                        <div class='product-body'>
+                          <p class='product-category'>{$row['cat_name']}</p>
+                          <h3 class='product-name'>{$row['p_name']}</h3>
+                          <h4 class='product-price text-danger fw-bold'>
+                            " . number_format($row['p_price'], 2) . " บาท
+                          </h4>
+                        </div>
+                      </a>
+                      <div class='product-btns text-center mb-2'>
+                        <button class='add-to-wishlist'>
+                          <i class='fa fa-heart-o'></i>
+                          <span class='tooltipp'>เพิ่มในรายการโปรด</span>
+                        </button>
+                        <a href='product.php?id={$row['p_id']}' class='quick-view'>
+                          <i class='fa fa-eye'></i>
+                          <span class='tooltipp'>ดูสินค้า</span>
                         </a>
-                        <div class='product-label'>
-                          <span class='new'>NEW</span>
-                        </div>
-                      </div>
-                      <div class='product-body'>
-                        <p class='product-category'>{$row['cat_name']}</p>
-                        <h3 class='product-name'>
-                          <a href='product.php?id={$row['p_id']}'>{$row['p_name']}</a>
-                        </h3>
-                        <h4 class='product-price text-danger fw-bold'>{$row['p_price']} บาท</h4>
-                        <div class='product-btns'>
-                          <button class='add-to-wishlist'>
-                            <i class='fa fa-heart-o'></i>
-                            <span class='tooltipp'>เพิ่มในรายการโปรด</span>
-                          </button>
-                          <a href='product.php?id={$row['p_id']}' class='quick-view'>
-                            <i class='fa fa-eye'></i>
-                            <span class='tooltipp'>ดูสินค้า</span>
-                          </a>
-                        </div>
                       </div>
                       <div class='add-to-cart'>
                         <button class='add-to-cart-btn'>
@@ -188,7 +189,7 @@ include("connectdb.php");
         <div class="row">
           <div class="col-md-12 text-center">
             <span class="copyright">
-              Copyright &copy; <script>document.write(new Date().getFullYear());</script> 
+              Copyright &copy; <script>document.write(new Date().getFullYear());</script>
               All rights reserved | Template by <a href="https://colorlib.com" target="_blank">Colorlib</a>
             </span>
           </div>
@@ -198,7 +199,7 @@ include("connectdb.php");
   </footer>
   <!-- /FOOTER -->
 
-  <!-- jQuery Plugins -->
+  <!-- JS -->
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <script src="js/slick.min.js"></script>
