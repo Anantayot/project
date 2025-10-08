@@ -24,80 +24,89 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ รีเซ็ตสไตล์การ์ดสินค้าให้ขาวสะอาด */
+/* ✅ การ์ดสินค้า */
 .product {
   position: relative;
-  background: #fff !important;
+  background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
-  min-height: 450px; /* ให้ทุกการ์ดสูงเท่ากัน */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+}
+.product:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
 }
 
-/* ✅ ลบ pseudo element ดำที่อยู่ข้างล่างของ template เดิม */
-.product::after,
-.product::before {
-  display: none !important;
-  content: none !important;
-}
-
-/* ✅ รูปสินค้าเต็มการ์ด ไม่มีขอบดำ */
+/* ✅ รูปสินค้า */
 .product .product-img {
-  background: #fff;
+  position: relative;
   overflow: hidden;
 }
 .product .product-img img {
   width: 100%;
   height: 250px;
   object-fit: cover;
-  display: block;
   border-radius: 10px 10px 0 0;
+  display: block;
 }
 
-/* ✅ ปรับส่วนเนื้อหาให้อยู่ตรงกลางพอดี */
+/* ✅ เนื้อหา */
 .product .product-body {
-  background: #fff;
-  padding: 10px 15px;
-  flex-grow: 1;
+  padding: 15px;
+  text-align: center;
 }
 
-/* ✅ ปุ่มล่างสุดสวย ไม่มีพื้นหลังดำ */
+/* ✅ ปุ่ม "หยิบใส่ตะกร้า" ซ่อนอยู่ตอนแรก */
 .add-to-cart {
-  background: #fff;
-  padding: 10px;
-  border-top: 1px solid #eee;
+  position: absolute;
+  bottom: -100%; /* ซ่อนไว้นอกกรอบ */
+  left: 0;
+  width: 100%;
+  background: transparent;
+  text-align: center;
+  transition: all 0.4s ease;
+  z-index: 10;
 }
+
+/* ✅ ปุ่มจริง */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  width: 100%;
-  font-weight: 600;
+  width: 90%;
+  margin: 10px auto;
   padding: 10px 0;
-  transition: 0.2s;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
 }
 .add-to-cart-btn:hover {
   background: #a3001b;
+  transform: scale(1.05);
 }
 
-/* ✅ Hover เงาเบาๆ */
-.product:hover {
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-  transform: translateY(-3px);
+/* ✅ เมื่อ hover ที่สินค้า ปุ่มจะเลื่อนขึ้นมา */
+.product:hover .add-to-cart {
+  bottom: 0;
 }
 
-/* ✅ ปุ่มหัวใจ/ตา */
-.product-btns {
-  background: #fff;
-  border-top: 1px solid #eee;
-  padding: 8px 0;
+/* ✅ เพิ่มเอฟเฟกต์การ fade-in */
+.product:hover .add-to-cart-btn {
+  animation: fadeUp 0.4s ease forwards;
+}
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ✅ ลบขอบดำล่างของเทมเพลตเก่า */
+.product::after, .product::before {
+  display: none !important;
+  content: none !important;
 }
 </style>
+
 
 
 </head>
