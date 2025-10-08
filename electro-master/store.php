@@ -32,10 +32,10 @@ include("connectdb.php");
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
-  min-height: 470px;
+  min-height: 480px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 .product:hover {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
@@ -59,31 +59,35 @@ include("connectdb.php");
 .product .product-body {
   padding: 15px;
   text-align: center;
+  flex-grow: 1;
 }
 
-/* ✅ ซ่อนปุ่มตอนปกติ */
+/* ✅ พื้นที่ของปุ่ม (อยู่ใน product เสมอ) */
 .add-to-cart {
   position: absolute;
-  bottom: -80px; /* ซ่อนอยู่ใต้การ์ด */
   left: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(6px); /* เบลอเล็กน้อย */
+  height: 70px;
+  bottom: 0;
   text-align: center;
-  opacity: 0;
-  transition: all 0.4s ease-in-out;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(6px);
   border-top: 1px solid #eee;
   border-radius: 0 0 10px 10px;
-  z-index: 10;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+  pointer-events: none; /* ป้องกันการ trigger hover หลุด */
 }
 
-/* ✅ แสดงปุ่มตอน hover */
+/* ✅ แสดงปุ่มเมื่อ hover */
 .product:hover .add-to-cart {
-  bottom: 0;        /* เลื่อนขึ้นมาด้านบน */
-  opacity: 1;       /* ค่อยๆ แสดง */
+  transform: translateY(0%);
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* ✅ ปุ่ม “หยิบใส่ตะกร้า” */
+/* ✅ ปุ่มจริง */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
@@ -95,6 +99,7 @@ include("connectdb.php");
   border-radius: 50px;
   font-size: 15px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 .add-to-cart-btn:hover {
   background: #a3001b;
@@ -106,7 +111,7 @@ include("connectdb.php");
   display: none !important;
 }
 
-/* ✅ ระยะ spacing */
+/* ✅ ช่องว่างและขนาด */
 #store .col-md-4 {
   margin-bottom: 30px;
 }
@@ -114,6 +119,7 @@ include("connectdb.php");
   max-width: 95% !important;
 }
 </style>
+
 
 
 
