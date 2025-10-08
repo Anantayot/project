@@ -133,7 +133,7 @@ include("connectdb.php");
                       </div>
                       <div class='product-body'>
                         <p class='product-category'>{$row['cat_id']}</p>
-                        <h3 class='product-name'><a href='#'>{$row['p_name']}</a></h3>
+                        <h3 class='product-name'><a href='product.php?id={$row['p_id']}'>{$row['p_name']}</a></h3>
                         <h4 class='product-price'>{$row['p_price']} บาท</h4>
                         <div class='product-btns'>
                           <button class='add-to-wishlist'><i class='fa fa-heart-o'></i><span class='tooltipp'>เพิ่มในรายการโปรด</span></button>
