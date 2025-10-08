@@ -9,18 +9,13 @@ include("connectdb.php");
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Electro - Store</title>
 
-  <!-- Google font -->
+  <!-- CSS -->
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
-  <!-- Bootstrap -->
   <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css"/>
-  <!-- Slick -->
   <link type="text/css" rel="stylesheet" href="css/slick.css"/>
   <link type="text/css" rel="stylesheet" href="css/slick-theme.css"/>
-  <!-- nouislider -->
   <link type="text/css" rel="stylesheet" href="css/nouislider.min.css"/>
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="css/font-awesome.min.css">
-  <!-- Custom stylesheet -->
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
@@ -115,22 +110,24 @@ include("connectdb.php");
                 LEFT JOIN category c ON p.cat_id = c.cat_id
                 ORDER BY p.p_id DESC
               ");
+
               if ($stmt->rowCount() > 0) {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-
-                  // ตรวจสอบรูป
-                  $imgPath = "admin/uploads/" . $row['p_image'];
-                  if (!file_exists($imgPath) || empty($row['p_image'])) {
-                    $imgPath = "img/product01.png";
+                  
+                  // ✅ ตรวจสอบ path รูปภาพ
+                  $imagePath = "admin/uploads/" . trim($row['p_image']);
+                  if (!empty($row['p_image']) && file_exists($imagePath)) {
+                    $img = $imagePath;
+                  } else {
+                    $img = "img/product01.png";
                   }
 
-                  // HTML แสดงสินค้า
                   echo "
                   <div class='col-md-4 col-xs-6'>
                     <div class='product'>
                       <a href='product.php?id={$row['p_id']}' style='text-decoration:none;color:inherit;'>
                         <div class='product-img'>
-                          <img src='{$imgPath}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;width:100%;'>
+                          <img src='{$img}' alt='{$row['p_name']}' style='width:100%;height:250px;object-fit:cover;border-radius:6px;'>
                           <div class='product-label'>
                             <span class='new'>NEW</span>
                           </div>
@@ -149,8 +146,7 @@ include("connectdb.php");
                           <span class='tooltipp'>เพิ่มในรายการโปรด</span>
                         </button>
                         <a href='product.php?id={$row['p_id']}' class='quick-view'>
-                          <i class='fa fa-eye'></i>
-                          <span class='tooltipp'>ดูสินค้า</span>
+                          <i class='fa fa-eye'></i><span class='tooltipp'>ดูสินค้า</span>
                         </a>
                       </div>
                       <div class='add-to-cart'>
