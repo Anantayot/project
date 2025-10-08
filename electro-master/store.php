@@ -24,47 +24,50 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ ปรับ container ให้กว้างขึ้น */
-.container {
-  max-width: 95% !important; /* จากเดิม 1170px → กว้างขึ้นเต็มเกือบจอ */
-}
-
-/* ✅ ปรับช่องว่างระหว่างการ์ดสินค้า */
-#store .col-md-4 {
-  width: 31.5%;              /* จากเดิมประมาณ 30% */
-  margin: 1% !important;     /* ระยะห่างเล็กน้อยระหว่างการ์ด */
-}
-
-/* ✅ ทำให้แถวสินค้าเรียงเป็นกริดสวยขึ้น */
-#store .row {
+/* ✅ ปรับความสูงของการ์ดสินค้าให้ยาวลง */
+.product {
+  min-height: 460px; /* เดิมประมาณ 380px */
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* ✅ ลด padding ของ container หลัก */
-.section .container {
-  padding-left: 10px;
-  padding-right: 10px;
+/* ✅ ปรับความสูงภาพให้สมดุลกับตัวการ์ด */
+.product .product-img img {
+  height: 280px; /* เดิม 250px → ขยายให้ภาพเด่นขึ้น */
+  object-fit: cover;
 }
 
-/* ✅ ปรับให้ responsive สวยบนจอเล็ก */
-@media (max-width: 992px) {
-  #store .col-md-4 {
-    width: 48%;
-    margin: 1%;
-  }
+/* ✅ เพิ่มระยะข้างในและลดความแน่น */
+.product .product-body {
+  padding: 20px 15px 10px 15px;
 }
 
-@media (max-width: 600px) {
-  #store .col-md-4 {
-    width: 98%;
-    margin: 1% auto;
-  }
+/* ✅ ปรับปุ่มล่างให้มีพื้นที่หายใจมากขึ้น */
+.add-to-cart {
+  bottom: -80px; /* ซ่อนต่ำลงอีกนิด */
+  transition: all 0.4s ease;
+}
+.product:hover .add-to-cart {
+  bottom: 50px; /* เลื่อนขึ้นมาไม่ชนขอบล่าง */
+}
+
+/* ✅ ปรับขนาดปุ่มให้สวยในความสูงใหม่ */
+.add-to-cart-btn {
+  padding: 12px 0;
+  font-size: 15px;
+}
+
+/* ✅ ปรับ layout ระยะห่างระหว่างการ์ด */
+#store .col-md-4 {
+  margin-bottom: 30px;
+}
+
+/* ✅ ปรับ container ให้กว้างขึ้นนิดหนึ่ง */
+.container {
+  max-width: 95% !important;
 }
 </style>
-
-
 
 </head>
 <body>
