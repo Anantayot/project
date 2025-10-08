@@ -24,7 +24,7 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ การ์ดสินค้า */
+/* ✅ โครงสร้างการ์ดสินค้า */
 .product {
   position: relative;
   background: #fff;
@@ -34,7 +34,7 @@ include("connectdb.php");
   transition: all 0.3s ease;
 }
 .product:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   transform: translateY(-5px);
 }
 
@@ -57,16 +57,25 @@ include("connectdb.php");
   text-align: center;
 }
 
-/* ✅ ปุ่ม "หยิบใส่ตะกร้า" ซ่อนอยู่ตอนแรก */
+/* ✅ ปุ่มรายการโปรด / ดูสินค้า */
+.product-btns {
+  position: relative;
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 8px 0;
+  z-index: 5; /* อยู่เหนือปุ่มหยิบใส่ตะกร้า */
+}
+
+/* ✅ ปุ่ม "หยิบใส่ตะกร้า" — ซ่อนอยู่ตอนแรก */
 .add-to-cart {
   position: absolute;
-  bottom: -100%; /* ซ่อนไว้นอกกรอบ */
+  bottom: -70px; /* ซ่อนไว้ด้านล่าง */
   left: 0;
   width: 100%;
-  background: transparent;
+  background: rgba(255,255,255,0.95);
   text-align: center;
   transition: all 0.4s ease;
-  z-index: 10;
+  z-index: 3; /* อยู่ใต้ปุ่มโปรด */
 }
 
 /* ✅ ปุ่มจริง */
@@ -88,10 +97,10 @@ include("connectdb.php");
 
 /* ✅ เมื่อ hover ที่สินค้า ปุ่มจะเลื่อนขึ้นมา */
 .product:hover .add-to-cart {
-  bottom: 0;
+  bottom: 40px; /* ขึ้นมาจากขอบล่างนิดนึง (ไม่ทับปุ่มโปรด) */
 }
 
-/* ✅ เพิ่มเอฟเฟกต์การ fade-in */
+/* ✅ เอฟเฟกต์ fade-in */
 .product:hover .add-to-cart-btn {
   animation: fadeUp 0.4s ease forwards;
 }
@@ -100,12 +109,13 @@ include("connectdb.php");
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ✅ ลบขอบดำล่างของเทมเพลตเก่า */
+/* ✅ ลบขอบดำจากเทมเพลตเก่า */
 .product::after, .product::before {
   display: none !important;
   content: none !important;
 }
 </style>
+
 
 
 
