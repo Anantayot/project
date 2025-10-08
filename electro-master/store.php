@@ -24,48 +24,81 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ ลบขอบดำและทำให้ภาพกลมกลืนกับพื้นหลัง */
+/* ✅ รีเซ็ตสไตล์การ์ดสินค้าให้ขาวสะอาด */
 .product {
-  background: #fff !important;         /* พื้นหลังการ์ดขาว */
-  border: 1px solid #e0e0e0;           /* เส้นขอบบางๆ */
+  position: relative;
+  background: #fff !important;
+  border: 1px solid #e0e0e0;
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
+  min-height: 450px; /* ให้ทุกการ์ดสูงเท่ากัน */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* ✅ เวลา hover ให้มีเงาเบาๆ */
-.product:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  transform: translateY(-3px);
+/* ✅ ลบ pseudo element ดำที่อยู่ข้างล่างของ template เดิม */
+.product::after,
+.product::before {
+  display: none !important;
+  content: none !important;
 }
 
-/* ✅ รูปภาพเต็มการ์ด ไม่มีขอบดำ */
+/* ✅ รูปสินค้าเต็มการ์ด ไม่มีขอบดำ */
+.product .product-img {
+  background: #fff;
+  overflow: hidden;
+}
 .product .product-img img {
   width: 100%;
   height: 250px;
   object-fit: cover;
   display: block;
-  background: #fff;
+  border-radius: 10px 10px 0 0;
 }
 
-/* ✅ ปุ่ม "หยิบใส่ตะกร้า" ให้อยู่ขอบล่างพอดี */
+/* ✅ ปรับส่วนเนื้อหาให้อยู่ตรงกลางพอดี */
+.product .product-body {
+  background: #fff;
+  padding: 10px 15px;
+  flex-grow: 1;
+}
+
+/* ✅ ปุ่มล่างสุดสวย ไม่มีพื้นหลังดำ */
 .add-to-cart {
   background: #fff;
+  padding: 10px;
   border-top: 1px solid #eee;
 }
-
-/* ✅ ปุ่มในล่างสุดไม่มีพื้นหลังดำ */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
-  border-radius: 0 0 10px 10px;
+  border: none;
+  border-radius: 6px;
   width: 100%;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  padding: 10px 0;
+  transition: 0.2s;
 }
 .add-to-cart-btn:hover {
   background: #a3001b;
 }
+
+/* ✅ Hover เงาเบาๆ */
+.product:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  transform: translateY(-3px);
+}
+
+/* ✅ ปุ่มหัวใจ/ตา */
+.product-btns {
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 8px 0;
+}
 </style>
+
 
 </head>
 <body>
