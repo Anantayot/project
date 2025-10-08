@@ -2,7 +2,7 @@
 include("connectdb.php");
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -27,7 +27,6 @@ include("connectdb.php");
 
   <!-- HEADER -->
   <?php 
-  // ถ้ามี header.php ให้ include ถ้าไม่มีไฟล์นี้ ให้ลบหรือคอมเมนต์บรรทัดนี้ออก
   if (file_exists("header.php")) include("header.php"); 
   ?>
   <!-- /HEADER -->
@@ -112,12 +111,15 @@ include("connectdb.php");
           <div class="row">
             <?php
             try {
-              $stmt = $conn->query("SELECT * FROM product ORDER BY p_id DESC");
+              $stmt = $conn->query("SELECT p.*, c.cat_name 
+                                    FROM product p 
+                                    LEFT JOIN category c ON p.cat_id = c.cat_id
+                                    ORDER BY p.p_id DESC");
               if ($stmt->rowCount() > 0) {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                  
+
                   // ✅ ตรวจสอบ path รูปให้ถูกต้อง
-                  $imgPath = "../admin/uploads/" . $row['p_image'];
+                  $imgPath = "admin/uploads/" . $row['p_image'];
                   if (!file_exists($imgPath) || empty($row['p_image'])) {
                     $imgPath = "img/product01.png"; // รูปสำรอง
                   }
@@ -126,22 +128,34 @@ include("connectdb.php");
                   <div class='col-md-4 col-xs-6'>
                     <div class='product'>
                       <div class='product-img'>
-                        <img src='{$imgPath}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;'>
+                        <a href='product.php?id={$row['p_id']}'>
+                          <img src='{$imgPath}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;width:100%;'>
+                        </a>
                         <div class='product-label'>
                           <span class='new'>NEW</span>
                         </div>
                       </div>
                       <div class='product-body'>
-                        <p class='product-category'>{$row['cat_id']}</p>
-                        <h3 class='product-name'><a href='product.php?id={$row['p_id']}'>{$row['p_name']}</a></h3>
-                        <h4 class='product-price'>{$row['p_price']} บาท</h4>
+                        <p class='product-category'>{$row['cat_name']}</p>
+                        <h3 class='product-name'>
+                          <a href='product.php?id={$row['p_id']}'>{$row['p_name']}</a>
+                        </h3>
+                        <h4 class='product-price text-danger fw-bold'>{$row['p_price']} บาท</h4>
                         <div class='product-btns'>
-                          <button class='add-to-wishlist'><i class='fa fa-heart-o'></i><span class='tooltipp'>เพิ่มในรายการโปรด</span></button>
-                          <button class='quick-view'><i class='fa fa-eye'></i><span class='tooltipp'>ดูสินค้า</span></button>
+                          <button class='add-to-wishlist'>
+                            <i class='fa fa-heart-o'></i>
+                            <span class='tooltipp'>เพิ่มในรายการโปรด</span>
+                          </button>
+                          <a href='product.php?id={$row['p_id']}' class='quick-view'>
+                            <i class='fa fa-eye'></i>
+                            <span class='tooltipp'>ดูสินค้า</span>
+                          </a>
                         </div>
                       </div>
                       <div class='add-to-cart'>
-                        <button class='add-to-cart-btn'><i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า</button>
+                        <button class='add-to-cart-btn'>
+                          <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
+                        </button>
                       </div>
                     </div>
                   </div>
