@@ -24,7 +24,7 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ โครงสร้างการ์ดสินค้า */
+/* ✅ โครงสร้างสินค้า */
 .product {
   position: relative;
   background: #fff;
@@ -32,10 +32,10 @@ include("connectdb.php");
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.3s ease;
-  min-height: 480px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: space-between;
+  min-height: 500px;
 }
 .product:hover {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
@@ -46,48 +46,59 @@ include("connectdb.php");
 .product .product-img {
   position: relative;
   overflow: hidden;
+  border-radius: 10px 10px 0 0;
 }
 .product .product-img img {
   width: 100%;
-  height: 280px;
+  height: 260px;
   object-fit: cover;
   border-radius: 10px 10px 0 0;
-  display: block;
+  transition: transform 0.4s ease;
+}
+.product:hover .product-img img {
+  transform: scale(1.05);
 }
 
-/* ✅ เนื้อหา */
+/* ✅ ข้อความสินค้า */
 .product .product-body {
   padding: 15px;
   text-align: center;
   flex-grow: 1;
 }
+.product .product-body p {
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+.product .product-body h3 {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.product .product-body h4 {
+  font-size: 17px;
+  color: #D10024;
+  font-weight: 700;
+}
 
-/* ✅ พื้นที่ของปุ่ม (อยู่ใน product เสมอ) */
+/* ✅ ปุ่ม “หยิบใส่ตะกร้า” */
 .add-to-cart {
   position: absolute;
   left: 0;
+  bottom: -80px;
   width: 100%;
-  height: 70px;
-  bottom: 0;
   text-align: center;
-  background: rgba(255,255,255,0.96);
-  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,0.97);
   border-top: 1px solid #eee;
   border-radius: 0 0 10px 10px;
-  transform: translateY(100%);
-  opacity: 0;
   transition: all 0.4s ease-in-out;
-  pointer-events: none; /* ป้องกันการ trigger hover หลุด */
+  opacity: 0;
 }
-
-/* ✅ แสดงปุ่มเมื่อ hover */
 .product:hover .add-to-cart {
-  transform: translateY(0%);
+  bottom: 0;
   opacity: 1;
-  pointer-events: auto;
 }
-
-/* ✅ ปุ่มจริง */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
@@ -97,7 +108,6 @@ include("connectdb.php");
   padding: 12px 0;
   font-weight: 600;
   border-radius: 50px;
-  font-size: 15px;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -106,19 +116,36 @@ include("connectdb.php");
   transform: scale(1.05);
 }
 
-/* ✅ ลบปุ่มอื่น */
-.product-btns {
-  display: none !important;
+/* ✅ จัด grid layout */
+#store .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+}
+#store .col-md-4 {
+  flex: 1 1 calc(25% - 20px); /* 4 คอลัมน์ desktop */
+  max-width: calc(25% - 20px);
 }
 
-/* ✅ ช่องว่างและขนาด */
-#store .col-md-4 {
-  margin-bottom: 30px;
+/* ✅ Responsive */
+@media (max-width: 991px) {
+  #store .col-md-4 {
+    flex: 1 1 calc(50% - 20px); /* 2 คอลัมน์ tablet */
+    max-width: calc(50% - 20px);
+  }
 }
-.container {
-  max-width: 95% !important;
+@media (max-width: 576px) {
+  #store .col-md-4 {
+    flex: 1 1 100%; /* 1 คอลัมน์ mobile */
+    max-width: 100%;
+  }
+  .product .product-img img {
+    height: 220px;
+  }
 }
 </style>
+
 
 </head>
 <body>
