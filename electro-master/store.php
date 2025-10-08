@@ -116,9 +116,31 @@ include("connectdb.php");
   flex-wrap: wrap;
   gap: 20px;
 }
+/* ✅ แสดงสินค้า 3 ช่องต่อแถว */
 #store .col-md-4 {
-  flex: 1 1 calc(25% - 20px);
-  max-width: calc(25% - 20px);
+  flex: 1 1 calc(33.333% - 20px);
+  max-width: calc(33.333% - 20px);
+}
+
+/* ✅ Tablet (2 ช่อง) */
+@media (max-width: 991px) {
+  #store .col-md-4 {
+    flex: 1 1 calc(50% - 20px);
+    max-width: calc(50% - 20px);
+  }
+}
+
+/* ✅ Mobile (1 ช่อง) */
+@media (max-width: 576px) {
+  #store .col-md-4 {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .product .product-img img {
+    height: 220px;
+  }
+}
+
 }
 @media (max-width: 991px) {
   #store .col-md-4 {
