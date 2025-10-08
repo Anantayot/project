@@ -24,98 +24,45 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ โครงสร้างการ์ดสินค้า */
-.product {
-  position: relative;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-.product:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  transform: translateY(-5px);
+/* ✅ ปรับ container ให้กว้างขึ้น */
+.container {
+  max-width: 95% !important; /* จากเดิม 1170px → กว้างขึ้นเต็มเกือบจอ */
 }
 
-/* ✅ รูปสินค้า */
-.product .product-img {
-  position: relative;
-  overflow: hidden;
-}
-.product .product-img img {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 10px 10px 0 0;
-  display: block;
+/* ✅ ปรับช่องว่างระหว่างการ์ดสินค้า */
+#store .col-md-4 {
+  width: 31.5%;              /* จากเดิมประมาณ 30% */
+  margin: 1% !important;     /* ระยะห่างเล็กน้อยระหว่างการ์ด */
 }
 
-/* ✅ เนื้อหา */
-.product .product-body {
-  padding: 15px;
-  text-align: center;
+/* ✅ ทำให้แถวสินค้าเรียงเป็นกริดสวยขึ้น */
+#store .row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
-/* ✅ ปุ่มรายการโปรด / ดูสินค้า */
-.product-btns {
-  position: relative;
-  background: #fff;
-  border-top: 1px solid #eee;
-  padding: 8px 0;
-  z-index: 5; /* อยู่เหนือปุ่มหยิบใส่ตะกร้า */
+/* ✅ ลด padding ของ container หลัก */
+.section .container {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-/* ✅ ปุ่ม "หยิบใส่ตะกร้า" — ซ่อนอยู่ตอนแรก */
-.add-to-cart {
-  position: absolute;
-  bottom: -70px; /* ซ่อนไว้ด้านล่าง */
-  left: 0;
-  width: 100%;
-  background: rgba(255,255,255,0.95);
-  text-align: center;
-  transition: all 0.4s ease;
-  z-index: 3; /* อยู่ใต้ปุ่มโปรด */
+/* ✅ ปรับให้ responsive สวยบนจอเล็ก */
+@media (max-width: 992px) {
+  #store .col-md-4 {
+    width: 48%;
+    margin: 1%;
+  }
 }
 
-/* ✅ ปุ่มจริง */
-.add-to-cart-btn {
-  background: #D10024;
-  color: #fff;
-  border: none;
-  width: 90%;
-  margin: 10px auto;
-  padding: 10px 0;
-  font-weight: 600;
-  border-radius: 50px;
-  transition: all 0.3s ease;
-}
-.add-to-cart-btn:hover {
-  background: #a3001b;
-  transform: scale(1.05);
-}
-
-/* ✅ เมื่อ hover ที่สินค้า ปุ่มจะเลื่อนขึ้นมา */
-.product:hover .add-to-cart {
-  bottom: 40px; /* ขึ้นมาจากขอบล่างนิดนึง (ไม่ทับปุ่มโปรด) */
-}
-
-/* ✅ เอฟเฟกต์ fade-in */
-.product:hover .add-to-cart-btn {
-  animation: fadeUp 0.4s ease forwards;
-}
-@keyframes fadeUp {
-  0% { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* ✅ ลบขอบดำจากเทมเพลตเก่า */
-.product::after, .product::before {
-  display: none !important;
-  content: none !important;
+@media (max-width: 600px) {
+  #store .col-md-4 {
+    width: 98%;
+    margin: 1% auto;
+  }
 }
 </style>
-
 
 
 
