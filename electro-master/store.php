@@ -24,48 +24,62 @@ include("connectdb.php");
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
   
   <style>
-/* ✅ ปรับความสูงของการ์ดสินค้าให้ยาวลง */
+/* ✅ ซ่อนปุ่มหยิบใส่ตะกร้าเริ่มต้น */
+.add-to-cart {
+  position: absolute;
+  bottom: -70px; /* ซ่อนไว้ด้านล่าง */
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: #fff;
+  text-align: center;
+  transition: all 0.4s ease;
+  opacity: 0;
+  z-index: 3;
+  border-top: 1px solid #eee;
+  border-radius: 0 0 10px 10px;
+}
+
+/* ✅ แสดงปุ่มเมื่อ hover การ์ด */
+.product:hover .add-to-cart {
+  bottom: 0;             /* เลื่อนขึ้นมาอยู่ด้านล่างของการ์ด */
+  opacity: 1;            /* ค่อยๆ แสดง */
+}
+
+/* ✅ ปุ่มภายใน */
+.add-to-cart-btn {
+  background: #D10024;
+  color: #fff;
+  border: none;
+  width: 90%;
+  margin: 10px auto;
+  padding: 12px 0;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+.add-to-cart-btn:hover {
+  background: #a3001b;
+  transform: scale(1.05);
+}
+
+/* ✅ ทำให้ product card สูงพอดี */
 .product {
-  min-height: 460px; /* เดิมประมาณ 380px */
+  position: relative;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-height: 470px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-
-/* ✅ ปรับความสูงภาพให้สมดุลกับตัวการ์ด */
-.product .product-img img {
-  height: 280px; /* เดิม 250px → ขยายให้ภาพเด่นขึ้น */
-  object-fit: cover;
-}
-
-/* ✅ เพิ่มระยะข้างในและลดความแน่น */
-.product .product-body {
-  padding: 20px 15px 10px 15px;
-}
-
-/* ✅ ปรับปุ่มล่างให้มีพื้นที่หายใจมากขึ้น */
-.add-to-cart {
-  bottom: -80px; /* ซ่อนต่ำลงอีกนิด */
-  transition: all 0.4s ease;
-}
-.product:hover .add-to-cart {
-  bottom: 50px; /* เลื่อนขึ้นมาไม่ชนขอบล่าง */
-}
-
-/* ✅ ปรับขนาดปุ่มให้สวยในความสูงใหม่ */
-.add-to-cart-btn {
-  padding: 12px 0;
-  font-size: 15px;
-}
-
-/* ✅ ปรับ layout ระยะห่างระหว่างการ์ด */
-#store .col-md-4 {
-  margin-bottom: 30px;
-}
-
-/* ✅ ปรับ container ให้กว้างขึ้นนิดหนึ่ง */
-.container {
-  max-width: 95% !important;
+.product:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
 }
 </style>
 
