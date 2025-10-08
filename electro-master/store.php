@@ -26,7 +26,10 @@ include("connectdb.php");
 <body>
 
   <!-- HEADER -->
-  <?php include("header.php"); ?> <!-- ถ้ามี header แยก, ถ้าไม่มีก็ปล่อยไว้ -->
+  <?php 
+  // ถ้ามี header.php ให้ include ถ้าไม่มีไฟล์นี้ ให้ลบหรือคอมเมนต์บรรทัดนี้ออก
+  if (file_exists("header.php")) include("header.php"); 
+  ?>
   <!-- /HEADER -->
 
   <!-- NAVIGATION -->
@@ -112,12 +115,18 @@ include("connectdb.php");
               $stmt = $conn->query("SELECT * FROM product ORDER BY p_id DESC");
               if ($stmt->rowCount() > 0) {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                  $img = !empty($row['p_image']) ? "uploads/{$row['p_image']}" : "img/product01.png";
+                  
+                  // ✅ ตรวจสอบ path รูปให้ถูกต้อง
+                  $imgPath = "../admin/uploads/" . $row['p_image'];
+                  if (!file_exists($imgPath) || empty($row['p_image'])) {
+                    $imgPath = "img/product01.png"; // รูปสำรอง
+                  }
+
                   echo "
                   <div class='col-md-4 col-xs-6'>
                     <div class='product'>
                       <div class='product-img'>
-                        <img src='{$img}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;'>
+                        <img src='{$imgPath}' alt='{$row['p_name']}' style='height:250px;object-fit:cover;'>
                         <div class='product-label'>
                           <span class='new'>NEW</span>
                         </div>
