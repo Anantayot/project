@@ -120,9 +120,6 @@ include("connectdb.php");
 }
 </style>
 
-
-
-
 </head>
 <body>
 
