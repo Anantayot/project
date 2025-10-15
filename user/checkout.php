@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $totalPrice += $item['price'] * $item['qty'];
     }
 
-    // ✅ เพิ่มข้อมูลคำสั่งซื้อ (ใช้ customer_id แทน)
+    // ✅ เพิ่มข้อมูลคำสั่งซื้อ (ใช้ customer_id)
     $stmt = $conn->prepare("INSERT INTO orders 
       (customer_id, payment_method, total_price, order_date)
       VALUES (:cid, :payment, :total, NOW())");
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $orderId = $conn->lastInsertId();
 
-    // ✅ เพิ่มข้อมูลสินค้าในคำสั่งซื้อ
+    // ✅ เพิ่มข้อมูลสินค้าใน order_details
     $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, product_id, quantity, price)
                                  VALUES (:oid, :pid, :qty, :price)");
 
@@ -85,13 +85,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
+<!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">💳 ยืนยันคำสั่งซื้อ</h3>
 
   <div class="row">
-    <!-- 🧾 สินค้าในตะกร้า -->
+    <!-- 🔹 สินค้าในตะกร้า -->
     <div class="col-md-7 mb-4">
       <div class="card shadow-sm">
         <div class="card-header bg-dark text-white fw-semibold">สินค้าในตะกร้า</div>
@@ -129,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>
     </div>
 
-    <!-- 💳 ฟอร์มชำระเงิน -->
+    <!-- 🔹 ฟอร์มชำระเงิน -->
     <div class="col-md-5">
       <div class="card shadow-sm">
         <div class="card-header bg-dark text-white fw-semibold">ข้อมูลผู้สั่งซื้อ</div>
@@ -137,20 +138,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <form method="post">
             <div class="mb-3">
               <label class="form-label">ชื่อผู้ใช้</label>
-              <input type="text" class="form-control" 
-                     value="<?= htmlspecialchars($user['name']) ?>" disabled>
+              <input type="text" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" disabled>
             </div>
             <div class="mb-3">
               <label class="form-label">อีเมล</label>
-              <input type="text" class="form-control" 
-                     value="<?= htmlspecialchars($user['email']) ?>" disabled>
+              <input type="text" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" disabled>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>
               <select name="payment" class="form-select" required>
-                <option value="เก็บเงินปลายทาง">เก็บเงินปลายทาง</option>
-                <option value="โอนผ่านธนาคาร">โอนผ่านธนาคาร</option>
-                <option value="ชำระด้วย QR Code">ชำระด้วย QR Code</option>
+                <option value="COD">เก็บเงินปลายทาง (COD)</option>
+                <option value="BANK_TRANSFER">โอนผ่านธนาคาร (BANK_TRANSFER)</option>
+                <option value="QR">ชำระด้วย QR Code (QR)</option>
+                <option value="CASH">ชำระเงินสด (CASH)</option>
               </select>
             </div>
             <div class="d-grid">
