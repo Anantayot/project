@@ -1,0 +1,121 @@
+<?php
+session_start();
+include("../connectdb.php");
+
+// ✅ ฟังก์ชันลบสินค้าออกจากตะกร้า
+if (isset($_GET['remove'])) {
+  $id = intval($_GET['remove']);
+  unset($_SESSION['cart'][$id]);
+  header("Location: cart.php");
+  exit;
+}
+
+// ✅ ฟังก์ชันอัปเดตจำนวนสินค้า
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
+  foreach ($_POST['qty'] as $id => $qty) {
+    if ($qty <= 0) {
+      unset($_SESSION['cart'][$id]);
+    } else {
+      $_SESSION['cart'][$id]['qty'] = intval($qty);
+    }
+  }
+  header("Location: cart.php");
+  exit;
+}
+
+// ✅ ตะกร้าสินค้า
+$cart = $_SESSION['cart'] ?? [];
+$total = 0;
+?>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>MyCommiss | ตะกร้าสินค้า</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- 🔹 Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a href="cart.php" class="nav-link active">ตะกร้า</a></li>
+      <li class="nav-item"><a href="login.php" class="nav-link">เข้าสู่ระบบ</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h3 class="fw-bold mb-4 text-center">🛒 ตะกร้าสินค้าของคุณ</h3>
+
+  <?php if (empty($cart)): ?>
+    <div class="alert alert-info text-center">
+      🧺 ยังไม่มีสินค้าในตะกร้า  
+      <br><br>
+      <a href="index.php" class="btn btn-primary">⬅️ กลับไปเลือกซื้อสินค้า</a>
+    </div>
+  <?php else: ?>
+    <form method="post">
+      <div class="table-responsive shadow-sm">
+        <table class="table align-middle table-bordered text-center bg-white">
+          <thead class="table-dark">
+            <tr>
+              <th>ภาพสินค้า</th>
+              <th>ชื่อสินค้า</th>
+              <th>ราคา</th>
+              <th>จำนวน</th>
+              <th>รวม</th>
+              <th>ลบ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($cart as $item): 
+              $sum = $item['price'] * $item['qty'];
+              $total += $sum;
+              $imgPath = "../admin/uploads/" . $item['image'];
+              if (!file_exists($imgPath) || empty($item['image'])) {
+                $imgPath = "img/default.png";
+              }
+            ?>
+              <tr>
+                <td><img src="<?= $imgPath ?>" width="80" height="80" class="rounded shadow-sm"></td>
+                <td><?= htmlspecialchars($item['name']) ?></td>
+                <td><?= number_format($item['price'], 2) ?> บาท</td>
+                <td style="width:100px;">
+                  <input type="number" name="qty[<?= $item['id'] ?>]" value="<?= $item['qty'] ?>" min="1" class="form-control text-center">
+                </td>
+                <td><?= number_format($sum, 2) ?> บาท</td>
+                <td>
+                  <a href="cart.php?remove=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('ลบสินค้านี้ออกจากตะกร้า?');">ลบ</a>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+          <tfoot>
+            <tr class="table-light">
+              <th colspan="4" class="text-end">💰 ราคารวมทั้งหมด:</th>
+              <th colspan="2" class="text-danger"><?= number_format($total, 2) ?> บาท</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between mt-3">
+        <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าร้าน</a>
+        <div class="d-flex gap-2">
+          <button type="submit" name="update" class="btn btn-warning">🔁 อัปเดตจำนวน</button>
+          <a href="checkout.php" class="btn btn-success">✅ ดำเนินการชำระเงิน</a>
+        </div>
+      </div>
+    </form>
+  <?php endif; ?>
+</div>
+
+<footer class="text-center py-3 mt-5 bg-dark text-white">
+  © <?= date('Y') ?> MyCommiss | ตะกร้าสินค้า
+</footer>
+
+</body>
+</html>
