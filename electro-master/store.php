@@ -119,7 +119,7 @@ include("connectdb.php");
 #store .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px; /* เพิ่มช่องว่างให้สบายตา */
+  gap: 50px; /* เพิ่มช่องว่างให้สบายตา */
   justify-content: center; /* ให้อยู่ตรงกลาง */
   align-items: stretch;
 }
