@@ -19,10 +19,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($check->rowCount() > 0) {
       $error = "⚠️ อีเมลนี้ถูกใช้ไปแล้ว";
     } else {
+      // เข้ารหัสรหัสผ่าน
       $hashed = password_hash($password, PASSWORD_DEFAULT);
-      $stmt = $conn->prepare("INSERT INTO customers (name, email, password, phone, address) VALUES (?,?,?,?,?)");
-      $stmt->execute([$name, $email, $hashed, $phone, $address]);
-      echo "<script>alert('✅ สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย'); window.location='login.php';</script>";
+      
+      // ✅ ตรวจสอบว่ามีฟิลด์ตรงกับฐานข้อมูลจริง
+      $stmt = $conn->prepare("
+        INSERT INTO customers (name, email, password, phone, address)
+        VALUES (:name, :email, :password, :phone, :address)
+      ");
+      $stmt->execute([
+        ':name' => $name,
+        ':email' => $email,
+        ':password' => $hashed,
+        ':phone' => $phone,
+        ':address' => $address
+      ]);
+
+      echo "<script>
+        alert('✅ สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
+        window.location.href = 'login.php';
+      </script>";
       exit;
     }
   }
@@ -33,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
   <meta charset="UTF-8">
   <title>สมัครสมาชิก | MyCommiss</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css' rel='stylesheet'>
 </head>
 <body class="bg-light">
 
@@ -42,8 +58,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="card-header bg-dark text-white text-center fw-bold">สมัครสมาชิก</div>
     <div class="card-body">
       <?php if (!empty($error)): ?>
-        <div class="alert alert-danger"><?= $error ?></div>
+        <div class="alert alert-danger text-center"><?= $error ?></div>
       <?php endif; ?>
+
       <form method="post">
         <div class="mb-3">
           <label class="form-label">ชื่อ-นามสกุล</label>
@@ -53,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <label class="form-label">อีเมล</label>
           <input type="email" name="email" class="form-control" required>
         </div>
+
         <div class="row">
           <div class="col-md-6 mb-3">
             <label class="form-label">รหัสผ่าน</label>
@@ -63,20 +81,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <input type="password" name="confirm" class="form-control" required>
           </div>
         </div>
+
         <div class="mb-3">
-          <label class="form-label">เบอร์โทร</label>
+          <label class="form-label">เบอร์โทรศัพท์</label>
           <input type="text" name="phone" class="form-control">
         </div>
+
         <div class="mb-3">
           <label class="form-label">ที่อยู่</label>
-          <textarea name="address" rows="3" class="form-control"></textarea>
+          <textarea name="address" class="form-control" rows="3"></textarea>
         </div>
+
         <div class="d-grid">
-          <button class="btn btn-success">✅ สมัครสมาชิก</button>
+          <button type="submit" class="btn btn-success">✅ สมัครสมาชิก</button>
         </div>
       </form>
     </div>
   </div>
+
   <div class="text-center mt-3">
     <a href="login.php" class="text-decoration-none">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</a><br>
     <a href="index.php" class="btn btn-secondary btn-sm mt-2">⬅️ กลับหน้าหลัก</a>
