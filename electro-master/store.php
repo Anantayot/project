@@ -82,21 +82,10 @@ include("connectdb.php");
 }
 
 /* ✅ ปุ่มหยิบใส่ตะกร้า */
-.add-to-cart {
-  position: absolute;
-  left: 0;
-  bottom: -80px;
-  width: 100%;
-  text-align: center;
-  background: rgba(255,255,255,0.97);
-  border-top: 1px solid #eee;
-  border-radius: 0 0 10px 10px;
-  transition: all 0.4s ease-in-out;
-  opacity: 0;
-}
 .product:hover .add-to-cart {
-  bottom: 0;
+  transform: translateY(0%);
   opacity: 1;
+  pointer-events: auto;
 }
 .add-to-cart-btn {
   background: #D10024;
@@ -107,6 +96,7 @@ include("connectdb.php");
   padding: 12px 0;
   font-weight: 600;
   border-radius: 50px;
+  font-size: 15px;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -115,6 +105,18 @@ include("connectdb.php");
   transform: scale(1.05);
 }
 
+/* ✅ ลบปุ่มอื่น */
+.product-btns {
+  display: none !important;
+}
+
+/* ✅ ช่องว่างและขนาด */
+#store .col-md-4 {
+  margin-bottom: 30px;
+}
+.container {
+  max-width: 95% !important;
+}
 /* ✅ Layout หลัก */
 #store .row {
   display: flex;
