@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 include("connectdb.php");
 
@@ -53,9 +56,9 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tbody class="text-center">
           <?php foreach ($orders as $o): ?>
             <?php
-              $status = $o['order_status'] ?? 'รอดำเนินการ';
+              $status = $o['payment_status'] ?? 'รอดำเนินการ';
               $badgeClass = match($status) {
-                'จัดส่งแล้ว' => 'success',
+                'ชำระเงินแล้ว' => 'success',
                 'ยกเลิก' => 'danger',
                 default => 'warning'
               };
