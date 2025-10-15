@@ -2,80 +2,72 @@
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อน
+// ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
 }
 
 $cid = $_SESSION['customer_id'];
-
-// ✅ ดึงข้อมูลลูกค้าจากฐานข้อมูล
-$stmtUser = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
-$stmtUser->execute([$cid]);
-$user = $stmtUser->fetch(PDO::FETCH_ASSOC);
-
-// ✅ ตรวจสอบตะกร้า
 $cart = $_SESSION['cart'] ?? [];
 if (empty($cart)) {
   echo "<script>alert('ตะกร้าสินค้าว่าง'); window.location='cart.php';</script>";
   exit;
 }
 
-// ✅ เมื่อผู้ใช้กดยืนยันคำสั่งซื้อ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $address = trim($_POST['address']);
   $payment = $_POST['payment'];
 
-  try {
-    $conn->beginTransaction();
+  if (empty($address)) {
+    echo "<script>alert('กรุณากรอกที่อยู่จัดส่ง');</script>";
+  } else {
+    try {
+      $conn->beginTransaction();
 
-    // ✅ คำนวณราคารวมทั้งหมด
-    $totalPrice = 0;
-    foreach ($cart as $item) {
-      $totalPrice += $item['price'] * $item['qty'];
-    }
+      // ✅ เพิ่มคำสั่งซื้อให้ตรงกับฟิลด์จริง
+      $stmt = $conn->prepare("INSERT INTO orders 
+        (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
+        VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
 
-    // ✅ เพิ่มข้อมูลคำสั่งซื้อ (ใช้ customer_id)
-    $stmt = $conn->prepare("INSERT INTO orders 
-      (customer_id, payment_method, total_price, order_date)
-      VALUES (:cid, :payment, :total, NOW())");
+      $totalPrice = 0;
+      foreach ($cart as $item) {
+        $totalPrice += $item['price'] * $item['qty'];
+      }
 
-    $stmt->execute([
-      ':cid' => $cid,
-      ':payment' => $payment,
-      ':total' => $totalPrice
-    ]);
-
-    $orderId = $conn->lastInsertId();
-
-    // ✅ เพิ่มข้อมูลสินค้าใน order_details
-    $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
-                             VALUES (:oid, :pid, :qty, :price)");
-
-
-    foreach ($cart as $item) {
-      $stmtDetail->execute([
-        ':oid' => $orderId,
-        ':pid' => $item['id'],
-        ':qty' => $item['qty'],
-        ':price' => $item['price']
+      $stmt->execute([
+        ':cid' => $cid,
+        ':address' => $address,
+        ':payment' => $payment,
+        ':total' => $totalPrice
       ]);
+
+      $orderId = $conn->lastInsertId();
+
+      // ✅ ตาราง order_details ต้องใช้ p_id (จากตาราง product)
+      $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
+                                   VALUES (:oid, :pid, :qty, :price)");
+
+      foreach ($cart as $item) {
+        $stmtDetail->execute([
+          ':oid' => $orderId,
+          ':pid' => $item['id'],
+          ':qty' => $item['qty'],
+          ':price' => $item['price']
+        ]);
+      }
+
+      $conn->commit();
+      unset($_SESSION['cart']);
+      echo "<script>alert('✅ สั่งซื้อสำเร็จ!'); window.location='orders.php';</script>";
+    } catch (Exception $e) {
+      $conn->rollBack();
+      echo "<script>alert('❌ Error: " . addslashes($e->getMessage()) . "');</script>";
     }
-
-    $conn->commit();
-    unset($_SESSION['cart']); // ล้างตะกร้า
-
-    echo "<script>
-      alert('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
-      window.location='orders.php';
-    </script>";
-    exit;
-
-  } catch (Exception $e) {
-    $conn->rollBack();
-    echo "<script>alert('❌ เกิดข้อผิดพลาด: " . addslashes($e->getMessage()) . "');</script>";
   }
 }
+?>
+
 ?>
 <!DOCTYPE html>
 <html lang="th">
