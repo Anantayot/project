@@ -126,8 +126,8 @@ include("connectdb.php");
 
 /* ✅ 3 ช่องต่อแถว (Desktop) */
 #store .col-md-4 {
-  flex: 1 1 calc(33.333% - 50px);
-  max-width: calc(33.333% - 50px);
+  flex: 1 1 calc(33.333% - 20px);
+  max-width: calc(33.333% - 90px);
   display: flex;
 }
 
