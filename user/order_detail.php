@@ -29,7 +29,7 @@ if (!$order) {
 // ✅ ดึงข้อมูลสินค้าในคำสั่งซื้อนี้
 $stmt2 = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
                          FROM order_details d 
-                         LEFT JOIN product p ON d.product_id = p.p_id 
+                         LEFT JOIN product p ON d.p_id = p.p_id 
                          WHERE d.order_id = ?");
 $stmt2->execute([$orderId]);
 $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
@@ -55,20 +55,21 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     <div class="card-body">
       <div class="row">
         <div class="col-md-6">
-          <p><strong>ชื่อผู้รับ:</strong> <?= htmlspecialchars($order['customer_name']) ?></p>
-          <p><strong>ที่อยู่:</strong> <?= nl2br(htmlspecialchars($order['customer_address'])) ?></p>
-          <p><strong>เบอร์โทร:</strong> <?= htmlspecialchars($order['customer_phone']) ?></p>
+          <p><strong>รหัสลูกค้า:</strong> <?= htmlspecialchars($order['customer_id']) ?></p>
+          <p><strong>ที่อยู่จัดส่ง:</strong> <?= nl2br(htmlspecialchars($order['shipping_address'])) ?></p>
         </div>
         <div class="col-md-6">
           <p><strong>วันที่สั่งซื้อ:</strong> <?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></p>
           <p><strong>วิธีชำระเงิน:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
           <?php
             $status = $order['order_status'] ?? 'รอดำเนินการ';
-            $badgeClass = match($status) {
-              'จัดส่งแล้ว' => 'success',
-              'ยกเลิก' => 'danger',
-              default => 'warning'
-            };
+            if ($status === 'จัดส่งแล้ว') {
+              $badgeClass = 'success';
+            } elseif ($status === 'ยกเลิก') {
+              $badgeClass = 'danger';
+            } else {
+              $badgeClass = 'warning';
+            }
           ?>
           <p><strong>สถานะ:</strong> 
             <span class="badge bg-<?= $badgeClass ?>">
