@@ -119,7 +119,7 @@ include("connectdb.php");
 #store .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 25px;
+  gap: 20px;
   justify-content: center; /* ให้การ์ดอยู่ตรงกลาง */
   align-items: stretch;    /* ให้ทุกการ์ดสูงเท่ากัน */
 }
