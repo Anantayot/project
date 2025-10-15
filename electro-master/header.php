@@ -8,7 +8,7 @@ if (!empty($_SESSION['cart'])) {
 <!-- ตัวอย่างไอคอน -->
 <a href="cart.php" class="header-cart">
   <i class="fa fa-shopping-cart"></i>
-  <span id="cart-count"><?= $totalQty ?></span>
+  <span id="cart-count"><?= isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'],'qty')) : 0 ?></span>
 </a>
 
 <style>
