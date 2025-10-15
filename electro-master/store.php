@@ -81,42 +81,50 @@ include("connectdb.php");
   font-weight: 700;
 }
 
-/* ✅ ปุ่มหยิบใส่ตะกร้า */
-.product:hover .add-to-cart {
-  transform: translateY(0%);
-  opacity: 1;
-  pointer-events: auto;
+/* ✅ ปุ่ม “หยิบใส่ตะกร้า” สวยพอดี */
+.add-to-cart {
+  position: absolute;
+  bottom: -70px; /* ซ่อนอยู่ใต้การ์ดตอนแรก */
+  left: 0;
+  width: 100%;
+  text-align: center;
+  background: #fff;
+  border-top: 1px solid #eee;
+  border-radius: 0 0 10px 10px;
+  padding: 10px 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
 }
+
+/* ✅ ตอน hover การ์ด → ปุ่มสไลด์ขึ้นพอดี */
+.product:hover .add-to-cart {
+  bottom: 0;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ✅ ปุ่มภายใน */
 .add-to-cart-btn {
   background: #D10024;
   color: #fff;
   border: none;
   width: 90%;
-  margin: 10px auto;
+  margin: 0 auto;
   padding: 12px 0;
   font-weight: 600;
-  border-radius: 50px;
   font-size: 15px;
+  border-radius: 50px;
+  display: block;
   transition: all 0.3s ease;
-  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
+
 .add-to-cart-btn:hover {
   background: #a3001b;
   transform: scale(1.05);
 }
 
-/* ✅ ลบปุ่มอื่น */
-.product-btns {
-  display: none !important;
-}
-
-/* ✅ ช่องว่างและขนาด */
-#store .col-md-4 {
-  margin-bottom: 30px;
-}
-.container {
-  max-width: 95% !important;
-}
 /* ✅ Layout หลัก */
 #store .row {
   display: flex;
