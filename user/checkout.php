@@ -24,63 +24,55 @@ if (empty($cart)) {
 
 // ✅ เมื่อผู้ใช้กดยืนยันคำสั่งซื้อ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $name = trim($_POST['name']);
-  $address = trim($_POST['address']);
-  $phone = trim($_POST['phone']);
   $payment = $_POST['payment'];
 
-  if (empty($name) || empty($address) || empty($phone)) {
-    echo "<script>alert('กรุณากรอกข้อมูลให้ครบถ้วน');</script>";
-  } else {
-    try {
-      $conn->beginTransaction();
+  try {
+    $conn->beginTransaction();
 
-      // ✅ เพิ่มคำสั่งซื้อ
-      $stmt = $conn->prepare("INSERT INTO orders 
-        (customer_id, customer_name, customer_address, customer_phone, payment_method, total_price, order_date)
-        VALUES (:cid, :name, :address, :phone, :payment, :total, NOW())");
-
-      $totalPrice = 0;
-      foreach ($cart as $item) {
-        $totalPrice += $item['price'] * $item['qty'];
-      }
-
-      $stmt->execute([
-        ':cid' => $cid,
-        ':name' => $name,
-        ':address' => $address,
-        ':phone' => $phone,
-        ':payment' => $payment,
-        ':total' => $totalPrice
-      ]);
-
-      $orderId = $conn->lastInsertId();
-
-      // ✅ เพิ่มสินค้าใน order_details
-      $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, product_id, quantity, price)
-                                    VALUES (:oid, :pid, :qty, :price)");
-
-      foreach ($cart as $item) {
-        $stmtDetail->execute([
-          ':oid' => $orderId,
-          ':pid' => $item['id'],
-          ':qty' => $item['qty'],
-          ':price' => $item['price']
-        ]);
-      }
-
-      $conn->commit();
-      unset($_SESSION['cart']); // ล้างตะกร้า
-
-      echo "<script>
-        alert('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
-        window.location='orders.php';
-      </script>";
-      exit;
-    } catch (Exception $e) {
-      $conn->rollBack();
-      echo "<script>alert('❌ เกิดข้อผิดพลาด: " . addslashes($e->getMessage()) . "');</script>";
+    // ✅ คำนวณราคารวมทั้งหมด
+    $totalPrice = 0;
+    foreach ($cart as $item) {
+      $totalPrice += $item['price'] * $item['qty'];
     }
+
+    // ✅ เพิ่มข้อมูลคำสั่งซื้อ (ใช้ customer_id แทน)
+    $stmt = $conn->prepare("INSERT INTO orders 
+      (customer_id, payment_method, total_price, order_date)
+      VALUES (:cid, :payment, :total, NOW())");
+
+    $stmt->execute([
+      ':cid' => $cid,
+      ':payment' => $payment,
+      ':total' => $totalPrice
+    ]);
+
+    $orderId = $conn->lastInsertId();
+
+    // ✅ เพิ่มข้อมูลสินค้าในคำสั่งซื้อ
+    $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, product_id, quantity, price)
+                                 VALUES (:oid, :pid, :qty, :price)");
+
+    foreach ($cart as $item) {
+      $stmtDetail->execute([
+        ':oid' => $orderId,
+        ':pid' => $item['id'],
+        ':qty' => $item['qty'],
+        ':price' => $item['price']
+      ]);
+    }
+
+    $conn->commit();
+    unset($_SESSION['cart']); // ล้างตะกร้า
+
+    echo "<script>
+      alert('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
+      window.location='orders.php';
+    </script>";
+    exit;
+
+  } catch (Exception $e) {
+    $conn->rollBack();
+    echo "<script>alert('❌ เกิดข้อผิดพลาด: " . addslashes($e->getMessage()) . "');</script>";
   }
 }
 ?>
@@ -93,14 +85,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">💳 ยืนยันคำสั่งซื้อ</h3>
 
   <div class="row">
-    <!-- 🔹 สินค้าในตะกร้า -->
+    <!-- 🧾 สินค้าในตะกร้า -->
     <div class="col-md-7 mb-4">
       <div class="card shadow-sm">
         <div class="card-header bg-dark text-white fw-semibold">สินค้าในตะกร้า</div>
@@ -138,25 +129,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>
     </div>
 
-    <!-- 🔹 ฟอร์มกรอกข้อมูล -->
+    <!-- 💳 ฟอร์มชำระเงิน -->
     <div class="col-md-5">
       <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white fw-semibold">ข้อมูลการจัดส่ง</div>
+        <div class="card-header bg-dark text-white fw-semibold">ข้อมูลผู้สั่งซื้อ</div>
         <div class="card-body">
           <form method="post">
             <div class="mb-3">
-              <label class="form-label">ชื่อผู้รับ</label>
-              <input type="text" name="name" class="form-control" 
-                     value="<?= htmlspecialchars($user['name']) ?>" required>
+              <label class="form-label">ชื่อผู้ใช้</label>
+              <input type="text" class="form-control" 
+                     value="<?= htmlspecialchars($user['name']) ?>" disabled>
             </div>
             <div class="mb-3">
-              <label class="form-label">ที่อยู่จัดส่ง</label>
-              <textarea name="address" class="form-control" rows="3" required><?= htmlspecialchars($user['address']) ?></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" name="phone" class="form-control" 
-                     value="<?= htmlspecialchars($user['phone']) ?>" required>
+              <label class="form-label">อีเมล</label>
+              <input type="text" class="form-control" 
+                     value="<?= htmlspecialchars($user['email']) ?>" disabled>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>
