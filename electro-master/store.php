@@ -119,24 +119,23 @@ include("connectdb.php");
 #store .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px; /* เพิ่มช่องว่างให้สบายตา */
-  justify-content: center; /* ให้อยู่ตรงกลาง */
-  align-items: stretch;
+  gap: 20px;
+  justify-content: center; /* ให้การ์ดอยู่ตรงกลาง */
+  align-items: stretch;    /* ให้ทุกการ์ดสูงเท่ากัน */
 }
 
-/* ✅ กล่องสินค้า — ขยายกว้างขึ้น */
+/* ✅ 3 ช่องต่อแถว (Desktop) */
 #store .col-md-4 {
-  flex: 1 1 calc(31% - 50px);  /* เดิม 33.333% ตอนนี้ขยายเล็กน้อย */
-  max-width: calc(31% - 50px);
+  flex: 1 1 calc(33.333% - 20px);
+  max-width: calc(33.333% - 20px);
   display: flex;
-  justify-content: center;
 }
 
-/* ✅ Tablet (2 ช่องต่อแถว) */
+/* ✅ Tablet (2 ช่อง) */
 @media (max-width: 991px) {
   #store .col-md-4 {
-    flex: 1 1 calc(48% - 20px);
-    max-width: calc(48% - 20px);
+    flex: 1 1 calc(50% - 20px);
+    max-width: calc(50% - 20px);
   }
 }
 
@@ -150,7 +149,6 @@ include("connectdb.php");
     height: 220px;
   }
 }
-
 </style>
 
 </head>
