@@ -38,9 +38,24 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
   <div class="container">
     <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
     <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-      <li class="nav-item"><a href="login.php" class="nav-link">เข้าสู่ระบบ</a></li>
-    </ul>
+  <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
+
+  <?php if (isset($_SESSION['customer_id'])): ?>
+    <!-- ถ้าล็อกอินแล้ว -->
+    <li class="nav-item">
+      <a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a>
+    </li>
+    <li class="nav-item">
+      <a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a>
+    </li>
+  <?php else: ?>
+    <!-- ถ้ายังไม่ได้ล็อกอิน -->
+    <li class="nav-item">
+      <a href="login.php" class="nav-link">เข้าสู่ระบบ</a>
+    </li>
+  <?php endif; ?>
+</ul>
+
   </div>
 </nav>
 
