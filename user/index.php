@@ -1,5 +1,12 @@
 <?php
-include("connectdb.php"); // ✅ แก้ path ให้ถูกต้อง
+session_start(); // ✅ ต้องมีทุกหน้าที่ใช้ session
+include("connectdb.php");
+
+// ✅ ถ้ายังไม่ได้ล็อกอิน → กลับไปหน้า login.php
+if (!isset($_SESSION['customer_id'])) {
+  header("Location: login.php");
+  exit;
+}
 
 $search = $_GET['search'] ?? '';
 $cat = $_GET['cat'] ?? '';
@@ -37,25 +44,28 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
     <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
+
     <ul class="navbar-nav ms-auto">
-  <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
+      <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
 
-  <?php if (isset($_SESSION['customer_id'])): ?>
-    <!-- ถ้าล็อกอินแล้ว -->
-    <li class="nav-item">
-      <a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a>
-    </li>
-    <li class="nav-item">
-      <a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a>
-    </li>
-  <?php else: ?>
-    <!-- ถ้ายังไม่ได้ล็อกอิน -->
-    <li class="nav-item">
-      <a href="login.php" class="nav-link">เข้าสู่ระบบ</a>
-    </li>
-  <?php endif; ?>
-</ul>
-
+      <?php if (isset($_SESSION['customer_id'])): ?>
+        <li class="nav-item">
+          <a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link text-info fw-semibold">
+            👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
+          </span>
+        </li>
+        <li class="nav-item">
+          <a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a>
+        </li>
+      <?php else: ?>
+        <li class="nav-item">
+          <a href="login.php" class="nav-link">เข้าสู่ระบบ</a>
+        </li>
+      <?php endif; ?>
+    </ul>
   </div>
 </nav>
 
@@ -80,15 +90,14 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </form>
 
-  <!-- 🛍 สินค้า -->
+  <!-- 🛍 แสดงสินค้า -->
   <div class="row row-cols-1 row-cols-md-4 g-4">
     <?php if (count($products) > 0): ?>
       <?php foreach ($products as $p): ?>
         <?php
-          // ✅ กำหนด path รูปภาพให้ถูกต้อง
           $imagePath = "../admin/uploads/" . $p['p_image'];
           if (!file_exists($imagePath) || empty($p['p_image'])) {
-            $imagePath = "img/default.png"; // รูปสำรอง (สร้างโฟลเดอร์ user/img/ และใส่ default.png)
+            $imagePath = "img/default.png"; // ✅ สร้างโฟลเดอร์ user/img/default.png
           }
         ?>
         <div class="col">
