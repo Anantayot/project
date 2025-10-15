@@ -1,5 +1,6 @@
 <?php
-include("connectdb.php");
+include("../connectdb.php"); // ✅ แก้ path ให้ถูกต้อง
+
 $search = $_GET['search'] ?? '';
 $cat = $_GET['cat'] ?? '';
 
@@ -66,23 +67,36 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
 
   <!-- 🛍 สินค้า -->
   <div class="row row-cols-1 row-cols-md-4 g-4">
-    <?php foreach ($products as $p): ?>
-      <div class="col">
-        <div class="card h-100 shadow-sm border-0">
-          <img src="uploads/<?= htmlspecialchars($p['p_image']) ?>" class="card-img-top" style="height:200px;object-fit:cover;">
-          <div class="card-body">
-            <h6 class="card-title"><?= htmlspecialchars($p['p_name']) ?></h6>
-            <p class="text-muted mb-2"><?= number_format($p['p_price'],2) ?> บาท</p>
-            <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-sm btn-outline-primary w-100">ดูรายละเอียด</a>
+    <?php if (count($products) > 0): ?>
+      <?php foreach ($products as $p): ?>
+        <?php
+          // ✅ กำหนด path รูปภาพให้ถูกต้อง
+          $imagePath = "../admin/uploads/" . $p['p_image'];
+          if (!file_exists($imagePath) || empty($p['p_image'])) {
+            $imagePath = "img/default.png"; // รูปสำรอง (สร้างโฟลเดอร์ user/img/ และใส่ default.png)
+          }
+        ?>
+        <div class="col">
+          <div class="card h-100 shadow-sm border-0">
+            <img src="<?= $imagePath ?>" class="card-img-top" style="height:200px;object-fit:cover;">
+            <div class="card-body">
+              <h6 class="card-title text-truncate" title="<?= htmlspecialchars($p['p_name']) ?>">
+                <?= htmlspecialchars($p['p_name']) ?>
+              </h6>
+              <p class="text-muted mb-2"><?= number_format($p['p_price'], 2) ?> บาท</p>
+              <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-sm btn-outline-primary w-100">ดูรายละเอียด</a>
+            </div>
           </div>
         </div>
-      </div>
-    <?php endforeach; ?>
+      <?php endforeach; ?>
+    <?php else: ?>
+      <p class="text-center text-muted">ไม่พบสินค้าที่ค้นหา</p>
+    <?php endif; ?>
   </div>
 </div>
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
-  © <?= date('Y') ?> MyCommiss | หน้าแรก
+  © <?= date('Y') ?> MyCommiss | หน้าร้าน
 </footer>
 
 </body>
