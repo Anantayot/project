@@ -216,27 +216,6 @@ include("connectdb.php");
                   $imgPath = $p; break;
                 }
               }
-              echo "
-              <div class='col-md-4 col-xs-6'>
-                <div class='product'>
-                  <a href=\"product.php?id={$row['p_id']}\" style=\"text-decoration:none;color:inherit;\">
-                    <div class='product-img'>
-                      <img src='{$imgPath}' alt='{$row['p_name']}'>
-                      <div class='product-label'><span class='new'>NEW</span></div>
-                    </div>
-                    <div class='product-body'>
-                      <p class='product-category'>{$row['cat_name']}</p>
-                      <h3 class='product-name'>{$row['p_name']}</h3>
-                      <h4 class='product-price text-danger fw-bold'>".number_format($row['p_price'],2)." บาท</h4>
-                    </div>
-                  </a>
-                  <div class='add-to-cart'>
-                    <button class='add-to-cart-btn'>
-                      <i class='fa fa-shopping-cart'></i> หยิบใส่ตะกร้า
-                    </button>
-                  </div>
-                </div>
-              </div>";
             }
             ?>
           </div>
