@@ -42,7 +42,7 @@ include("connectdb.php");
   position: relative;
   overflow: hidden;
   border-radius: 10px 10px 0 0;
-  height: 260px;
+  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
