@@ -2,6 +2,12 @@
 session_start();
 include("connectdb.php");
 
+// ✅ ตรวจสอบการเข้าสู่ระบบ
+if (!isset($_SESSION['customer_id'])) {
+  header("Location: login.php");
+  exit;
+}
+
 // ✅ ฟังก์ชันลบสินค้าออกจากตะกร้า
 if (isset($_GET['remove'])) {
   $id = intval($_GET['remove']);
@@ -23,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
   exit;
 }
 
-// ✅ ตะกร้าสินค้า
+// ✅ ดึงข้อมูลตะกร้า
 $cart = $_SESSION['cart'] ?? [];
 $total = 0;
 ?>
@@ -42,7 +48,24 @@ $total = 0;
     <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
     <ul class="navbar-nav ms-auto">
       <li class="nav-item"><a href="cart.php" class="nav-link active">ตะกร้า</a></li>
-      <li class="nav-item"><a href="login.php" class="nav-link">เข้าสู่ระบบ</a></li>
+
+      <?php if (isset($_SESSION['customer_id'])): ?>
+        <li class="nav-item">
+          <a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link text-info fw-semibold">
+            👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
+          </span>
+        </li>
+        <li class="nav-item">
+          <a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a>
+        </li>
+      <?php else: ?>
+        <li class="nav-item">
+          <a href="login.php" class="nav-link">เข้าสู่ระบบ</a>
+        </li>
+      <?php endif; ?>
     </ul>
   </div>
 </nav>
@@ -51,14 +74,14 @@ $total = 0;
   <h3 class="fw-bold mb-4 text-center">🛒 ตะกร้าสินค้าของคุณ</h3>
 
   <?php if (empty($cart)): ?>
-    <div class="alert alert-info text-center">
+    <div class="alert alert-info text-center shadow-sm">
       🧺 ยังไม่มีสินค้าในตะกร้า  
       <br><br>
       <a href="index.php" class="btn btn-primary">⬅️ กลับไปเลือกซื้อสินค้า</a>
     </div>
   <?php else: ?>
     <form method="post">
-      <div class="table-responsive shadow-sm">
+      <div class="table-responsive shadow-sm rounded">
         <table class="table align-middle table-bordered text-center bg-white">
           <thead class="table-dark">
             <tr>
@@ -74,9 +97,10 @@ $total = 0;
             <?php foreach ($cart as $item): 
               $sum = $item['price'] * $item['qty'];
               $total += $sum;
+
               $imgPath = "../admin/uploads/" . $item['image'];
               if (!file_exists($imgPath) || empty($item['image'])) {
-                $imgPath = "img/default.png";
+                $imgPath = "img/default.png"; // ✅ สร้างไฟล์ default.png ใน /user/img/
               }
             ?>
               <tr>
@@ -88,7 +112,8 @@ $total = 0;
                 </td>
                 <td><?= number_format($sum, 2) ?> บาท</td>
                 <td>
-                  <a href="cart.php?remove=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('ลบสินค้านี้ออกจากตะกร้า?');">ลบ</a>
+                  <a href="cart.php?remove=<?= $item['id'] ?>" class="btn btn-sm btn-danger"
+                     onclick="return confirm('ลบสินค้านี้ออกจากตะกร้า?');">ลบ</a>
                 </td>
               </tr>
             <?php endforeach; ?>

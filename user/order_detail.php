@@ -2,6 +2,14 @@
 session_start();
 include("../connectdb.php");
 
+// ✅ ต้องเข้าสู่ระบบก่อนถึงเข้าได้
+if (!isset($_SESSION['customer_id'])) {
+  header("Location: ../login.php");
+  exit;
+}
+
+$customer_id = $_SESSION['customer_id'];
+
 // ตรวจสอบว่ามี id ออเดอร์ไหม
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสคำสั่งซื้อ</p>");
@@ -9,13 +17,13 @@ if (!isset($_GET['id'])) {
 
 $orderId = intval($_GET['id']);
 
-// ✅ ดึงข้อมูลคำสั่งซื้อ
-$stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ?");
-$stmt->execute([$orderId]);
+// ✅ ดึงข้อมูลคำสั่งซื้อ (ของลูกค้าคนนี้เท่านั้น)
+$stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ?");
+$stmt->execute([$orderId, $customer_id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$order) {
-  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้</p>");
+  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือคุณไม่มีสิทธิ์เข้าดู</p>");
 }
 
 // ✅ ดึงข้อมูลสินค้าในคำสั่งซื้อนี้
@@ -38,10 +46,15 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 <!-- 🔹 Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
+    <a class="navbar-brand fw-bold" href="../index.php">🖥 MyCommiss</a>
     <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="orders.php" class="nav-link active">คำสั่งซื้อ</a></li>
-      <li class="nav-item"><a href="login.php" class="nav-link">เข้าสู่ระบบ</a></li>
+      <li class="nav-item"><a href="orders.php" class="nav-link active">คำสั่งซื้อของฉัน</a></li>
+      <li class="nav-item">
+        <span class="nav-link text-info fw-semibold">
+          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
+        </span>
+      </li>
+      <li class="nav-item"><a href="../logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
     </ul>
   </div>
 </nav>

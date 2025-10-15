@@ -2,29 +2,42 @@
 session_start();
 include("connectdb.php");
 
+// ✅ ต้องล็อกอินก่อนเข้า
+if (!isset($_SESSION['customer_id'])) {
+  header("Location: login.php");
+  exit;
+}
+
+// ✅ ดึงข้อมูลลูกค้าปัจจุบันจากฐานข้อมูล
+$cid = $_SESSION['customer_id'];
+$stmtUser = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
+$stmtUser->execute([$cid]);
+$user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+// ✅ ตรวจสอบตะกร้า
 $cart = $_SESSION['cart'] ?? [];
 if (empty($cart)) {
   echo "<script>alert('ตะกร้าสินค้าว่าง'); window.location='cart.php';</script>";
   exit;
 }
 
-// เมื่อผู้ใช้กดยืนยันคำสั่งซื้อ
+// ✅ เมื่อผู้ใช้กดยืนยันคำสั่งซื้อ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $name = trim($_POST['name']);
   $address = trim($_POST['address']);
   $phone = trim($_POST['phone']);
   $payment = $_POST['payment'];
 
-  // ตรวจสอบข้อมูล
   if (empty($name) || empty($address) || empty($phone)) {
     echo "<script>alert('กรุณากรอกข้อมูลให้ครบถ้วน');</script>";
   } else {
     try {
       $conn->beginTransaction();
 
-      // ✅ เพิ่มข้อมูลในตาราง orders
-      $stmt = $conn->prepare("INSERT INTO orders (customer_name, customer_address, customer_phone, payment_method, total_price, order_date)
-                              VALUES (:name, :address, :phone, :payment, :total, NOW())");
+      // ✅ บันทึกข้อมูลคำสั่งซื้อ
+      $stmt = $conn->prepare("INSERT INTO orders 
+        (customer_id, customer_name, customer_address, customer_phone, payment_method, total_price, order_date)
+        VALUES (:cid, :name, :address, :phone, :payment, :total, NOW())");
 
       $totalPrice = 0;
       foreach ($cart as $item) {
@@ -32,6 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       }
 
       $stmt->execute([
+        ':cid' => $cid,
         ':name' => $name,
         ':address' => $address,
         ':phone' => $phone,
@@ -41,9 +55,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $orderId = $conn->lastInsertId();
 
-      // ✅ เพิ่มข้อมูลใน order_details
+      // ✅ เพิ่มสินค้าใน order_details
       $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, product_id, quantity, price)
-                                   VALUES (:oid, :pid, :qty, :price)");
+                                    VALUES (:oid, :pid, :qty, :price)");
 
       foreach ($cart as $item) {
         $stmtDetail->execute([
@@ -55,10 +69,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       }
 
       $conn->commit();
+      unset($_SESSION['cart']); // เคลียร์ตะกร้า
 
-      // ✅ เคลียร์ตะกร้า
-      unset($_SESSION['cart']);
-      echo "<script>alert('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ'); window.location='orders.php';</script>";
+      echo "<script>
+        alert('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
+        window.location='orders.php';
+      </script>";
       exit;
     } catch (Exception $e) {
       $conn->rollBack();
@@ -82,7 +98,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
     <ul class="navbar-nav ms-auto">
       <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-      <li class="nav-item"><a href="login.php" class="nav-link">เข้าสู่ระบบ</a></li>
+      <li class="nav-item"><a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a></li>
+      <li class="nav-item">
+        <span class="nav-link text-info fw-semibold">
+          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
+        </span>
+      </li>
+      <li class="nav-item"><a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
     </ul>
   </div>
 </nav>
@@ -137,15 +159,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <form method="post">
             <div class="mb-3">
               <label class="form-label">ชื่อผู้รับ</label>
-              <input type="text" name="name" class="form-control" required>
+              <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" required>
             </div>
             <div class="mb-3">
               <label class="form-label">ที่อยู่จัดส่ง</label>
-              <textarea name="address" class="form-control" rows="3" required></textarea>
+              <textarea name="address" class="form-control" rows="3" required><?= htmlspecialchars($user['address']) ?></textarea>
             </div>
             <div class="mb-3">
               <label class="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" name="phone" class="form-control" required>
+              <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>" required>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>

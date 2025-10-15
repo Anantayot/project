@@ -2,6 +2,12 @@
 session_start();
 include("connectdb.php");
 
+// ✅ ต้องเข้าสู่ระบบก่อนเข้าหน้านี้
+if (!isset($_SESSION['customer_id'])) {
+  header("Location: login.php");
+  exit;
+}
+
 // ตรวจสอบว่ามี id สินค้าหรือไม่
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสสินค้า</p>");
@@ -19,20 +25,20 @@ if (!$product) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบสินค้านี้</p>");
 }
 
-// ตั้ง path รูปสินค้า
+// ✅ ตั้ง path รูปสินค้า
 $imgPath = "../admin/uploads/" . $product['p_image'];
 if (!file_exists($imgPath) || empty($product['p_image'])) {
   $imgPath = "img/default.png"; // รูปสำรอง
 }
 
-// เมื่อกดเพิ่มลงตะกร้า
+// ✅ เมื่อกดเพิ่มลงตะกร้า
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $pid = $product['p_id'];
   $qty = intval($_POST['qty'] ?? 1);
 
   if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
 
-  // ถ้ามีสินค้าในตะกร้าแล้ว ให้บวกจำนวนเพิ่ม
+  // ถ้ามีสินค้าในตะกร้าแล้ว → บวกจำนวนเพิ่ม
   if (isset($_SESSION['cart'][$pid])) {
     $_SESSION['cart'][$pid]['qty'] += $qty;
   } else {
@@ -45,7 +51,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ];
   }
 
-  echo "<script>alert('✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!'); window.location='cart.php';</script>";
+  echo "<script>
+    alert('✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!');
+    window.location='cart.php';
+  </script>";
   exit;
 }
 ?>
@@ -64,7 +73,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
     <ul class="navbar-nav ms-auto">
       <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-      <li class="nav-item"><a href="login.php" class="nav-link">เข้าสู่ระบบ</a></li>
+      <li class="nav-item"><a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a></li>
+      <li class="nav-item">
+        <span class="nav-link text-info fw-semibold">
+          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
+        </span>
+      </li>
+      <li class="nav-item"><a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
     </ul>
   </div>
 </nav>
