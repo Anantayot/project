@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("../connectdb.php");
+include("connectdb.php");
 
 // ✅ ฟังก์ชันลบสินค้าออกจากตะกร้า
 if (isset($_GET['remove'])) {
