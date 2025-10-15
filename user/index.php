@@ -1,5 +1,5 @@
 <?php
-include("../connectdb.php"); // ✅ แก้ path ให้ถูกต้อง
+include("connectdb.php"); // ✅ แก้ path ให้ถูกต้อง
 
 $search = $_GET['search'] ?? '';
 $cat = $_GET['cat'] ?? '';
