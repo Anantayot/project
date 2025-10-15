@@ -1,11 +1,11 @@
 <?php
 ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
@@ -13,7 +13,6 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ดึงเฉพาะคำสั่งซื้อของลูกค้าคนนี้
 $sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':cid', $customer_id, PDO::PARAM_INT);
@@ -29,7 +28,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
@@ -57,11 +55,13 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <?php foreach ($orders as $o): ?>
             <?php
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
-              $badgeClass = match($status) {
-                'ชำระเงินแล้ว' => 'success',
-                'ยกเลิก' => 'danger',
-                default => 'warning'
-              };
+              if ($status === 'ชำระเงินแล้ว') {
+                $badgeClass = 'success';
+              } elseif ($status === 'ยกเลิก') {
+                $badgeClass = 'danger';
+              } else {
+                $badgeClass = 'warning';
+              }
             ?>
             <tr>
               <td>#<?= $o['order_id'] ?></td>
