@@ -119,15 +119,15 @@ include("connectdb.php");
 #store .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 50px; /* เพิ่มช่องว่างให้สบายตา */
+  gap: 30px; /* เพิ่มช่องว่างให้สบายตา */
   justify-content: center; /* ให้อยู่ตรงกลาง */
   align-items: stretch;
 }
 
 /* ✅ กล่องสินค้า — ขยายกว้างขึ้น */
 #store .col-md-4 {
-  flex: 1 1 calc(31% - 30px);  /* เดิม 33.333% ตอนนี้ขยายเล็กน้อย */
-  max-width: calc(31% - 30px);
+  flex: 1 1 calc(31% - 50px);  /* เดิม 33.333% ตอนนี้ขยายเล็กน้อย */
+  max-width: calc(31% - 50px);
   display: flex;
   justify-content: center;
 }
