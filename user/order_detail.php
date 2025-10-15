@@ -1,23 +1,23 @@
 <?php
 session_start();
-include("../connectdb.php");
+include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อนถึงเข้าได้
+// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
-  header("Location: ../login.php");
+  header("Location: login.php");
   exit;
 }
 
 $customer_id = $_SESSION['customer_id'];
 
-// ตรวจสอบว่ามี id ออเดอร์ไหม
+// ✅ ตรวจสอบว่ามี id ออเดอร์หรือไม่
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสคำสั่งซื้อ</p>");
 }
 
 $orderId = intval($_GET['id']);
 
-// ✅ ดึงข้อมูลคำสั่งซื้อ (ของลูกค้าคนนี้เท่านั้น)
+// ✅ ดึงข้อมูลคำสั่งซื้อ (เฉพาะของลูกค้าคนนั้น)
 $stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ?");
 $stmt->execute([$orderId, $customer_id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,21 +43,8 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="../index.php">🖥 MyCommiss</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="orders.php" class="nav-link active">คำสั่งซื้อของฉัน</a></li>
-      <li class="nav-item">
-        <span class="nav-link text-info fw-semibold">
-          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-        </span>
-      </li>
-      <li class="nav-item"><a href="../logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
-    </ul>
-  </div>
-</nav>
+<!-- ✅ Navbar ส่วนกลาง -->
+<?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <h3 class="fw-bold text-center mb-4">📦 รายละเอียดคำสั่งซื้อ #<?= $orderId ?></h3>
@@ -83,7 +70,11 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
               default => 'warning'
             };
           ?>
-          <p><strong>สถานะ:</strong> <span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></p>
+          <p><strong>สถานะ:</strong> 
+            <span class="badge bg-<?= $badgeClass ?>">
+              <?= htmlspecialchars($status) ?>
+            </span>
+          </p>
         </div>
       </div>
     </div>

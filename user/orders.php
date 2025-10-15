@@ -2,7 +2,7 @@
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อนเข้าหน้านี้
+// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
@@ -26,22 +26,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-      <li class="nav-item"><a href="orders.php" class="nav-link active">คำสั่งซื้อของฉัน</a></li>
-      <li class="nav-item">
-        <span class="nav-link text-info fw-semibold">
-          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-        </span>
-      </li>
-      <li class="nav-item"><a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
-    </ul>
-  </div>
-</nav>
+<!-- ✅ Navbar ส่วนกลาง -->
+<?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">📦 ประวัติคำสั่งซื้อของคุณ</h3>

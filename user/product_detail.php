@@ -8,7 +8,7 @@ if (!isset($_SESSION['customer_id'])) {
   exit;
 }
 
-// ตรวจสอบว่ามี id สินค้าหรือไม่
+// ✅ ตรวจสอบว่ามี id สินค้าหรือไม่
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสสินค้า</p>");
 }
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
 
-  // ถ้ามีสินค้าในตะกร้าแล้ว → บวกจำนวนเพิ่ม
+  // ถ้ามีสินค้าในตะกร้าอยู่แล้ว → บวกจำนวนเพิ่ม
   if (isset($_SESSION['cart'][$pid])) {
     $_SESSION['cart'][$pid]['qty'] += $qty;
   } else {
@@ -67,34 +67,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-      <li class="nav-item"><a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a></li>
-      <li class="nav-item">
-        <span class="nav-link text-info fw-semibold">
-          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-        </span>
-      </li>
-      <li class="nav-item"><a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
-    </ul>
-  </div>
-</nav>
+<!-- ✅ Navbar ส่วนกลาง -->
+<?php include("navbar_user.php"); ?>
 
-<!-- 🔹 เนื้อหา -->
 <div class="container mt-4">
   <div class="card shadow border-0 p-4">
     <div class="row g-4 align-items-center">
       <div class="col-md-5 text-center">
-        <img src="<?= $imgPath ?>" class="img-fluid rounded shadow-sm" alt="<?= htmlspecialchars($product['p_name']) ?>">
+        <img src="<?= $imgPath ?>" class="img-fluid rounded shadow-sm" 
+             alt="<?= htmlspecialchars($product['p_name']) ?>">
       </div>
+
       <div class="col-md-7">
         <h3 class="fw-bold"><?= htmlspecialchars($product['p_name']) ?></h3>
-        <p class="text-muted mb-1">หมวดหมู่: <?= htmlspecialchars($product['cat_name'] ?? '-') ?></p>
-        <h4 class="text-danger mb-3"><?= number_format($product['p_price'], 2) ?> บาท</h4>
+        <p class="text-muted mb-1">
+          หมวดหมู่: <?= htmlspecialchars($product['cat_name'] ?? '-') ?>
+        </p>
+        <h4 class="text-danger mb-3">
+          <?= number_format($product['p_price'], 2) ?> บาท
+        </h4>
         <p><?= nl2br(htmlspecialchars($product['p_description'])) ?></p>
 
         <form method="post" class="mt-3">
@@ -106,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             🛒 เพิ่มลงตะกร้า
           </button>
           <a href="index.php" class="btn btn-secondary">
-            ⬅️ กลับหน้าหลัก
+            ⬅️ กลับหน้าร้าน
           </a>
         </form>
       </div>

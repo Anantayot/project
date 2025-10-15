@@ -2,7 +2,7 @@
 session_start();
 include("connectdb.php");
 
-// ✅ ตรวจสอบการเข้าสู่ระบบ
+// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
@@ -42,33 +42,8 @@ $total = 0;
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="cart.php" class="nav-link active">ตะกร้า</a></li>
-
-      <?php if (isset($_SESSION['customer_id'])): ?>
-        <li class="nav-item">
-          <a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a>
-        </li>
-        <li class="nav-item">
-          <span class="nav-link text-info fw-semibold">
-            👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-          </span>
-        </li>
-        <li class="nav-item">
-          <a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a>
-        </li>
-      <?php else: ?>
-        <li class="nav-item">
-          <a href="login.php" class="nav-link">เข้าสู่ระบบ</a>
-        </li>
-      <?php endif; ?>
-    </ul>
-  </div>
-</nav>
+<!-- ✅ Navbar ส่วนกลาง -->
+<?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">🛒 ตะกร้าสินค้าของคุณ</h3>
@@ -100,7 +75,7 @@ $total = 0;
 
               $imgPath = "../admin/uploads/" . $item['image'];
               if (!file_exists($imgPath) || empty($item['image'])) {
-                $imgPath = "img/default.png"; // ✅ สร้างไฟล์ default.png ใน /user/img/
+                $imgPath = "img/default.png";
               }
             ?>
               <tr>
@@ -108,7 +83,8 @@ $total = 0;
                 <td><?= htmlspecialchars($item['name']) ?></td>
                 <td><?= number_format($item['price'], 2) ?> บาท</td>
                 <td style="width:100px;">
-                  <input type="number" name="qty[<?= $item['id'] ?>]" value="<?= $item['qty'] ?>" min="1" class="form-control text-center">
+                  <input type="number" name="qty[<?= $item['id'] ?>]" value="<?= $item['qty'] ?>" 
+                         min="1" class="form-control text-center">
                 </td>
                 <td><?= number_format($sum, 2) ?> บาท</td>
                 <td>

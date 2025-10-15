@@ -2,14 +2,15 @@
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องล็อกอินก่อนเข้า
+// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
 }
 
-// ✅ ดึงข้อมูลลูกค้าปัจจุบันจากฐานข้อมูล
 $cid = $_SESSION['customer_id'];
+
+// ✅ ดึงข้อมูลลูกค้าจากฐานข้อมูล
 $stmtUser = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
 $stmtUser->execute([$cid]);
 $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
@@ -34,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     try {
       $conn->beginTransaction();
 
-      // ✅ บันทึกข้อมูลคำสั่งซื้อ
+      // ✅ เพิ่มคำสั่งซื้อ
       $stmt = $conn->prepare("INSERT INTO orders 
         (customer_id, customer_name, customer_address, customer_phone, payment_method, total_price, order_date)
         VALUES (:cid, :name, :address, :phone, :payment, :total, NOW())");
@@ -69,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       }
 
       $conn->commit();
-      unset($_SESSION['cart']); // เคลียร์ตะกร้า
+      unset($_SESSION['cart']); // ล้างตะกร้า
 
       echo "<script>
         alert('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
@@ -92,22 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-      <li class="nav-item"><a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a></li>
-      <li class="nav-item">
-        <span class="nav-link text-info fw-semibold">
-          👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-        </span>
-      </li>
-      <li class="nav-item"><a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a></li>
-    </ul>
-  </div>
-</nav>
+<!-- ✅ Navbar ส่วนกลาง -->
+<?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">💳 ยืนยันคำสั่งซื้อ</h3>
@@ -159,7 +146,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <form method="post">
             <div class="mb-3">
               <label class="form-label">ชื่อผู้รับ</label>
-              <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" required>
+              <input type="text" name="name" class="form-control" 
+                     value="<?= htmlspecialchars($user['name']) ?>" required>
             </div>
             <div class="mb-3">
               <label class="form-label">ที่อยู่จัดส่ง</label>
@@ -167,7 +155,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
             <div class="mb-3">
               <label class="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone']) ?>" required>
+              <input type="text" name="phone" class="form-control" 
+                     value="<?= htmlspecialchars($user['phone']) ?>" required>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>

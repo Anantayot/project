@@ -1,8 +1,8 @@
 <?php
-session_start(); // ✅ ต้องมีทุกหน้าที่ใช้ session
+session_start();
 include("connectdb.php");
 
-// ✅ ถ้ายังไม่ได้ล็อกอิน → กลับไปหน้า login.php
+// ✅ ตรวจสอบการเข้าสู่ระบบ
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
@@ -11,25 +11,23 @@ if (!isset($_SESSION['customer_id'])) {
 $search = $_GET['search'] ?? '';
 $cat = $_GET['cat'] ?? '';
 
+// 🔹 ดึงข้อมูลหมวดหมู่
+$cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
+
+// 🔹 ดึงข้อมูลสินค้า
 $sql = "SELECT p.*, c.cat_name 
         FROM product p 
         LEFT JOIN category c ON p.cat_id = c.cat_id 
         WHERE 1";
 
-if (!empty($search)) {
-  $sql .= " AND p.p_name LIKE :search";
-}
-if (!empty($cat)) {
-  $sql .= " AND p.cat_id = :cat";
-}
+if (!empty($search)) $sql .= " AND p.p_name LIKE :search";
+if (!empty($cat)) $sql .= " AND p.cat_id = :cat";
 
 $stmt = $conn->prepare($sql);
 if (!empty($search)) $stmt->bindValue(':search', "%$search%");
 if (!empty($cat)) $stmt->bindValue(':cat', $cat);
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -40,34 +38,8 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-light">
 
-<!-- 🔹 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="index.php">🖥 MyCommiss</a>
-
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item"><a href="cart.php" class="nav-link">ตะกร้า</a></li>
-
-      <?php if (isset($_SESSION['customer_id'])): ?>
-        <li class="nav-item">
-          <a href="orders.php" class="nav-link">คำสั่งซื้อของฉัน</a>
-        </li>
-        <li class="nav-item">
-          <span class="nav-link text-info fw-semibold">
-            👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-          </span>
-        </li>
-        <li class="nav-item">
-          <a href="logout.php" class="nav-link text-danger">ออกจากระบบ</a>
-        </li>
-      <?php else: ?>
-        <li class="nav-item">
-          <a href="login.php" class="nav-link">เข้าสู่ระบบ</a>
-        </li>
-      <?php endif; ?>
-    </ul>
-  </div>
-</nav>
+<!-- ✅ Navbar ส่วนกลาง -->
+<?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <!-- 🔍 ค้นหา -->
@@ -83,7 +55,8 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
       </select>
     </div>
     <div class="col-md-6">
-      <input type="text" name="search" class="form-control" placeholder="ค้นหาสินค้า..." value="<?= htmlspecialchars($search) ?>">
+      <input type="text" name="search" class="form-control" placeholder="ค้นหาสินค้า..." 
+             value="<?= htmlspecialchars($search) ?>">
     </div>
     <div class="col-md-2 d-grid">
       <button class="btn btn-primary">ค้นหา</button>
@@ -97,7 +70,7 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
         <?php
           $imagePath = "../admin/uploads/" . $p['p_image'];
           if (!file_exists($imagePath) || empty($p['p_image'])) {
-            $imagePath = "img/default.png"; // ✅ สร้างโฟลเดอร์ user/img/default.png
+            $imagePath = "img/default.png";
           }
         ?>
         <div class="col">
@@ -108,7 +81,9 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
                 <?= htmlspecialchars($p['p_name']) ?>
               </h6>
               <p class="text-muted mb-2"><?= number_format($p['p_price'], 2) ?> บาท</p>
-              <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-sm btn-outline-primary w-100">ดูรายละเอียด</a>
+              <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-sm btn-outline-primary w-100">
+                ดูรายละเอียด
+              </a>
             </div>
           </div>
         </div>
@@ -120,7 +95,7 @@ $cats = $conn->query("SELECT * FROM category")->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
-  © <?= date('Y') ?> MyCommiss | หน้าร้าน
+  © <?= date('Y') ?> MyCommiss | หน้าแรก
 </footer>
 
 </body>
