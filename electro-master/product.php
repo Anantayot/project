@@ -47,6 +47,60 @@ if (!file_exists($imgPath) || empty($product['p_image'])) {
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
+<script>
+$(document).ready(function(){
+  // เมื่อกดปุ่มเพิ่มลงตะกร้า
+  $('.add-to-cart-btn').on('click', function(e){
+    e.preventDefault();
+
+    const qty = parseInt($('.input-number input').val()) || 1;
+    const productId = <?php echo $product['p_id']; ?>;
+
+    $.ajax({
+      url: 'add_to_cart.php',
+      type: 'POST',
+      dataType: 'json',
+      data: { id: productId, qty: qty },
+      success: function(res){
+        if(res.ok){
+          $('#cart-count').text(res.count);
+          showToast('✅ ' + res.message);
+        } else {
+          showToast('⚠️ ' + res.message);
+        }
+      },
+      error: function(){
+        showToast('❌ ไม่สามารถเพิ่มสินค้าได้');
+      }
+    });
+  });
+
+  // ฟังก์ชัน Toast แจ้งเตือนเล็กๆ
+  function showToast(msg){
+    let toast = $('#toast-box');
+    if(!toast.length){
+      $('body').append(`
+        <div id="toast-box" style="
+          position:fixed;
+          left:50%;
+          bottom:20px;
+          transform:translateX(-50%);
+          background:#333;
+          color:#fff;
+          padding:10px 16px;
+          border-radius:8px;
+          z-index:9999;
+          opacity:0;
+          transition:opacity .2s, bottom .2s;
+        "></div>
+      `);
+      toast = $('#toast-box');
+    }
+    toast.text(msg).css({opacity:1, bottom:'30px'});
+    setTimeout(()=> toast.css({opacity:0, bottom:'20px'}), 1600);
+  }
+});
+</script>
 
   <!-- HEADER -->
   <?php if (file_exists("header.php")) include("header.php"); ?>
