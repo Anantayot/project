@@ -49,8 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $orderId = $conn->lastInsertId();
 
     // ✅ เพิ่มข้อมูลสินค้าใน order_details
-    $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, product_id, quantity, price)
-                                 VALUES (:oid, :pid, :qty, :price)");
+    $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
+                             VALUES (:oid, :pid, :qty, :price)");
+
 
     foreach ($cart as $item) {
       $stmtDetail->execute([
