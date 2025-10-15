@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("../connectdb.php");
+include("connectdb.php");
 
 // ตรวจสอบว่ามี id สินค้าหรือไม่
 if (!isset($_GET['id'])) {
