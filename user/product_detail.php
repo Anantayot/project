@@ -1,175 +1,112 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อน
-if (!isset($_SESSION['customer_id'])) {
-  header("Location: login.php");
-  exit;
-}
-
-$customer_id = $_SESSION['customer_id'];
-
-// ✅ ตรวจสอบว่ามี id คำสั่งซื้อหรือไม่
+// ✅ ตรวจสอบว่ามี id สินค้าหรือไม่
 if (!isset($_GET['id'])) {
-  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสคำสั่งซื้อ</p>");
+  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสสินค้า</p>");
 }
 
-$order_id = intval($_GET['id']);
+$id = intval($_GET['id']);
+$stmt = $conn->prepare("SELECT p.*, c.cat_name 
+                        FROM product p 
+                        LEFT JOIN category c ON p.cat_id = c.cat_id 
+                        WHERE p_id = ?");
+$stmt->execute([$id]);
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// ✅ ดึงข้อมูลคำสั่งซื้อของลูกค้าคนนั้น
-$stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ?");
-$stmt->execute([$order_id, $customer_id]);
-$order = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$order) {
-  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือคุณไม่มีสิทธิ์ดู</p>");
+if (!$product) {
+  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบสินค้านี้</p>");
 }
 
-/* =======================================================
-   ✅ ฟังก์ชันสร้าง QR พร้อมเพย์ (มาตรฐาน EMVCo ใช้งานจริง)
-   ======================================================= */
-function generatePromptPayPayload($promptPayID, $amount = 0.00) {
-  $id = preg_replace('/[^0-9]/', '', $promptPayID);
-  if (strlen($id) == 10) { // ถ้าเป็นเบอร์โทร
-    $id = '0066' . substr($id, 1);
-  }
-
-  // ฟิลด์ตามมาตรฐาน EMVCo
-  $data = [
-    '00' => '01',
-    '01' => '11',
-    '29' => formatField('00', 'A000000677010111') . formatField('01', $id),
-    '53' => '764',
-    '54' => sprintf('%0.2f', $amount),
-    '58' => 'TH',
-  ];
-
-  $payload = '';
-  foreach ($data as $id => $val) {
-    $payload .= $id . sprintf('%02d', strlen($val)) . $val;
-  }
-  $payload .= '6304';
-  return $payload . strtoupper(crc16($payload));
-}
-
-function formatField($id, $value) {
-  return $id . sprintf('%02d', strlen($value)) . $value;
-}
-
-function crc16($data) {
-  $crc = 0xFFFF;
-  for ($i = 0; $i < strlen($data); $i++) {
-    $crc ^= ord($data[$i]) << 8;
-    for ($j = 0; $j < 8; $j++) {
-      if ($crc & 0x8000)
-        $crc = ($crc << 1) ^ 0x1021;
-      else
-        $crc <<= 1;
-      $crc &= 0xFFFF;
-    }
-  }
-  return strtoupper(str_pad(dechex($crc), 4, '0', STR_PAD_LEFT));
-}
-
-/* =======================================================
-   ✅ ยืนยันการชำระเงิน (บันทึกไฟล์ใน admin/uploads/slips)
-   ======================================================= */
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = __DIR__ . "/admin/uploads/slips/"; // ← เปลี่ยนตำแหน่งที่เก็บไฟล์
-  if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-
-  $fileName = "";
-  if (!empty($_FILES['slip']['name'])) {
-    $ext = pathinfo($_FILES['slip']['name'], PATHINFO_EXTENSION);
-    $fileName = "slip_" . time() . "_" . rand(1000,9999) . "." . $ext;
-    $targetFile = $uploadDir . $fileName;
-    move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile);
-  }
-
-  $stmt = $conn->prepare("UPDATE orders 
-                          SET payment_status = 'ชำระเงินแล้ว', 
-                              slip_image = :slip,
-                              payment_date = NOW()
-                          WHERE order_id = :oid AND customer_id = :cid");
-  $stmt->execute([
-    ':slip' => $fileName,
-    ':oid' => $order_id,
-    ':cid' => $customer_id
-  ]);
-
-  echo "<script>
-    alert('✅ ยืนยันการชำระเงินเรียบร้อยแล้ว!');
-    window.location='order_detail.php?id=$order_id';
-  </script>";
-  exit;
+// ✅ ตั้ง path รูปสินค้า
+$imgPath = "../admin/uploads/" . $product['p_image'];
+if (!file_exists($imgPath) || empty($product['p_image'])) {
+  $imgPath = "img/default.png";
 }
 ?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>แจ้งชำระเงิน | MyCommiss</title>
+  <title><?= htmlspecialchars($product['p_name']) ?> | รายละเอียดสินค้า</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-light">
 
 <?php include("navbar_user.php"); ?>
 
-<div class="container mt-4">
-  <div class="card shadow-lg border-0 mx-auto" style="max-width:600px;">
-    <div class="card-header bg-dark text-white text-center fw-bold">
-      💰 แจ้งชำระเงินคำสั่งซื้อ #<?= $order_id ?>
+<!-- 🔔 Toast แจ้งเตือน -->
+<?php if (isset($_SESSION['toast_success'])): ?>
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast_success'] ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
     </div>
-    <div class="card-body text-center">
-      <p><strong>วิธีชำระ:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
+  </div>
+  <?php unset($_SESSION['toast_success']); ?>
+<?php endif; ?>
 
-      <?php if ($order['payment_method'] === 'QR'): ?>
-        <?php
-          $shopPromptPay = "0903262100"; // ใส่หมายเลขพร้อมเพย์จริง
-          $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
-        ?>
-        <div class="text-center my-4">
-          <h5>📱 สแกน QR พร้อมเพย์ เพื่อชำระเงิน</h5>
-          <div id="qrcode" class="border p-3 rounded d-inline-block bg-white"></div>
-          <p class="mt-3 text-muted">
-            💵 ยอดชำระ <?= number_format($order['total_price'], 2) ?> บาท<br>
-            ☎️ พร้อมเพย์: <?= htmlspecialchars($shopPromptPay) ?>
-          </p>
+<div class="container mt-4">
+  <div class="card shadow border-0 p-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-md-5 text-center">
+        <img src="<?= $imgPath ?>" class="img-fluid rounded shadow-sm" alt="<?= htmlspecialchars($product['p_name']) ?>">
+      </div>
+
+      <div class="col-md-7">
+        <h3 class="fw-bold"><?= htmlspecialchars($product['p_name']) ?></h3>
+        <p class="text-muted mb-1">หมวดหมู่: <?= htmlspecialchars($product['cat_name'] ?? '-') ?></p>
+        <h4 class="text-danger mb-3"><?= number_format($product['p_price'], 2) ?> บาท</h4>
+        <p><?= nl2br(htmlspecialchars($product['p_description'])) ?></p>
+
+        <div class="mt-3">
+          <?php if (isset($_SESSION['customer_id'])): ?>
+            <!-- ✅ ส่งข้อมูลไป cart_add.php -->
+            <form method="post" action="cart_add.php">
+              <input type="hidden" name="id" value="<?= $product['p_id'] ?>">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <label for="qty" class="fw-semibold">จำนวน:</label>
+                <input type="number" name="qty" id="qty" min="1" value="1" class="form-control w-25">
+              </div>
+              <button type="submit" class="btn btn-success">
+                🛒 เพิ่มลงตะกร้า
+              </button>
+              <a href="index.php" class="btn btn-secondary">
+                ⬅️ กลับหน้าร้าน
+              </a>
+            </form>
+          <?php else: ?>
+            <div class="alert alert-warning">
+              🔑 กรุณาเข้าสู่ระบบก่อนเพื่อทำการสั่งซื้อ
+            </div>
+            <a href="login.php" class="btn btn-primary">เข้าสู่ระบบ</a>
+            <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าร้าน</a>
+          <?php endif; ?>
         </div>
-
-        <script>
-          const qrContainer = document.getElementById("qrcode");
-          const payload = "<?= $payload ?>";
-          new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
-        </script>
-      <?php endif; ?>
-
-      <form method="post" enctype="multipart/form-data" class="mt-4">
-        <div class="mb-3 text-start">
-          <label for="slip" class="form-label">แนบสลิปการชำระเงิน</label>
-          <input type="file" name="slip" id="slip" class="form-control" accept="image/*">
-          <small class="text-muted">* สามารถกดยืนยันโดยไม่ต้องแนบสลิปได้</small>
-        </div>
-
-        <div class="d-grid gap-2 mt-4">
-          <button type="submit" class="btn btn-success">✅ ยืนยันการชำระเงิน</button>
-          <a href="orders.php" class="btn btn-secondary">⬅️ กลับไปหน้าคำสั่งซื้อ</a>
-          <a href="order_detail.php?id=<?= $order_id ?>" class="btn btn-outline-primary">🔍 ดูรายละเอียดสินค้า</a>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
-  © <?= date('Y') ?> MyCommiss | แจ้งชำระเงิน
+  © <?= date('Y') ?> MyCommiss | รายละเอียดสินค้า
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 </body>
 </html>
