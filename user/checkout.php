@@ -157,8 +157,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>
               <select name="payment" class="form-select" required>
-                <option value="COD">เก็บเงินปลายทาง (COD)</option>
-                <option value="QR">ชำระด้วย QR Code (QR)</option>
+                <option value="COD">เก็บเงินปลายทาง</option>
+                <option value="QR">ชำระด้วย QR Code</option>
               </select>
             </div>
             <div class="d-grid">
