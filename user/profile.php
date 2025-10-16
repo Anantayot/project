@@ -26,20 +26,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $phone = trim($_POST['phone']);
   $address = trim($_POST['address']);
 
-  $stmt = $conn->prepare("UPDATE customers 
-                          SET name = ?, email = ?, phone = ?, address = ? 
-                          WHERE customer_id = ?");
-  $stmt->execute([$name, $email, $phone, $address, $customer_id]);
+  // ✅ ตรวจสอบความถูกต้องของเบอร์โทรศัพท์ (10 หลัก ตัวเลขเท่านั้น)
+  if (!preg_match('/^[0-9]{10}$/', $phone)) {
+    $msg = "❌ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)";
+  } else {
+    // ✅ บันทึกข้อมูลลงฐานข้อมูล
+    $stmt = $conn->prepare("UPDATE customers 
+                            SET name = ?, email = ?, phone = ?, address = ? 
+                            WHERE customer_id = ?");
+    $stmt->execute([$name, $email, $phone, $address, $customer_id]);
 
-  $msg = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
-  
-  // อัปเดต session เผื่อมีการเปลี่ยนชื่อ
-  $_SESSION['customer_name'] = $name;
+    $msg = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
+    
+    // อัปเดต session เผื่อมีการเปลี่ยนชื่อ
+    $_SESSION['customer_name'] = $name;
 
-  // โหลดข้อมูลใหม่
-  $stmt = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
-  $stmt->execute([$customer_id]);
-  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // โหลดข้อมูลใหม่
+    $stmt = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
+    $stmt->execute([$customer_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -77,7 +83,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="card-body p-4">
       <?php if (!empty($msg)): ?>
-        <div class="alert alert-success text-center"><?= $msg ?></div>
+        <div class="alert text-center <?= strpos($msg, '❌') !== false ? 'alert-danger' : 'alert-success' ?>">
+          <?= $msg ?>
+        </div>
       <?php endif; ?>
 
       <form method="POST">
@@ -93,7 +101,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
           <label class="form-label fw-semibold">เบอร์โทรศัพท์</label>
-          <input type="text" name="phone" value="<?= htmlspecialchars($user['phone']) ?>" class="form-control">
+          <input 
+            type="text" 
+            name="phone" 
+            value="<?= htmlspecialchars($user['phone']) ?>" 
+            class="form-control"
+            maxlength="10"
+            pattern="[0-9]{10}"
+            title="กรุณากรอกหมายเลขโทรศัพท์ 10 หลัก"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);"
+            required
+          >
         </div>
 
         <div class="mb-3">
