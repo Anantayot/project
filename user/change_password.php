@@ -10,7 +10,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ดึงข้อมูลปัจจุบัน
+// ✅ ดึงข้อมูลผู้ใช้
 $stmt = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
 $stmt->execute([$customer_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -19,13 +19,12 @@ if (!$user) {
   die("<p class='text-center text-danger mt-5'>❌ ไม่พบข้อมูลผู้ใช้</p>");
 }
 
-// ✅ เมื่อกดบันทึกรหัสผ่านใหม่
+// ✅ เมื่อกดเปลี่ยนรหัสผ่าน
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $old_pass = $_POST['old_password'];
   $new_pass = $_POST['new_password'];
   $confirm_pass = $_POST['confirm_password'];
 
-  // ตรวจสอบความถูกต้อง
   if (empty($old_pass) || empty($new_pass) || empty($confirm_pass)) {
     $msg = "❌ กรุณากรอกข้อมูลให้ครบทุกช่อง";
   } elseif ($new_pass !== $confirm_pass) {
@@ -104,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <a href="profile.php" class="btn btn-secondary">
             ⬅️ กลับโปรไฟล์
           </a>
-          <button type="submit" class="btn btn-danger">
+          <button type="submit" class="btn btn-success">
             💾 เปลี่ยนรหัสผ่าน
           </button>
         </div>
