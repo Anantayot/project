@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 order_status='กำลังดำเนินการ'
                             WHERE order_id=?");
     $stmt->execute([$id]);
-    echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='order_detail.php?id=$id';</script>";
+    echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='order_view.php?id=$id';</script>";
     exit;
   } elseif ($action === 'reject') {
     $stmt = $conn->prepare("UPDATE orders 
@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 order_status='ยกเลิก'
                             WHERE order_id=?");
     $stmt->execute([$id]);
-    echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='order_detail.php?id=$id';</script>";
+    echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='order_view.php?id=$id';</script>";
     exit;
   }
 }
@@ -109,10 +109,8 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
            target="_blank" class="btn btn-outline-light btn-sm">
           🧾 ดูรูปสลิป
         </a>
-      <?php else: ?>
-        <?php if ($order['payment_method'] !== 'COD'): ?>
-          <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
-        <?php endif; ?>
+      <?php elseif ($order['payment_method'] !== 'COD'): ?>
+        <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
       <?php endif; ?>
     </div>
   </div>
@@ -159,7 +157,8 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
 
-  <?php if ($order['admin_verified'] === 'กำลังตรวจสอบ' && $order['payment_method'] !== 'COD'): ?>
+  <!-- ✅ แสดงปุ่มอนุมัติ/ปฏิเสธเฉพาะตอน "กำลังตรวจสอบ" -->
+  <?php if (trim($order['admin_verified']) === 'กำลังตรวจสอบ' && $order['payment_method'] !== 'COD'): ?>
     <form method="post" class="mt-3 d-inline">
       <button type="submit" name="action" value="approve" class="btn btn-success"
               onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
