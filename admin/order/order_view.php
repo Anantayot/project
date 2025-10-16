@@ -98,7 +98,6 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <?php else: ?>
         <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
       <?php endif; ?>
-
     </div>
   </div>
 </div>
@@ -126,9 +125,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         ?>
         <tr>
           <td><?= $i + 1 ?></td>
-          <td>
-            <img src="../uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded">
-          </td>
+          <td><img src="../uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded"></td>
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
           <td><?= (int)$it['quantity'] ?></td>
           <td><?= number_format($it['price'], 2) ?></td>
@@ -146,19 +143,21 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
 
-  <form method="post" class="mt-3 d-inline">
-    <button type="submit" name="action" value="approve" class="btn btn-success"
-            onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
-      ✅ อนุมัติการชำระเงิน
-    </button>
-  </form>
+  <?php if ($order['admin_verified'] === 'กำลังตรวจสอบ'): ?>
+    <form method="post" class="mt-3 d-inline">
+      <button type="submit" name="action" value="approve" class="btn btn-success"
+              onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
+        ✅ อนุมัติการชำระเงิน
+      </button>
+    </form>
 
-  <form method="post" class="mt-3 d-inline">
-    <button type="submit" name="action" value="reject" class="btn btn-danger"
-            onclick="return confirm('ต้องการปฏิเสธคำสั่งซื้อนี้หรือไม่?');">
-      ❌ ปฏิเสธคำสั่งซื้อ
-    </button>
-  </form>
+    <form method="post" class="mt-3 d-inline">
+      <button type="submit" name="action" value="reject" class="btn btn-danger"
+              onclick="return confirm('ต้องการปฏิเสธคำสั่งซื้อนี้หรือไม่?');">
+        ❌ ปฏิเสธคำสั่งซื้อ
+      </button>
+    </form>
+  <?php endif; ?>
 
   <a href="orders.php" class="btn btn-secondary mt-3">
     <i class="bi bi-arrow-left-circle"></i> กลับ
