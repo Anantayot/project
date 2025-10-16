@@ -36,7 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $hash_new = password_hash($new_pass, PASSWORD_DEFAULT);
       $stmt = $conn->prepare("UPDATE customers SET password = ? WHERE customer_id = ?");
       $stmt->execute([$hash_new, $customer_id]);
-      $msg = "✅ เปลี่ยนรหัสผ่านเรียบร้อยแล้ว";
+
+      // ✅ เปลี่ยนรหัสผ่านสำเร็จ → redirect ไปหน้าโปรไฟล์
+      header("Location: profile.php?msg=success");
+      exit;
     } else {
       $msg = "❌ รหัสผ่านเดิมไม่ถูกต้อง";
     }
