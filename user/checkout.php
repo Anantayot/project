@@ -56,50 +56,50 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $_SESSION['toast_error'] = "⚠️ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เฉพาะตัวเลข 10 หลัก)";
   } else {
     try {
-  $conn->beginTransaction();
+      $conn->beginTransaction();
 
-  // ✅ คำนวณราคารวม
-  $totalPrice = 0;
-  foreach ($cart as $item) {
-    $totalPrice += $item['price'] * $item['qty'];
+      // ✅ คำนวณราคารวม
+      $totalPrice = 0;
+      foreach ($cart as $item) {
+        $totalPrice += $item['price'] * $item['qty'];
+      }
+
+      // ✅ เพิ่มคำสั่งซื้อ
+      $stmt = $conn->prepare("INSERT INTO orders 
+        (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
+        VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
+      $stmt->execute([
+        ':cid' => $cid,
+        ':address' => $address,
+        ':payment' => $payment,
+        ':total' => $totalPrice
+      ]);
+
+      $orderId = $conn->lastInsertId();
+
+      // ✅ เพิ่มรายละเอียดสินค้า
+      $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
+                                   VALUES (:oid, :pid, :qty, :price)");
+      foreach ($cart as $item) {
+        $stmtDetail->execute([
+          ':oid' => $orderId,
+          ':pid' => $item['id'],
+          ':qty' => $item['qty'],
+          ':price' => $item['price']
+        ]);
+      }
+
+      $conn->commit();
+
+      // ✅ ล้างตะกร้า + Toast
+      unset($_SESSION['cart']);
+      $_SESSION['toast_success'] = "✅ ขอบคุณคุณ " . htmlspecialchars($user['name']) . " 🎉 คำสั่งซื้อของคุณถูกบันทึกแล้ว";
+
+    } catch (Exception $e) {
+      $conn->rollBack();
+      $_SESSION['toast_error'] = "❌ เกิดข้อผิดพลาด: " . $e->getMessage();
+    }
   }
-
-  // ✅ เพิ่มคำสั่งซื้อ
-  $stmt = $conn->prepare("INSERT INTO orders 
-    (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
-    VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
-  $stmt->execute([
-    ':cid' => $cid,
-    ':address' => $address,
-    ':payment' => $payment,
-    ':total' => $totalPrice
-  ]);
-
-  $orderId = $conn->lastInsertId();
-
-  // ✅ เพิ่มรายละเอียดสินค้า
-  $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
-                               VALUES (:oid, :pid, :qty, :price)");
-  foreach ($cart as $item) {
-    $stmtDetail->execute([
-      ':oid' => $orderId,
-      ':pid' => $item['id'],
-      ':qty' => $item['qty'],
-      ':price' => $item['price']
-    ]);
-  }
-
-  $conn->commit();
-  unset($_SESSION['cart']);
-
-  // ✅ Toast แสดงผลรหัสลูกค้าแทน order_id
-  $_SESSION['toast_success'] = "✅ สั่งซื้อสำเร็จ! ขอบคุณลูกค้า #" . $cid . " 🎉 กรุณาตรวจสอบคำสั่งซื้อของคุณในหน้า 'รายการคำสั่งซื้อ'";
-
-} catch (Exception $e) {
-  $conn->rollBack();
-  $_SESSION['toast_error'] = "❌ เกิดข้อผิดพลาด: " . $e->getMessage();
-}
-
 }
 ?>
 <!DOCTYPE html>
@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <?php if (isset($_SESSION['toast_success'])): ?>
     <div class="toast align-items-center text-bg-success border-0 show" role="alert">
       <div class="d-flex">
-        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+        <div class="toast-body fs-6 fw-semibold"><?= $_SESSION['toast_success'] ?></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
@@ -128,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <?php if (isset($_SESSION['toast_error'])): ?>
     <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
       <div class="d-flex">
-        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
+        <div class="toast-body fs-6 fw-semibold"><?= $_SESSION['toast_error'] ?></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
