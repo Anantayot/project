@@ -97,15 +97,20 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
                         (($order['payment_method'] === 'COD') ? 'เก็บเงินปลายทาง' :
                         htmlspecialchars($order['payment_method']));
 
-          // ✅ สี Badge
+          // ✅ สีของสถานะ
           $payment_status = $order['payment_status'] ?? 'รอดำเนินการ';
           $order_status = $order['order_status'] ?? 'รอดำเนินการ';
+          $admin_verified = $order['admin_verified'] ?? 'รอตรวจสอบ';
 
           $paymentBadge = ($payment_status === 'ชำระเงินแล้ว') ? 'success' :
                           (($payment_status === 'ยกเลิก') ? 'danger' : 'warning');
           $orderBadge = ($order_status === 'จัดส่งแล้ว') ? 'success' :
                         (($order_status === 'กำลังจัดเตรียม') ? 'info' :
                         (($order_status === 'ยกเลิก') ? 'danger' : 'secondary'));
+
+          // ✅ สีของ admin_verified
+          $adminBadge = ($admin_verified === 'อนุมัติ') ? 'success' :
+                        (($admin_verified === 'ปฏิเสธ') ? 'danger' : 'warning text-dark');
           ?>
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
@@ -114,6 +119,9 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           </p>
           <p><strong>สถานะคำสั่งซื้อ:</strong>
             <span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span>
+          </p>
+          <p><strong>สถานะตรวจสอบโดยแอดมิน:</strong>
+            <span class="badge bg-<?= $adminBadge ?>"><?= htmlspecialchars($admin_verified) ?></span>
           </p>
 
           <?php if (!empty($order['shipped_date'])): ?>
