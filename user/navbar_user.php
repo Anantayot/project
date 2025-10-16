@@ -43,9 +43,9 @@ if (session_status() === PHP_SESSION_NONE) {
             </a>
           </li>
           
-          <!-- 🔹 ปุ่มออกจากระบบ -->
+          <!-- 🔹 ปุ่มออกจากระบบ พร้อมยืนยัน -->
           <li class="nav-item">
-            <a href="logout.php" class="nav-link text-danger">
+            <a href="#" class="nav-link text-danger fw-semibold" onclick="confirmLogout(event)">
               🚪 ออกจากระบบ
             </a>
           </li>
@@ -68,16 +68,26 @@ if (session_status() === PHP_SESSION_NONE) {
   </div>
 </nav>
 
+<!-- ✅ Confirm Logout -->
+<script>
+function confirmLogout(e) {
+  e.preventDefault();
+  if (confirm("คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?")) {
+    window.location = "logout.php";
+  }
+}
+</script>
+
 <style>
 /* 💡 ปรับสีชื่อผู้ใช้ให้เด่น */
 .user-link {
-  color: #0dcaf0 !important; /* สีฟ้า Bootstrap */
+  color: #0dcaf0 !important;
   transition: 0.2s ease;
   text-decoration: none !important;
 }
 .user-link:hover {
-  color: #31d2f2 !important; /* ฟ้าอ่อนตอน hover */
-  text-decoration: none !important; /* ❌ ไม่ขีดเส้นใต้ */
+  color: #31d2f2 !important;
+  text-decoration: none !important;
 }
 /* 💡 ถ้าอยู่หน้า profile ให้เป็นฟ้าเข้มกว่าปกติ */
 .user-link.active {
@@ -86,4 +96,3 @@ if (session_status() === PHP_SESSION_NONE) {
   text-decoration: none !important;
 }
 </style>
-

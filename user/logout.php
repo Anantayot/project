@@ -1,11 +1,14 @@
 <?php
 session_start();
 
-// ✅ ลบข้อมูล session ทั้งหมด
+// ✅ ลบข้อมูลทั้งหมดใน session
 session_unset();
 session_destroy();
 
-// ✅ เด้งกลับไปหน้า login
-header("Location: login.php");
+// ✅ ตั้งค่า Toast สำหรับแจ้งเตือนหน้า index.php
+session_start();
+$_SESSION['toast_success'] = "✅ ออกจากระบบสำเร็จ";
+
+header("Location: index.php");
 exit;
 ?>
