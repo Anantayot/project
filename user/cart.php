@@ -41,6 +41,30 @@ $total = 0;
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
+<!-- 🔔 Toast แสดงเมื่อมีข้อความแจ้งเตือน -->
+<?php if (isset($_SESSION['toast_success']) || isset($_SESSION['toast_error'])): ?>
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <?php if (isset($_SESSION['toast_success'])): ?>
+      <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      <?php unset($_SESSION['toast_success']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['toast_error'])): ?>
+      <div class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+      <?php unset($_SESSION['toast_error']); ?>
+    <?php endif; ?>
+  </div>
+<?php endif; ?>
 
 <!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
@@ -117,6 +141,17 @@ $total = 0;
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | ตะกร้าสินค้า
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ให้ Toast แสดง 5 วิ แล้วปิดเอง
+  document.addEventListener("DOMContentLoaded", () => {
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.forEach(toastEl => {
+      const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+      toast.show();
+    });
+  });
+</script>
 
 </body>
 </html>

@@ -51,10 +51,10 @@ if (isset($_SESSION['cart'][$productId])) {
   ];
 }
 
-// ✅ ตั้ง Toast แจ้งเตือน
+// ✅ Toast แจ้งเตือน
 $_SESSION['toast_success'] = "✅ เพิ่มสินค้า <b>" . htmlspecialchars($product['p_name']) . "</b> ในตะกร้าเรียบร้อยแล้ว!";
 
-// ✅ กลับไปหน้าเดิม
-header("Location: index.php");
+// ✅ กลับไปหน้า cart.php พร้อม Toast
+header("Location: cart.php");
 exit;
 ?>
