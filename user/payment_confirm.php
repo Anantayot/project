@@ -76,11 +76,24 @@ function crc16($data) {
 }
 
 /* =======================================================
-   ✅ ยืนยันการชำระเงิน (เก็บสลิป + อัปเดตสถานะ)
+   ✅ ยืนยันการชำระเงิน (อัปโหลดสลิป + อัปเดตสถานะ)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = __DIR__ . "/admin/uploads/slips/";
-  if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+  // ✅ path ที่ถูกต้อง: /var/www/html/project/admin/uploads/slips/
+  $uploadDir = dirname(__DIR__) . "/admin/uploads/slips/";
+
+  // ถ้าไม่มีโฟลเดอร์ ให้สร้างใหม่
+  if (!is_dir($uploadDir)) {
+    if (!mkdir($uploadDir, 0777, true)) {
+      die("<p class='text-danger text-center mt-5'>❌ ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้: $uploadDir</p>");
+    }
+  }
+
+  // ตรวจสิทธิ์
+  if (!is_writable($uploadDir)) {
+    die("<p class='text-danger text-center mt-5'>❌ ไม่มีสิทธิ์เขียนไฟล์ใน: $uploadDir</p>");
+  }
 
   $fileName = "";
   if (!empty($_FILES['slip']['name'])) {
@@ -95,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   // ✅ อัปเดตสถานะเป็น “กำลังตรวจสอบ”
   $stmt = $conn->prepare("UPDATE orders 
-                          SET payment_status = 'รอดำเนินการ', 
+                          SET payment_status = 'รอดำเนินการ',
                               admin_verified = 'กำลังตรวจสอบ',
                               slip_image = :slip,
                               payment_date = NOW()
