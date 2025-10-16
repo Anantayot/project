@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 include("connectdb.php");
 
@@ -40,45 +44,62 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>รายละเอียดคำสั่งซื้อ #<?= $order_id ?> | MyCommiss</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .btn { border-radius: 8px; font-weight: 500; transition: all 0.2s ease-in-out; }
+    .btn:hover { transform: scale(1.05); }
+    .badge { font-size: 0.9rem; padding: 6px 10px; }
+    .card-header { background: #212529 !important; color: #fff; }
+  </style>
 </head>
 <body class="bg-light">
 
 <?php include("navbar_user.php"); ?>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
   <h3 class="fw-bold text-center mb-4">📦 รายละเอียดคำสั่งซื้อ #<?= $order_id ?></h3>
 
   <!-- 🔹 ข้อมูลคำสั่งซื้อ -->
   <div class="card mb-4 shadow-sm border-0">
-    <div class="card-header bg-dark text-white fw-semibold">ข้อมูลคำสั่งซื้อ</div>
+    <div class="card-header fw-semibold">ข้อมูลคำสั่งซื้อ</div>
     <div class="card-body">
       <div class="row">
         <div class="col-md-6">
           <p><strong>วันที่สั่งซื้อ:</strong> <?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></p>
-          <p><strong>วิธีชำระเงิน:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
-          <p><strong>สถานะการชำระเงิน:</strong> 
-            <?php
-              $status = $order['payment_status'] ?? 'รอดำเนินการ';
-              if ($status === 'ชำระเงินแล้ว') {
-                $badgeClass = 'success';
-              } elseif ($status === 'ยกเลิก') {
-                $badgeClass = 'danger';
-              } else {
-                $badgeClass = 'warning';
-              }
-            ?>
+
+          <?php
+            // ✅ แปลงชื่อวิธีชำระเงินเป็นไทย
+            $methodText = match($order['payment_method']) {
+              'QR' => '💳 ชำระด้วย QR Code',
+              'COD' => '💵 เก็บเงินปลายทาง',
+              default => htmlspecialchars($order['payment_method'])
+            };
+
+            $status = $order['payment_status'] ?? 'รอดำเนินการ';
+            $badgeClass = match($status) {
+              'ชำระเงินแล้ว' => 'success',
+              'ยกเลิก' => 'danger',
+              default => 'warning'
+            };
+          ?>
+
+          <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
+          <p><strong>สถานะการชำระเงิน:</strong>
             <span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span>
           </p>
 
-          <?php if ($status === 'รอดำเนินการ' && in_array($order['payment_method'], ['BANK_TRANSFER', 'QR'])): ?>
+          <?php if ($status === 'รอดำเนินการ' && $order['payment_method'] === 'QR'): ?>
             <a href="payment_confirm.php?id=<?= $order_id ?>" class="btn btn-warning mt-2">
               💰 แจ้งชำระเงิน
             </a>
           <?php endif; ?>
         </div>
+
         <div class="col-md-6">
           <p><strong>ที่อยู่จัดส่ง:</strong><br><?= nl2br(htmlspecialchars($order['shipping_address'] ?? '-')) ?></p>
-          <p><strong>ยอดรวมทั้งหมด:</strong> <span class="text-danger fw-bold"><?= number_format($order['total_price'], 2) ?> บาท</span></p>
+          <p><strong>ยอดรวมทั้งหมด:</strong> 
+            <span class="text-danger fw-bold"><?= number_format($order['total_price'], 2) ?> บาท</span>
+          </p>
         </div>
       </div>
     </div>
@@ -86,7 +107,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
   <!-- 🔹 รายการสินค้า -->
   <div class="card shadow-sm border-0">
-    <div class="card-header bg-dark text-white fw-semibold">รายการสินค้า</div>
+    <div class="card-header fw-semibold">รายการสินค้า</div>
     <div class="card-body table-responsive">
       <table class="table align-middle text-center">
         <thead class="table-dark">
@@ -119,6 +140,17 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
       </table>
     </div>
   </div>
+
+  <!-- 🔹 ปุ่มยกเลิกคำสั่งซื้อ (เฉพาะสถานะรอดำเนินการ) -->
+  <?php if ($status === 'รอดำเนินการ'): ?>
+    <div class="text-center mt-4">
+      <a href="order_cancel.php?id=<?= $order_id ?>" 
+         class="btn btn-danger btn-lg"
+         onclick="return confirm('แน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?');">
+         ❌ ยกเลิกคำสั่งซื้อ
+      </a>
+    </div>
+  <?php endif; ?>
 
   <div class="text-center mt-4">
     <a href="orders.php" class="btn btn-secondary">⬅️ กลับไปหน้าคำสั่งซื้อ</a>
