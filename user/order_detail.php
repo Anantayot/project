@@ -78,41 +78,43 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             }
 
             // ✅ สีของสถานะการชำระเงิน
-            $payment_status = isset($order['payment_status']) ? $order['payment_status'] : 'รอดำเนินการ';
-            if ($payment_status === 'ชำระเงินแล้ว') {
-              $paymentBadge = 'success';
-            } elseif ($payment_status === 'ยกเลิก') {
-              $paymentBadge = 'danger';
-            } else {
-              $paymentBadge = 'warning';
-            }
+            $payment_status = $order['payment_status'] ?? 'รอดำเนินการ';
+            $paymentBadge = $payment_status === 'ชำระเงินแล้ว' ? 'success' : ($payment_status === 'ยกเลิก' ? 'danger' : 'warning');
 
             // ✅ สีของสถานะคำสั่งซื้อ
-            $order_status = isset($order['order_status']) ? $order['order_status'] : 'รอดำเนินการ';
-            if ($order_status === 'จัดส่งแล้ว') {
-              $orderBadge = 'success';
-            } elseif ($order_status === 'กำลังจัดเตรียม') {
-              $orderBadge = 'info';
-            } elseif ($order_status === 'ยกเลิก') {
-              $orderBadge = 'danger';
-            } else {
-              $orderBadge = 'secondary';
-            }
+            $order_status = $order['order_status'] ?? 'รอดำเนินการ';
+            if ($order_status === 'จัดส่งแล้ว') $orderBadge = 'success';
+            elseif ($order_status === 'กำลังจัดเตรียม') $orderBadge = 'info';
+            elseif ($order_status === 'ยกเลิก') $orderBadge = 'danger';
+            else $orderBadge = 'secondary';
           ?>
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
-          <p><strong>สถานะการชำระเงิน:</strong>
+
+          <!-- 🔹 ปุ่มเปลี่ยนวิธีชำระเงิน -->
+          <?php if ($order_status === 'รอดำเนินการ'): ?>
+            <form action="update_payment_method.php" method="POST" class="mt-2">
+              <input type="hidden" name="order_id" value="<?= $order_id ?>">
+              <select name="payment_method" class="form-select d-inline-block w-auto">
+                <option value="COD" <?= $order['payment_method'] === 'COD' ? 'selected' : '' ?>>เก็บเงินปลายทาง</option>
+                <option value="QR" <?= $order['payment_method'] === 'QR' ? 'selected' : '' ?>>ชำระด้วย QR Code</option>
+              </select>
+              <button type="submit" class="btn btn-primary btn-sm ms-2">🔄 เปลี่ยนวิธีชำระเงิน</button>
+            </form>
+          <?php endif; ?>
+
+          <p class="mt-3"><strong>สถานะการชำระเงิน:</strong>
             <span class="badge bg-<?= $paymentBadge ?>"><?= htmlspecialchars($payment_status) ?></span>
           </p>
           <p><strong>สถานะคำสั่งซื้อ:</strong>
             <span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span>
           </p>
 
-          <?php if (isset($order['shipped_date']) && !empty($order['shipped_date'])): ?>
+          <?php if (!empty($order['shipped_date'])): ?>
             <p><strong>วันที่จัดส่ง:</strong> <?= date('d/m/Y H:i', strtotime($order['shipped_date'])) ?></p>
           <?php endif; ?>
 
-          <?php if (isset($order['tracking_number']) && !empty($order['tracking_number'])): ?>
+          <?php if (!empty($order['tracking_number'])): ?>
             <p><strong>หมายเลขพัสดุ:</strong> 📦 <?= htmlspecialchars($order['tracking_number']) ?></p>
           <?php endif; ?>
 
