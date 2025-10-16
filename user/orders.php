@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 session_start();
 include("connectdb.php");
 
+// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
@@ -13,8 +14,8 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ดึงเฉพาะออเดอร์ของลูกค้าคนนี้ (เรียงจากเก่า -> ใหม่)
-$sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date ASC";
+// ✅ ดึงเฉพาะออเดอร์ของลูกค้าคนนี้ (เรียงจากใหม่ -> เก่า)
+$sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date DESC";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':cid', $customer_id, PDO::PARAM_INT);
 $stmt->execute();
@@ -78,12 +79,13 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <table class="table align-middle table-bordered bg-white">
         <thead class="table-dark text-center">
           <tr>
-            <th>รหัสคำสั่งซื้อ</th>
+            <th>#</th>
             <th>วันที่สั่งซื้อ</th>
             <th>วิธีชำระเงิน</th>
             <th>ยอดรวม</th>
-            <th>สถานะการชำระเงิน</th>
+            <th>สถานะชำระเงิน</th>
             <th>สถานะคำสั่งซื้อ</th>
+            <th>ตรวจสอบโดยแอดมิน</th>
             <th>การจัดการ</th>
           </tr>
         </thead>
@@ -93,37 +95,30 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             foreach ($orders as $o): 
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
               $order_status = $o['order_status'] ?? 'รอดำเนินการ';
+              $admin_check = $o['admin_verified'] ?? 'รอตรวจสอบ';
               
               // ✅ สีของ payment_status
-              if ($status === 'ชำระเงินแล้ว') {
-                $badgeClass = 'success';
-              } elseif ($status === 'ยกเลิก') {
-                $badgeClass = 'danger';
-              } else {
-                $badgeClass = 'warning';
-              }
+              if ($status === 'ชำระเงินแล้ว') $badgeClass = 'success';
+              elseif ($status === 'ยกเลิก') $badgeClass = 'danger';
+              else $badgeClass = 'warning';
 
               // ✅ สีของ order_status
-              if ($order_status === 'จัดส่งแล้ว') {
-                $orderBadge = 'success';
-              } elseif ($order_status === 'กำลังจัดเตรียม') {
-                $orderBadge = 'info';
-              } elseif ($order_status === 'ยกเลิก') {
-                $orderBadge = 'danger';
-              } else {
-                $orderBadge = 'secondary';
-              }
+              if ($order_status === 'จัดส่งแล้ว') $orderBadge = 'success';
+              elseif ($order_status === 'กำลังจัดเตรียม') $orderBadge = 'info';
+              elseif ($order_status === 'ยกเลิก') $orderBadge = 'danger';
+              else $orderBadge = 'secondary';
 
-              // ✅ แปลง payment_method เป็นภาษาไทย
-              if ($o['payment_method'] === 'QR') {
-                $methodText = 'ชำระด้วย QR Code';
-              } elseif ($o['payment_method'] === 'COD') {
-                $methodText = 'เก็บเงินปลายทาง';
-              } else {
-                $methodText = htmlspecialchars($o['payment_method']);
-              }
+              // ✅ สีของ admin_verified
+              if ($admin_check === 'อนุมัติ') $adminBadge = 'success';
+              elseif ($admin_check === 'ปฏิเสธ') $adminBadge = 'danger';
+              else $adminBadge = 'warning text-dark';
 
-              // ✅ ถ้าเป็นคำสั่งซื้อที่ยกเลิก → แถวสีแดง
+              // ✅ วิธีชำระเงิน
+              $methodText = ($o['payment_method'] === 'QR') ? 'ชำระด้วย QR Code'
+                : (($o['payment_method'] === 'COD') ? 'เก็บเงินปลายทาง'
+                : htmlspecialchars($o['payment_method']));
+
+              // ✅ ถ้าออเดอร์ถูกยกเลิก → แถวแดง
               $rowClass = ($order_status === 'ยกเลิก') ? 'table-danger' : '';
           ?>
             <tr class="<?= $rowClass ?>">
@@ -133,6 +128,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <td><?= number_format($o['total_price'], 2) ?> บาท</td>
               <td><span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></td>
               <td><span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span></td>
+              <td><span class="badge bg-<?= $adminBadge ?>"><?= htmlspecialchars($admin_check) ?></span></td>
               <td>
                 <div class="d-flex justify-content-center flex-wrap gap-2">
                   <?php if ($status === 'รอดำเนินการ' && $o['payment_method'] === 'QR'): ?>
@@ -140,9 +136,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       💰 แจ้งชำระเงิน
                     </a>
                   <?php endif; ?>
-
                   <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
-                    🔍 ดูรายละเอียด
+                    🔍 รายละเอียด
                   </a>
                 </div>
               </td>
