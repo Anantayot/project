@@ -47,21 +47,19 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th>วันที่สั่งซื้อ</th>
             <th>วิธีชำระเงิน</th>
             <th>ยอดรวม</th>
-            <th>สถานะ</th>
-            <th>รายละเอียด</th>
+            <th>สถานะการชำระเงิน</th>
+            <th>การจัดการ</th>
           </tr>
         </thead>
         <tbody class="text-center">
           <?php foreach ($orders as $o): ?>
             <?php
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
-              if ($status === 'ชำระเงินแล้ว') {
-                $badgeClass = 'success';
-              } elseif ($status === 'ยกเลิก') {
-                $badgeClass = 'danger';
-              } else {
-                $badgeClass = 'warning';
-              }
+              $badgeClass = match ($status) {
+                'ชำระเงินแล้ว' => 'success',
+                'ยกเลิก' => 'danger',
+                default => 'warning'
+              };
             ?>
             <tr>
               <td>#<?= $o['order_id'] ?></td>
@@ -70,9 +68,15 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <td><?= number_format($o['total_price'], 2) ?> บาท</td>
               <td><span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></td>
               <td>
-                <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
-                  🔍 ดูรายละเอียด
-                </a>
+                <?php if ($status === 'รอดำเนินการ' && in_array($o['payment_method'], ['BANK_TRANSFER', 'QR'])): ?>
+                  <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
+                    💰 แจ้งชำระเงิน
+                  </a>
+                <?php else: ?>
+                  <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
+                    🔍 ดูรายละเอียด
+                  </a>
+                <?php endif; ?>
               </td>
             </tr>
           <?php endforeach; ?>
