@@ -50,23 +50,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     .btn:hover { transform: scale(1.05); }
     .badge { font-size: 0.9rem; padding: 6px 10px; }
     .card-header { background: #212529 !important; color: #fff; }
-
-    /* ✅ Toast style */
-    .toast-container { 
-      position: fixed; 
-      top: 20px; 
-      right: 20px; 
-      z-index: 3000; 
-    }
-    .toast {
-      opacity: 0;
-      transform: translateY(-20px);
-      animation: slideDown 0.4s ease forwards;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    @keyframes slideDown {
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
   </style>
 </head>
 <body class="bg-light">
@@ -96,18 +80,6 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   <?php endif; ?>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-  toastElList.forEach(toastEl => {
-    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
-    toast.show();
-  });
-});
-</script>
-
-
 <div class="container mt-4 mb-5">
   <h3 class="fw-bold text-center mb-4">📦 รายละเอียดคำสั่งซื้อ #<?= $order_id ?></h3>
 
@@ -120,42 +92,24 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>วันที่สั่งซื้อ:</strong> <?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></p>
 
           <?php
-            // ✅ แปลงชื่อวิธีชำระเงิน
-            if ($order['payment_method'] === 'QR') {
-              $methodText = 'ชำระด้วย QR Code';
-            } elseif ($order['payment_method'] === 'COD') {
-              $methodText = 'เก็บเงินปลายทาง';
-            } else {
-              $methodText = htmlspecialchars($order['payment_method']);
-            }
+          // ✅ แปลงชื่อวิธีชำระเงิน
+          $methodText = ($order['payment_method'] === 'QR') ? 'ชำระด้วย QR Code' :
+                        (($order['payment_method'] === 'COD') ? 'เก็บเงินปลายทาง' :
+                        htmlspecialchars($order['payment_method']));
 
-            // ✅ สีของสถานะการชำระเงิน
-            $payment_status = $order['payment_status'] ?? 'รอดำเนินการ';
-            $paymentBadge = $payment_status === 'ชำระเงินแล้ว' ? 'success' : ($payment_status === 'ยกเลิก' ? 'danger' : 'warning');
+          // ✅ สี Badge
+          $payment_status = $order['payment_status'] ?? 'รอดำเนินการ';
+          $order_status = $order['order_status'] ?? 'รอดำเนินการ';
 
-            // ✅ สีของสถานะคำสั่งซื้อ
-            $order_status = $order['order_status'] ?? 'รอดำเนินการ';
-            if ($order_status === 'จัดส่งแล้ว') $orderBadge = 'success';
-            elseif ($order_status === 'กำลังจัดเตรียม') $orderBadge = 'info';
-            elseif ($order_status === 'ยกเลิก') $orderBadge = 'danger';
-            else $orderBadge = 'secondary';
+          $paymentBadge = ($payment_status === 'ชำระเงินแล้ว') ? 'success' :
+                          (($payment_status === 'ยกเลิก') ? 'danger' : 'warning');
+          $orderBadge = ($order_status === 'จัดส่งแล้ว') ? 'success' :
+                        (($order_status === 'กำลังจัดเตรียม') ? 'info' :
+                        (($order_status === 'ยกเลิก') ? 'danger' : 'secondary'));
           ?>
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
-
-          <!-- 🔹 ปุ่มเปลี่ยนวิธีชำระเงิน -->
-          <?php if ($order_status === 'รอดำเนินการ'): ?>
-            <form action="update_payment_method.php" method="POST" class="mt-2">
-              <input type="hidden" name="order_id" value="<?= $order_id ?>">
-              <select name="payment_method" class="form-select d-inline-block w-auto">
-                <option value="COD" <?= $order['payment_method'] === 'COD' ? 'selected' : '' ?>>เก็บเงินปลายทาง</option>
-                <option value="QR" <?= $order['payment_method'] === 'QR' ? 'selected' : '' ?>>ชำระด้วย QR Code</option>
-              </select>
-              <button type="submit" class="btn btn-primary btn-sm ms-2">🔄 เปลี่ยนวิธีชำระเงิน</button>
-            </form>
-          <?php endif; ?>
-
-          <p class="mt-3"><strong>สถานะการชำระเงิน:</strong>
+          <p><strong>สถานะการชำระเงิน:</strong>
             <span class="badge bg-<?= $paymentBadge ?>"><?= htmlspecialchars($payment_status) ?></span>
           </p>
           <p><strong>สถานะคำสั่งซื้อ:</strong>
@@ -243,7 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ แสดง Toast 5 วิ แล้วปิดอัตโนมัติ
   const toastElList = [].slice.call(document.querySelectorAll('.toast'));
   toastElList.forEach(toastEl => {
     const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
