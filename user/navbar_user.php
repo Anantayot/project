@@ -76,7 +76,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 .user-link:hover {
   color: #31d2f2 !important;
-  text-decoration: underline;
+  text-decoration:;
 }
 /* 💡 ถ้าอยู่หน้า profile ให้เป็นฟ้าเข้มกว่าปกติ */
 .user-link.active {
