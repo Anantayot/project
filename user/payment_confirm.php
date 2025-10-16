@@ -41,10 +41,10 @@ function generatePromptPayPayload($promptPayID, $amount = 0.00) {
 
   // ฟิลด์ตามมาตรฐาน EMVCo
   $data = [
-    '00' => '01', // Payload Format Indicator
-    '01' => '11', // Point of Initiation Method
+    '00' => '01',
+    '01' => '11',
     '29' => formatField('00', 'A000000677010111') . formatField('01', $id),
-    '53' => '764', // THB
+    '53' => '764',
     '54' => sprintf('%0.2f', $amount),
     '58' => 'TH',
   ];
@@ -53,16 +53,14 @@ function generatePromptPayPayload($promptPayID, $amount = 0.00) {
   foreach ($data as $id => $val) {
     $payload .= $id . sprintf('%02d', strlen($val)) . $val;
   }
-  $payload .= '6304'; // CRC placeholder
+  $payload .= '6304';
   return $payload . strtoupper(crc16($payload));
 }
 
-// ฟอร์แมตฟิลด์
 function formatField($id, $value) {
   return $id . sprintf('%02d', strlen($value)) . $value;
 }
 
-// ✅ คำนวณ CRC16 CCITT-FALSE
 function crc16($data) {
   $crc = 0xFFFF;
   for ($i = 0; $i < strlen($data); $i++) {
@@ -79,10 +77,10 @@ function crc16($data) {
 }
 
 /* =======================================================
-   ✅ ยืนยันการชำระเงิน
+   ✅ ยืนยันการชำระเงิน (บันทึกไฟล์ใน admin/uploads/slips)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = "uploads/slips/";
+  $uploadDir = __DIR__ . "/admin/uploads/slips/"; // ← เปลี่ยนตำแหน่งที่เก็บไฟล์
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
   $fileName = "";
@@ -133,8 +131,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       <?php if ($order['payment_method'] === 'QR'): ?>
         <?php
-          // 👉 ใส่หมายเลขพร้อมเพย์ของร้าน (โทรศัพท์ / บัตรประชาชน / เลขบัญชี)
-          $shopPromptPay = "0903262100"; // แก้ตรงนี้ให้เป็นของจริง
+          $shopPromptPay = "0903262100"; // ใส่หมายเลขพร้อมเพย์จริง
           $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
         ?>
         <div class="text-center my-4">
@@ -149,13 +146,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <script>
           const qrContainer = document.getElementById("qrcode");
           const payload = "<?= $payload ?>";
-          const qr = new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
+          new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
         </script>
       <?php endif; ?>
 
       <form method="post" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3 text-start">
-          <label for="slip" class="form-label">แนบสลิปการชำระเงิน (ถ้ามี)</label>
+          <label for="slip" class="form-label">แนบสลิปการชำระเงิน</label>
           <input type="file" name="slip" id="slip" class="form-control" accept="image/*">
           <small class="text-muted">* สามารถกดยืนยันโดยไม่ต้องแนบสลิปได้</small>
         </div>
