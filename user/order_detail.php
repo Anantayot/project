@@ -147,20 +147,20 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   </div>
 
   <!-- 🔹 ปุ่มยกเลิกคำสั่งซื้อ -->
-  <?php if ($status === 'รอดำเนินการ'): ?>
-    <div class="text-center mt-4">
+  <div class="text-center mt-5 d-flex justify-content-center gap-3 flex-wrap">
+    <?php if ($status === 'รอดำเนินการ'): ?>
       <a href="order_cancel.php?id=<?= $order_id ?>" 
-         class="btn btn-danger btn-lg"
+         class="btn btn-danger px-4 py-2 fw-semibold"
          onclick="return confirm('แน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?');">
          ❌ ยกเลิกคำสั่งซื้อ
       </a>
-    </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <div class="text-center mt-4">
-    <a href="orders.php" class="btn btn-secondary">⬅️ กลับไปหน้าคำสั่งซื้อ</a>
+    <a href="orders.php" class="btn btn-secondary px-4 py-2 fw-semibold">
+      ⬅️ กลับไปหน้าคำสั่งซื้อ
+    </a>
   </div>
-</div>
+
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | รายละเอียดคำสั่งซื้อ
