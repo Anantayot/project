@@ -2,45 +2,56 @@
 session_start();
 include("connectdb.php");
 
-// 🔒 ตรวจสอบการเข้าสู่ระบบ
+// 🔒 ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
 }
 
 $customer_id = $_SESSION['customer_id'];
-$msg = "";
 
-// ✅ เมื่อผู้ใช้กดเปลี่ยนรหัสผ่าน
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $current = $_POST['current_password'];
-  $new = $_POST['new_password'];
-  $confirm = $_POST['confirm_password'];
+// ✅ เมื่อมีการส่งฟอร์มเปลี่ยนรหัสผ่าน
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $old_password = $_POST['old_password'];
+  $new_password = $_POST['new_password'];
+  $confirm_password = $_POST['confirm_password'];
 
-  // ✅ ดึงข้อมูลผู้ใช้
-  $stmt = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
+  // ✅ ดึงข้อมูลผู้ใช้จากฐานข้อมูล
+  $stmt = $conn->prepare("SELECT password FROM customers WHERE customer_id = ?");
   $stmt->execute([$customer_id]);
   $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
   if (!$user) {
-    $msg = "❌ ไม่พบข้อมูลผู้ใช้ในระบบ";
-  } elseif (!password_verify($current, $user['password'])) {
-    $msg = "❌ รหัสผ่านเดิมไม่ถูกต้อง";
-  } elseif ($new !== $confirm) {
-    $msg = "❌ รหัสผ่านใหม่และยืนยันไม่ตรงกัน";
-  } elseif (strlen($new) < 6) {
-    $msg = "❌ รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร";
-  } else {
-    // ✅ เปลี่ยนรหัสผ่านใหม่
-    $newHash = password_hash($new, PASSWORD_DEFAULT);
-    $update = $conn->prepare("UPDATE customers SET password = ? WHERE customer_id = ?");
-    $update->execute([$newHash, $customer_id]);
-
-    // ✅ เก็บข้อความ Toast แล้วกลับไปหน้าโปรไฟล์
-    $_SESSION['toast_success'] = "🔐 เปลี่ยนรหัสผ่านเรียบร้อยแล้ว";
-    header("Location: profile.php");
+    $_SESSION['toast_error'] = "❌ ไม่พบข้อมูลผู้ใช้";
+    header("Location: change_password.php");
     exit;
   }
+
+  // ✅ ตรวจสอบรหัสผ่านเก่า
+  if (!password_verify($old_password, $user['password'])) {
+    $_SESSION['toast_error'] = "❌ รหัสผ่านเดิมไม่ถูกต้อง";
+    header("Location: change_password.php");
+    exit;
+  }
+
+  // ✅ ตรวจสอบว่ารหัสใหม่ตรงกันไหม
+  if ($new_password !== $confirm_password) {
+    $_SESSION['toast_error'] = "❌ รหัสผ่านใหม่ไม่ตรงกัน";
+    header("Location: change_password.php");
+    exit;
+  }
+
+  // ✅ บันทึกรหัสใหม่ (เข้ารหัสก่อน)
+  $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+  $stmt = $conn->prepare("UPDATE customers SET password = ? WHERE customer_id = ?");
+  $stmt->execute([$hashed, $customer_id]);
+
+  // ✅ ตั้ง Toast แจ้งเตือนสำเร็จ
+  $_SESSION['toast_success'] = "✅ เปลี่ยนรหัสผ่านเรียบร้อยแล้ว";
+
+  // ✅ กลับไปหน้าโปรไฟล์
+  header("Location: profile.php");
+  exit;
 }
 ?>
 <!DOCTYPE html>
@@ -53,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     body { background-color: #f8f9fa; }
     .card {
       max-width: 500px;
-      margin: 50px auto;
+      margin: 60px auto;
       border-radius: 15px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
@@ -61,7 +72,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       background: #198754;
       color: #fff;
       font-weight: bold;
-      text-align: center;
       border-radius: 15px 15px 0 0;
     }
     .btn:hover { transform: scale(1.05); transition: 0.2s; }
@@ -71,40 +81,45 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <?php include("navbar_user.php"); ?>
 
-<div class="container">
-  <div class="card">
-    <div class="card-header">
-      🔑 เปลี่ยนรหัสผ่าน
+<!-- 🔔 Toast แจ้งเตือน -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <?php if (isset($_SESSION['toast_error'])): ?>
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast_error'] ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
     </div>
-    <div class="card-body p-4">
-      <?php if (!empty($msg)): ?>
-        <div class="alert text-center <?= strpos($msg, '❌') !== false ? 'alert-danger' : 'alert-success' ?>">
-          <?= $msg ?>
-        </div>
-      <?php endif; ?>
+    <?php unset($_SESSION['toast_error']); ?>
+  <?php endif; ?>
+</div>
 
-      <form method="POST">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">รหัสผ่านเดิม</label>
-          <input type="password" name="current_password" class="form-control" required>
-        </div>
+<div class="card">
+  <div class="card-header text-center">🔑 เปลี่ยนรหัสผ่าน</div>
+  <div class="card-body p-4">
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label fw-semibold">รหัสผ่านเดิม</label>
+        <input type="password" name="old_password" class="form-control" required>
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label fw-semibold">รหัสผ่านใหม่</label>
-          <input type="password" name="new_password" class="form-control" required minlength="6">
-        </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">รหัสผ่านใหม่</label>
+        <input type="password" name="new_password" class="form-control" required>
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label fw-semibold">ยืนยันรหัสผ่านใหม่</label>
-          <input type="password" name="confirm_password" class="form-control" required minlength="6">
-        </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">ยืนยันรหัสผ่านใหม่</label>
+        <input type="password" name="confirm_password" class="form-control" required>
+      </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <a href="profile.php" class="btn btn-secondary">⬅️ กลับโปรไฟล์</a>
-          <button type="submit" class="btn btn-success">💾 บันทึกรหัสผ่านใหม่</button>
-        </div>
-      </form>
-    </div>
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="profile.php" class="btn btn-secondary">⬅️ กลับ</a>
+        <button type="submit" class="btn btn-success">💾 เปลี่ยนรหัสผ่าน</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -112,13 +127,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   © <?= date('Y') ?> MyCommiss | เปลี่ยนรหัสผ่าน
 </footer>
 
-<!-- ✅ Toast Script 5 วินาที -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  // ✅ ให้ Toast แสดง 5 วิ แล้วปิดอัตโนมัติ
   const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-  const toastList = toastElList.map(function (toastEl) {
-    return new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
-  });
+  const toastList = toastElList.map(toastEl => new bootstrap.Toast(toastEl, { delay: 5000, autohide: true }));
   toastList.forEach(toast => toast.show());
 </script>
 
