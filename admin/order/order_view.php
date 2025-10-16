@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 order_status='กำลังดำเนินการ'
                             WHERE order_id=?");
     $stmt->execute([$id]);
-    echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='order_detail.php?id=$id';</script>";
+    echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='orders.php';</script>";
     exit;
   } elseif ($action === 'reject') {
     $stmt = $conn->prepare("UPDATE orders 
@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 order_status='ยกเลิก'
                             WHERE order_id=?");
     $stmt->execute([$id]);
-    echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='order_detail.php?id=$id';</script>";
+    echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='orders.php';</script>";
     exit;
   }
 }
