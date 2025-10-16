@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 15, 2025 at 07:34 PM
+-- Generation Time: Oct 16, 2025 at 07:56 PM
 -- Server version: 10.5.29-MariaDB-0+deb11u1
 -- PHP Version: 7.4.33
 
@@ -101,7 +101,7 @@ CREATE TABLE `customers` (
 --
 
 INSERT INTO `customers` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `created_at`) VALUES
-(3, 'อนันตยศ อิทราพงษ์', '67010974018@msu.ac.th', '$2y$10$DKMcpv6pO10cLJv99ulAHOhVV15UhGvCKAAlki3smjZZ0N7XOb53W', '0903262100', 'สารคาม', '2025-10-15 12:04:02');
+(1, 'อนันตยศ อินทราพงษ์', '67010974018@msu.ac.th', '$2y$10$g2TOwNeq8WS/qknez/Dml.eHW.AdPRzysgMa7RcKhqjHCaeDQkUYi', '0903262100', 'ประจวบ', '2025-10-16 09:11:21');
 
 -- --------------------------------------------------------
 
@@ -114,8 +114,11 @@ CREATE TABLE `orders` (
   `customer_id` int(11) DEFAULT NULL,
   `total_price` decimal(10,2) NOT NULL,
   `shipping_address` text DEFAULT NULL,
-  `payment_method` enum('COD','BANK_TRANSFER','QR','CASH') DEFAULT 'COD',
+  `payment_method` enum('COD','QR') DEFAULT 'COD',
+  `slip_image` varchar(255) DEFAULT NULL,
+  `payment_date` datetime DEFAULT NULL,
   `payment_status` enum('รอดำเนินการ','ชำระเงินแล้ว','ยกเลิก') DEFAULT 'รอดำเนินการ',
+  `admin_verified` enum('รอตรวจสอบ','กำลังตรวจสอบ','อนุมัติ','ปฏิเสธ') DEFAULT 'รอตรวจสอบ',
   `order_status` enum('รอดำเนินการ','กำลังจัดเตรียม','จัดส่งแล้ว','สำเร็จ','ยกเลิก') DEFAULT 'รอดำเนินการ',
   `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `shipped_date` datetime DEFAULT NULL,
@@ -127,8 +130,18 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`order_id`, `customer_id`, `total_price`, `shipping_address`, `payment_method`, `payment_status`, `order_status`, `order_date`, `shipped_date`, `tracking_number`, `note`) VALUES
-(3, 3, '15980.00', NULL, 'COD', 'รอดำเนินการ', 'รอดำเนินการ', '2025-10-15 12:24:06', NULL, NULL, NULL);
+INSERT INTO `orders` (`order_id`, `customer_id`, `total_price`, `shipping_address`, `payment_method`, `slip_image`, `payment_date`, `payment_status`, `admin_verified`, `order_status`, `order_date`, `shipped_date`, `tracking_number`, `note`) VALUES
+(4, 1, '44880.00', 'ประจวบ', 'COD', NULL, NULL, 'ชำระเงินแล้ว', 'รอตรวจสอบ', 'สำเร็จ', '2025-10-16 11:02:03', NULL, NULL, NULL),
+(5, 1, '35890.00', 'ประจวบ', 'COD', NULL, NULL, 'ชำระเงินแล้ว', 'อนุมัติ', 'กำลังจัดเตรียม', '2025-10-16 11:03:32', NULL, NULL, NULL),
+(6, 1, '39890.00', 'ประจวบ', 'COD', NULL, NULL, 'รอดำเนินการ', 'รอตรวจสอบ', 'รอดำเนินการ', '2025-10-16 11:04:17', NULL, NULL, NULL),
+(7, 1, '19900.00', 'ประจวบ', 'QR', 'slip_1760616764_5719.jpeg', '2025-10-16 19:12:44', 'ชำระเงินแล้ว', 'อนุมัติ', 'กำลังจัดเตรียม', '2025-10-16 11:08:54', NULL, NULL, NULL),
+(8, 1, '23900.00', 'ประจวบ', 'QR', 'slip_1760618196_5197.jpeg', '2025-10-16 19:36:36', 'ชำระเงินแล้ว', 'อนุมัติ', 'กำลังจัดเตรียม', '2025-10-16 11:09:18', NULL, NULL, NULL),
+(9, 1, '15990.00', 'ประจวบ', 'QR', 'slip_1760618311_4171.jpeg', '2025-10-16 19:38:31', 'ยกเลิก', 'ปฏิเสธ', 'ยกเลิก', '2025-10-16 11:10:11', NULL, NULL, NULL),
+(10, 1, '23900.00', 'ประจวบ', 'QR', 'slip_1760614847_5683.jpeg', '2025-10-16 18:40:47', 'ชำระเงินแล้ว', NULL, 'รอดำเนินการ', '2025-10-16 11:18:01', NULL, NULL, NULL),
+(11, 1, '29790.00', 'ประจวบ', 'QR', 'slip_1760615261_6906.jpeg', '2025-10-16 18:47:41', 'ชำระเงินแล้ว', NULL, 'รอดำเนินการ', '2025-10-16 11:18:20', NULL, NULL, NULL),
+(12, 1, '13990.00', 'ประจวบ', 'QR', 'slip_1760616090_7031.jpeg', '2025-10-16 19:01:30', 'รอดำเนินการ', 'กำลังตรวจสอบ', 'รอดำเนินการ', '2025-10-16 11:20:37', NULL, NULL, NULL),
+(13, 1, '250.00', 'ประจวบ', 'QR', 'slip_1760615717_4074.jpeg', '2025-10-16 18:55:17', 'ยกเลิก', 'ปฏิเสธ', 'ยกเลิก', '2025-10-16 11:22:47', NULL, NULL, NULL),
+(14, 1, '55960.00', 'ประจวบ', 'COD', NULL, NULL, 'รอดำเนินการ', NULL, 'รอดำเนินการ', '2025-10-16 11:46:23', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -150,8 +163,22 @@ CREATE TABLE `order_details` (
 --
 
 INSERT INTO `order_details` (`id`, `order_id`, `p_id`, `quantity`, `price`) VALUES
-(4, 3, 2, 1, '13990.00'),
-(5, 3, 20, 1, '1990.00');
+(7, 4, 4, 1, '15990.00'),
+(8, 4, 8, 1, '19900.00'),
+(9, 4, 17, 1, '8990.00'),
+(10, 5, 4, 1, '15990.00'),
+(11, 5, 8, 1, '19900.00'),
+(12, 6, 4, 1, '15990.00'),
+(13, 6, 3, 1, '23900.00'),
+(14, 7, 8, 1, '19900.00'),
+(15, 8, 3, 1, '23900.00'),
+(16, 9, 4, 1, '15990.00'),
+(17, 10, 3, 1, '23900.00'),
+(18, 11, 3, 1, '23900.00'),
+(19, 11, 19, 1, '5890.00'),
+(20, 12, 2, 1, '13990.00'),
+(21, 13, 12, 1, '250.00'),
+(22, 14, 2, 4, '13990.00');
 
 -- --------------------------------------------------------
 
@@ -442,19 +469,19 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `product`
