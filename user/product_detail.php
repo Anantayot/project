@@ -22,10 +22,10 @@ if (!$product) {
 // ✅ ตั้ง path รูปสินค้า
 $imgPath = "../admin/uploads/" . $product['p_image'];
 if (!file_exists($imgPath) || empty($product['p_image'])) {
-  $imgPath = "img/default.png"; // รูปสำรอง
+  $imgPath = "img/default.png";
 }
 
-// ✅ เมื่อกดเพิ่มลงตะกร้า (เฉพาะคนล็อกอินเท่านั้น)
+// ✅ เมื่อกดเพิ่มลงตะกร้า
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (!isset($_SESSION['customer_id'])) {
     $_SESSION['toast_error'] = "⚠️ กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า";
@@ -38,9 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
 
-  // ถ้ามีสินค้าในตะกร้าอยู่แล้ว → บวกจำนวนเพิ่ม
+  // ถ้ามีสินค้าในตะกร้าอยู่แล้ว → เพิ่มจำนวน
   if (isset($_SESSION['cart'][$pid])) {
     $_SESSION['cart'][$pid]['qty'] += $qty;
+    $_SESSION['toast_success'] = "🛒 เพิ่มจำนวนสินค้านี้ในตะกร้าเรียบร้อยแล้ว!";
   } else {
     $_SESSION['cart'][$pid] = [
       'id' => $pid,
@@ -49,11 +50,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       'image' => $product['p_image'],
       'qty' => $qty
     ];
+    $_SESSION['toast_success'] = "✅ เพิ่มสินค้าในตะกร้าเรียบร้อยแล้ว!";
   }
 
-  // ✅ Toast แจ้งเตือนเพิ่มสำเร็จ
-  $_SESSION['toast_success'] = "✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!";
-  header("Location: cart.php");
+  header("Location: product_detail.php?id=" . $pid);
   exit;
 }
 ?>
@@ -63,68 +63,56 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8">
   <title><?= htmlspecialchars($product['p_name']) ?> | รายละเอียดสินค้า</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .toast-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 3000;
-    }
-  </style>
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
 
-<!-- ✅ Toast แจ้งเตือน -->
-<div class="toast-container">
-  <?php if (isset($_SESSION['toast_success'])): ?>
-    <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+<!-- 🔔 Toast แสดงเมื่อเพิ่มสินค้าสำเร็จ -->
+<?php if (isset($_SESSION['toast_success'])): ?>
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
           <?= $_SESSION['toast_success'] ?>
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
-    <?php unset($_SESSION['toast_success']); ?>
-  <?php endif; ?>
+  </div>
+  <?php unset($_SESSION['toast_success']); ?>
+<?php endif; ?>
 
-  <?php if (isset($_SESSION['toast_error'])): ?>
-    <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+<!-- 🔔 Toast แสดงข้อผิดพลาด -->
+<?php if (isset($_SESSION['toast_error'])): ?>
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
           <?= $_SESSION['toast_error'] ?>
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
-    <?php unset($_SESSION['toast_error']); ?>
-  <?php endif; ?>
-</div>
+  </div>
+  <?php unset($_SESSION['toast_error']); ?>
+<?php endif; ?>
 
 <div class="container mt-4">
   <div class="card shadow border-0 p-4">
     <div class="row g-4 align-items-center">
       <div class="col-md-5 text-center">
-        <img src="<?= $imgPath ?>" class="img-fluid rounded shadow-sm" 
-             alt="<?= htmlspecialchars($product['p_name']) ?>">
+        <img src="<?= $imgPath ?>" class="img-fluid rounded shadow-sm" alt="<?= htmlspecialchars($product['p_name']) ?>">
       </div>
 
       <div class="col-md-7">
         <h3 class="fw-bold"><?= htmlspecialchars($product['p_name']) ?></h3>
-        <p class="text-muted mb-1">
-          หมวดหมู่: <?= htmlspecialchars($product['cat_name'] ?? '-') ?>
-        </p>
-        <h4 class="text-danger mb-3">
-          <?= number_format($product['p_price'], 2) ?> บาท
-        </h4>
+        <p class="text-muted mb-1">หมวดหมู่: <?= htmlspecialchars($product['cat_name'] ?? '-') ?></p>
+        <h4 class="text-danger mb-3"><?= number_format($product['p_price'], 2) ?> บาท</h4>
         <p><?= nl2br(htmlspecialchars($product['p_description'])) ?></p>
 
         <div class="mt-3">
           <?php if (isset($_SESSION['customer_id'])): ?>
-            <!-- ✅ ถ้าล็อกอินแล้ว -->
             <form method="post">
               <div class="d-flex align-items-center gap-2 mb-3">
                 <label for="qty" class="fw-semibold">จำนวน:</label>
@@ -133,12 +121,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               <button type="submit" class="btn btn-success">
                 🛒 เพิ่มลงตะกร้า
               </button>
-              <a href="index.php" class="btn btn-secondary">
-                ⬅️ กลับหน้าร้าน
-              </a>
+              <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าร้าน</a>
             </form>
           <?php else: ?>
-            <!-- 🚫 ถ้ายังไม่ล็อกอิน -->
             <div class="alert alert-warning">
               🔑 กรุณาเข้าสู่ระบบก่อนเพื่อทำการสั่งซื้อ
             </div>
