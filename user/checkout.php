@@ -94,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $_SESSION['toast_success'] = "✅ สั่งซื้อสำเร็จ! หมายเลขคำสั่งซื้อ #{$orderId}";
       $_SESSION['order_total'] = $totalPrice;
       $_SESSION['order_payment'] = $payment;
-      header("Location: payment_confirm.php?id={$orderId}");
+      header("Location: orders.php?id={$orderId}");
       exit;
     } catch (Exception $e) {
       $conn->rollBack();
