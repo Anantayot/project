@@ -65,11 +65,14 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               }
 
               // ✅ แปลง payment_method เป็นภาษาไทย
-              $methodText = match($o['payment_method']) {
-                'QR' => '💳 ชำระด้วยคิวอาร์โค้ด',
-                'COD' => '💵 เก็บเงินปลายทาง',
-                default => htmlspecialchars($o['payment_method'])
-              };
+              if ($o['payment_method'] === 'QR') {
+                $methodText = '💳 ชำระด้วยคิวอาร์โค้ด';
+              } elseif ($o['payment_method'] === 'COD') {
+                $methodText = '💵 เก็บเงินปลายทาง';
+              } else {
+                $methodText = htmlspecialchars($o['payment_method']);
+              }
+              
           ?>
             <tr>
               <td>#<?= $index ?></td>
