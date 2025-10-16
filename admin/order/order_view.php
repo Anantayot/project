@@ -167,5 +167,5 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
 
 <?php
 $pageContent = ob_get_clean();
-include __DIR__ . "/../partials/layout.php";
+include __DIR__ . "orders.php";
 ?>
