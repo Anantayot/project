@@ -39,14 +39,12 @@ function setToast($type, $msg) {
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['new_payment'])) {
   $new_payment = $_POST['new_payment'];
 
-  // อนุญาตเฉพาะ 2 แบบเท่านั้น
   if (!in_array($new_payment, ['COD', 'QR'])) {
     setToast('error', '❌ วิธีชำระเงินไม่ถูกต้อง');
     header("Location: order_detail.php?id={$order_id}");
     exit;
   }
 
-  // อัปเดตฐานข้อมูล
   $stmt = $conn->prepare("UPDATE orders 
                           SET payment_method = :method, payment_status = 'รอดำเนินการ', admin_verified = NULL 
                           WHERE order_id = :oid AND customer_id = :cid");
@@ -55,6 +53,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['new_payment'])) {
     ':oid' => $order_id,
     ':cid' => $customer_id
   ]);
+
+  // ถ้าเปลี่ยนเป็น QR → เด้งไปแจ้งชำระเงิน
+  if ($new_payment === 'QR') {
+    setToast('success', '✅ เปลี่ยนเป็นชำระด้วย QR Code แล้ว กรุณาแจ้งชำระเงิน');
+    header("Location: payment_confirm.php?id={$order_id}");
+    exit;
+  }
 
   setToast('success', '✅ เปลี่ยนวิธีชำระเงินเรียบร้อยแล้ว');
   header("Location: order_detail.php?id={$order_id}");
@@ -122,12 +127,10 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           <p><strong>วันที่สั่งซื้อ:</strong> <?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></p>
 
           <?php
-          // ✅ แปลงชื่อวิธีชำระเงิน
           $methodText = ($order['payment_method'] === 'QR') ? 'ชำระด้วย QR Code' :
                         (($order['payment_method'] === 'COD') ? 'เก็บเงินปลายทาง' :
                         htmlspecialchars($order['payment_method']));
 
-          // ✅ สีของสถานะ
           $payment_status = $order['payment_status'] ?? 'รอดำเนินการ';
           $order_status = $order['order_status'] ?? 'รอดำเนินการ';
           $admin_verified = $order['admin_verified'] ?? 'รอตรวจสอบ';
@@ -143,7 +146,6 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
 
-          <!-- 🔄 ปุ่มเปลี่ยนวิธีการชำระเงิน -->
           <?php if ($payment_status === 'รอดำเนินการ'): ?>
             <form method="post" class="mt-2">
               <div class="input-group">
@@ -162,9 +164,13 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           <p><strong>สถานะคำสั่งซื้อ:</strong>
             <span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span>
           </p>
-          <p><strong>สถานะตรวจสอบโดยแอดมิน:</strong>
-            <span class="badge bg-<?= $adminBadge ?>"><?= htmlspecialchars($admin_verified) ?></span>
-          </p>
+
+          <!-- ✅ แสดงเฉพาะเมื่อไม่ใช่เก็บเงินปลายทาง -->
+          <?php if ($order['payment_method'] !== 'COD'): ?>
+            <p><strong>สถานะตรวจสอบโดยแอดมิน:</strong>
+              <span class="badge bg-<?= $adminBadge ?>"><?= htmlspecialchars($admin_verified) ?></span>
+            </p>
+          <?php endif; ?>
 
           <?php if (!empty($order['shipped_date'])): ?>
             <p><strong>วันที่จัดส่ง:</strong> <?= date('d/m/Y H:i', strtotime($order['shipped_date'])) ?></p>
