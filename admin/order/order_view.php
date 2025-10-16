@@ -5,14 +5,16 @@ ini_set('display_errors', 1);
 $pageTitle = "รายละเอียดคำสั่งซื้อ";
 ob_start();
 
-include __DIR__ . "/../partials/connectdb.php"; // ✅ path ถูกต้องแล้ว
+include __DIR__ . "/../partials/connectdb.php";
 
 $id = $_GET['id'] ?? null;
 if (!$id) die("❌ ไม่พบคำสั่งซื้อ");
 
-// ✅ อนุมัติ / ปฏิเสธ
+// ✅ อัปเดตสถานะคำสั่งซื้อ / ชำระเงิน
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $action = $_POST['action'] ?? '';
+
+  // อนุมัติ/ปฏิเสธการชำระเงิน (เดิม)
   if ($action === 'approve') {
     $stmt = $conn->prepare("UPDATE orders 
                             SET payment_status='ชำระเงินแล้ว', 
@@ -22,6 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute([$id]);
     echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='order_view.php?id=$id';</script>";
     exit;
+
   } elseif ($action === 'reject') {
     $stmt = $conn->prepare("UPDATE orders 
                             SET payment_status='ยกเลิก', 
@@ -31,6 +34,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute([$id]);
     echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='order_view.php?id=$id';</script>";
     exit;
+  }
+
+  // เปลี่ยนสถานะชำระเงิน (ใหม่)
+  if ($action === 'update_payment_status') {
+    $newPayment = $_POST['payment_status'] ?? '';
+    if (in_array($newPayment, ['รอดำเนินการ','ชำระเงินแล้ว','ยกเลิก'])) {
+      $stmt = $conn->prepare("UPDATE orders SET payment_status=? WHERE order_id=?");
+      $stmt->execute([$newPayment, $id]);
+      echo "<script>alert('💰 เปลี่ยนสถานะชำระเงินเรียบร้อยแล้ว');window.location='order_view.php?id=$id';</script>";
+      exit;
+    }
+  }
+
+  // เปลี่ยนสถานะคำสั่งซื้อ (ใหม่)
+  if ($action === 'update_order_status') {
+    $newOrder = $_POST['order_status'] ?? '';
+    if (in_array($newOrder, ['รอดำเนินการ','กำลังจัดเตรียม','จัดส่งแล้ว','สำเร็จ','ยกเลิก'])) {
+      $stmt = $conn->prepare("UPDATE orders SET order_status=? WHERE order_id=?");
+      $stmt->execute([$newOrder, $id]);
+      echo "<script>alert('📦 เปลี่ยนสถานะคำสั่งซื้อเรียบร้อยแล้ว');window.location='order_view.php?id=$id';</script>";
+      exit;
+    }
   }
 }
 
@@ -80,13 +105,25 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       ?>
       <p><b>ช่องทางการชำระเงิน:</b> <?= $methodText ?></p>
 
+      <!-- ✅ สถานะชำระเงิน -->
       <p><b>สถานะชำระเงิน:</b>
         <span class="badge bg-<?= ($order['payment_status']=='ชำระเงินแล้ว'?'success':($order['payment_status']=='ยกเลิก'?'danger':'warning')) ?>">
           <?= htmlspecialchars($order['payment_status']) ?>
         </span>
       </p>
 
-      <!-- ✅ ตรวจสอบโดยแอดมิน (เฉพาะถ้าไม่ใช่ COD) -->
+      <!-- ✅ ปุ่มเปลี่ยนสถานะชำระเงิน -->
+      <form method="post" class="d-flex gap-2 mb-3">
+        <input type="hidden" name="action" value="update_payment_status">
+        <select name="payment_status" class="form-select form-select-sm w-auto bg-dark text-light border-secondary">
+          <option value="รอดำเนินการ" <?= $order['payment_status']=='รอดำเนินการ'?'selected':'' ?>>รอดำเนินการ</option>
+          <option value="ชำระเงินแล้ว" <?= $order['payment_status']=='ชำระเงินแล้ว'?'selected':'' ?>>ชำระเงินแล้ว</option>
+          <option value="ยกเลิก" <?= $order['payment_status']=='ยกเลิก'?'selected':'' ?>>ยกเลิก</option>
+        </select>
+        <button type="submit" class="btn btn-outline-light btn-sm">💰 บันทึก</button>
+      </form>
+
+      <!-- ✅ ตรวจสอบโดยแอดมิน -->
       <?php if ($order['payment_method'] !== 'COD'): ?>
       <p><b>ตรวจสอบโดยแอดมิน:</b>
         <span class="badge bg-<?= ($order['admin_verified']=='อนุมัติ'?'success':($order['admin_verified']=='ปฏิเสธ'?'danger':($order['admin_verified']=='กำลังตรวจสอบ'?'info':'secondary'))) ?>">
@@ -95,6 +132,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       </p>
       <?php endif; ?>
 
+      <!-- ✅ สถานะคำสั่งซื้อ -->
       <p><b>สถานะคำสั่งซื้อ:</b>
         <?php 
           $status = $order['order_status'] ?? 'รอดำเนินการ';
@@ -107,15 +145,26 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         <span class="badge bg-<?= $statusColor ?>"><?= htmlspecialchars($status) ?></span>
       </p>
 
-      <!-- 🔹 สลิป (เฉพาะ QR) -->
+      <!-- ✅ ปุ่มเปลี่ยนสถานะคำสั่งซื้อ -->
+      <form method="post" class="d-flex gap-2">
+        <input type="hidden" name="action" value="update_order_status">
+        <select name="order_status" class="form-select form-select-sm w-auto bg-dark text-light border-secondary">
+          <option value="รอดำเนินการ" <?= $order['order_status']=='รอดำเนินการ'?'selected':'' ?>>รอดำเนินการ</option>
+          <option value="กำลังจัดเตรียม" <?= $order['order_status']=='กำลังจัดเตรียม'?'selected':'' ?>>กำลังจัดเตรียม</option>
+          <option value="จัดส่งแล้ว" <?= $order['order_status']=='จัดส่งแล้ว'?'selected':'' ?>>จัดส่งแล้ว</option>
+          <option value="สำเร็จ" <?= $order['order_status']=='สำเร็จ'?'selected':'' ?>>สำเร็จ</option>
+          <option value="ยกเลิก" <?= $order['order_status']=='ยกเลิก'?'selected':'' ?>>ยกเลิก</option>
+        </select>
+        <button type="submit" class="btn btn-outline-light btn-sm">📝 บันทึก</button>
+      </form>
+
+      <!-- 🔹 สลิป -->
       <?php if (!empty($order['slip_image']) && $order['payment_method'] !== 'COD'): ?>
-        <p><b>หลักฐานการชำระเงิน:</b></p>
+        <p class="mt-3"><b>หลักฐานการชำระเงิน:</b></p>
         <a href="../../admin/uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
            target="_blank" class="btn btn-outline-light btn-sm">
           🧾 ดูรูปสลิป
         </a>
-      <?php elseif ($order['payment_method'] !== 'COD'): ?>
-        <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
       <?php endif; ?>
     </div>
   </div>
@@ -156,27 +205,11 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 ยอดรวม + ปุ่มจัดการ -->
+<!-- 🔹 ยอดรวม -->
 <div class="text-end mt-4">
   <h4 class="fw-bold text-success">
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
-
-  <?php if (trim($order['admin_verified']) === 'กำลังตรวจสอบ' && $order['payment_method'] !== 'COD'): ?>
-    <form method="post" class="mt-3 d-inline">
-      <button type="submit" name="action" value="approve" class="btn btn-success"
-              onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
-        ✅ อนุมัติการชำระเงิน
-      </button>
-    </form>
-
-    <form method="post" class="mt-3 d-inline">
-      <button type="submit" name="action" value="reject" class="btn btn-danger"
-              onclick="return confirm('ต้องการปฏิเสธคำสั่งซื้อนี้หรือไม่?');">
-        ❌ ปฏิเสธคำสั่งซื้อ
-      </button>
-    </form>
-  <?php endif; ?>
 
   <a href="orders.php" class="btn btn-secondary mt-3">
     <i class="bi bi-arrow-left-circle"></i> กลับ
