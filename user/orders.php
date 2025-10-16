@@ -13,7 +13,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ดึงเฉพาะออเดอร์ของลูกค้าคนนี้ (เรียงจากใหม่ไปเก่า)
+// ✅ ดึงเฉพาะออเดอร์ของลูกค้าคนนี้ (เรียงจากเก่า -> ใหม่)
 $sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date ASC";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':cid', $customer_id, PDO::PARAM_INT);
@@ -41,6 +41,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <?php include("navbar_user.php"); ?>
+
 <!-- ✅ Toast แจ้งเตือน -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
   <?php if (isset($_SESSION['toast_success'])): ?>
@@ -63,17 +64,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php unset($_SESSION['toast_error']); ?>
   <?php endif; ?>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-  toastElList.forEach(toastEl => {
-    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
-    toast.show();
-  });
-});
-</script>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">📦 ประวัติคำสั่งซื้อของคุณ</h3>
@@ -104,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
               $order_status = $o['order_status'] ?? 'รอดำเนินการ';
               
-              // สีของ payment_status
+              // ✅ สีของ payment_status
               if ($status === 'ชำระเงินแล้ว') {
                 $badgeClass = 'success';
               } elseif ($status === 'ยกเลิก') {
@@ -113,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 $badgeClass = 'warning';
               }
 
-              // สีของ order_status
+              // ✅ สีของ order_status
               if ($order_status === 'จัดส่งแล้ว') {
                 $orderBadge = 'success';
               } elseif ($order_status === 'กำลังจัดเตรียม') {
@@ -132,8 +122,11 @@ document.addEventListener("DOMContentLoaded", () => {
               } else {
                 $methodText = htmlspecialchars($o['payment_method']);
               }
+
+              // ✅ ถ้าเป็นคำสั่งซื้อที่ยกเลิก → แถวสีแดง
+              $rowClass = ($order_status === 'ยกเลิก') ? 'table-danger' : '';
           ?>
-            <tr>
+            <tr class="<?= $rowClass ?>">
               <td>#<?= $index ?></td>
               <td><?= date('d/m/Y H:i', strtotime($o['order_date'])) ?></td>
               <td><?= $methodText ?></td>
@@ -143,13 +136,11 @@ document.addEventListener("DOMContentLoaded", () => {
               <td>
                 <div class="d-flex justify-content-center flex-wrap gap-2">
                   <?php if ($status === 'รอดำเนินการ' && $o['payment_method'] === 'QR'): ?>
-                    <!-- 💰 แจ้งชำระเงิน (เฉพาะ QR และรอดำเนินการ) -->
                     <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
                       💰 แจ้งชำระเงิน
                     </a>
                   <?php endif; ?>
 
-                  <!-- 🔍 ดูรายละเอียด -->
                   <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
                     🔍 ดูรายละเอียด
                   </a>
@@ -173,6 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | ประวัติคำสั่งซื้อ
 </footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
