@@ -24,38 +24,6 @@ $imgPath = "../admin/uploads/" . $product['p_image'];
 if (!file_exists($imgPath) || empty($product['p_image'])) {
   $imgPath = "img/default.png";
 }
-
-// ✅ เมื่อกดเพิ่มลงตะกร้า
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  if (!isset($_SESSION['customer_id'])) {
-    $_SESSION['toast_error'] = "⚠️ กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า";
-    header("Location: login.php");
-    exit;
-  }
-
-  $pid = $product['p_id'];
-  $qty = intval($_POST['qty'] ?? 1);
-
-  if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-
-  // ถ้ามีสินค้าในตะกร้าอยู่แล้ว → เพิ่มจำนวน
-  if (isset($_SESSION['cart'][$pid])) {
-    $_SESSION['cart'][$pid]['qty'] += $qty;
-    $_SESSION['toast_success'] = "🛒 เพิ่มจำนวนสินค้านี้ในตะกร้าเรียบร้อยแล้ว!";
-  } else {
-    $_SESSION['cart'][$pid] = [
-      'id' => $pid,
-      'name' => $product['p_name'],
-      'price' => $product['p_price'],
-      'image' => $product['p_image'],
-      'qty' => $qty
-    ];
-    $_SESSION['toast_success'] = "✅ เพิ่มสินค้าในตะกร้าเรียบร้อยแล้ว!";
-  }
-
-  header("Location: product_detail.php?id=" . $pid);
-  exit;
-}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -68,34 +36,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <?php include("navbar_user.php"); ?>
 
-<!-- 🔔 Toast แสดงเมื่อเพิ่มสินค้าสำเร็จ -->
+<!-- 🔔 Toast แจ้งเตือน -->
 <?php if (isset($_SESSION['toast_success'])): ?>
   <div class="toast-container position-fixed top-0 end-0 p-3">
-    <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
       <div class="d-flex">
         <div class="toast-body">
           <?= $_SESSION['toast_success'] ?>
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
   </div>
   <?php unset($_SESSION['toast_success']); ?>
-<?php endif; ?>
-
-<!-- 🔔 Toast แสดงข้อผิดพลาด -->
-<?php if (isset($_SESSION['toast_error'])): ?>
-  <div class="toast-container position-fixed top-0 end-0 p-3">
-    <div class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          <?= $_SESSION['toast_error'] ?>
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-    </div>
-  </div>
-  <?php unset($_SESSION['toast_error']); ?>
 <?php endif; ?>
 
 <div class="container mt-4">
@@ -113,7 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <div class="mt-3">
           <?php if (isset($_SESSION['customer_id'])): ?>
-            <form method="post">
+            <!-- ✅ ส่งข้อมูลไป cart_add.php -->
+            <form method="post" action="cart_add.php">
+              <input type="hidden" name="id" value="<?= $product['p_id'] ?>">
               <div class="d-flex align-items-center gap-2 mb-3">
                 <label for="qty" class="fw-semibold">จำนวน:</label>
                 <input type="number" name="qty" id="qty" min="1" value="1" class="form-control w-25">
@@ -121,7 +76,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               <button type="submit" class="btn btn-success">
                 🛒 เพิ่มลงตะกร้า
               </button>
-              <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าร้าน</a>
+              <a href="index.php" class="btn btn-secondary">
+                ⬅️ กลับหน้าร้าน
+              </a>
             </form>
           <?php else: ?>
             <div class="alert alert-warning">
