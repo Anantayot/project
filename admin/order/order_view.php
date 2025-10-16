@@ -36,10 +36,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     exit;
   }
 
-  // เปลี่ยนสถานะชำระเงิน (ใหม่)
+  // ✅ เปลี่ยนสถานะชำระเงิน (ใหม่)
   if ($action === 'update_payment_status') {
     $newPayment = $_POST['payment_status'] ?? '';
+
     if (in_array($newPayment, ['รอดำเนินการ','ชำระเงินแล้ว','ยกเลิก'])) {
+
+      // ถ้าเลือก "ชำระเงินแล้ว" → อัปเดต admin_verified = 'อนุมัติ' ด้วย
+      if ($newPayment === 'ชำระเงินแล้ว') {
+        $stmt = $conn->prepare("UPDATE orders 
+                                SET payment_status=?, 
+                                    admin_verified='อนุมัติ',
+                                    order_status='กำลังจัดเตรียม'
+                                WHERE order_id=?");
+        $stmt->execute([$newPayment, $id]);
+        echo "<script>alert('💰 ชำระเงินแล้ว → แอดมินอนุมัติ + กำลังจัดเตรียมเรียบร้อย');window.location='order_view.php?id=$id';</script>";
+        exit;
+      }
+
+      // ถ้าเป็นสถานะอื่น (เช่น ยกเลิก / รอดำเนินการ)
       $stmt = $conn->prepare("UPDATE orders SET payment_status=? WHERE order_id=?");
       $stmt->execute([$newPayment, $id]);
       echo "<script>alert('💰 เปลี่ยนสถานะชำระเงินเรียบร้อยแล้ว');window.location='order_view.php?id=$id';</script>";
@@ -47,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
   }
 
-  // เปลี่ยนสถานะคำสั่งซื้อ (ใหม่)
+  // ✅ เปลี่ยนสถานะคำสั่งซื้อ (ใหม่)
   if ($action === 'update_order_status') {
     $newOrder = $_POST['order_status'] ?? '';
     if (in_array($newOrder, ['รอดำเนินการ','กำลังจัดเตรียม','จัดส่งแล้ว','สำเร็จ','ยกเลิก'])) {
@@ -112,7 +127,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         </span>
       </p>
 
-      <!-- ✅ ปุ่มเปลี่ยนสถานะชำระเงิน -->
+      <!-- ✅ เปลี่ยนสถานะชำระเงิน -->
       <form method="post" class="d-flex gap-2 mb-3">
         <input type="hidden" name="action" value="update_payment_status">
         <select name="payment_status" class="form-select form-select-sm w-auto bg-dark text-light border-secondary">
@@ -208,7 +223,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
 <!-- 🔹 ยอดรวม -->
 <div class="text-end mt-4">
   <h4 class="fw-bold text-success">
-    <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
+    <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format(array_sum(array_column($items,'subtotal')), 2) ?> ฿
   </h4>
 
   <a href="orders.php" class="btn btn-secondary mt-3">
