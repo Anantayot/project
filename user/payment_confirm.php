@@ -39,7 +39,6 @@ function generatePromptPayPayload($promptPayID, $amount = 0.00) {
     $id = '0066' . substr($id, 1);
   }
 
-  // ฟิลด์ตามมาตรฐาน EMVCo
   $data = [
     '00' => '01',
     '01' => '11',
@@ -80,7 +79,7 @@ function crc16($data) {
    ✅ ยืนยันการชำระเงิน (บันทึกไฟล์ใน admin/uploads/slips)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = __DIR__ . "/admin/uploads/slips/"; // ← เปลี่ยนตำแหน่งที่เก็บไฟล์
+  $uploadDir = __DIR__ . "/admin/uploads/slips/";
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
   $fileName = "";
@@ -91,11 +90,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile);
   }
 
-  $stmt = $conn->prepare("UPDATE orders 
-                          SET payment_status = 'ชำระเงินแล้ว', 
-                              slip_image = :slip,
-                              payment_date = NOW()
-                          WHERE order_id = :oid AND customer_id = :cid");
+  // ✅ ถ้ามีสลิป → กำหนดสถานะเป็น “กำลังตรวจสอบ”
+  if (!empty($fileName)) {
+    $stmt = $conn->prepare("UPDATE orders 
+                            SET payment_status = 'รอดำเนินการ', 
+                                admin_verified = 'กำลังตรวจสอบ',
+                                slip_image = :slip,
+                                payment_date = NOW()
+                            WHERE order_id = :oid AND customer_id = :cid");
+  } else {
+    // ❌ ถ้าไม่ได้แนบสลิป จะไม่เปลี่ยน admin_verified
+    $stmt = $conn->prepare("UPDATE orders 
+                            SET payment_status = 'รอดำเนินการ', 
+                                slip_image = :slip,
+                                payment_date = NOW()
+                            WHERE order_id = :oid AND customer_id = :cid");
+  }
+
   $stmt->execute([
     ':slip' => $fileName,
     ':oid' => $order_id,
@@ -103,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   ]);
 
   echo "<script>
-    alert('✅ ยืนยันการชำระเงินเรียบร้อยแล้ว!');
+    alert('📤 ส่งสลิปเรียบร้อยแล้ว! กำลังรอแอดมินตรวจสอบ');
     window.location='order_detail.php?id=$order_id';
   </script>";
   exit;
@@ -131,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       <?php if ($order['payment_method'] === 'QR'): ?>
         <?php
-          $shopPromptPay = "0903262100"; // ใส่หมายเลขพร้อมเพย์จริง
+          $shopPromptPay = "0903262100"; // หมายเลขพร้อมเพย์ของร้าน
           $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
         ?>
         <div class="text-center my-4">
