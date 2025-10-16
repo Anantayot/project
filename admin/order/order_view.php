@@ -107,7 +107,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <!-- 🔹 สลิป (เฉพาะ QR) -->
       <?php if (!empty($order['slip_image']) && $order['payment_method'] !== 'COD'): ?>
         <p><b>หลักฐานการชำระเงิน:</b></p>
-        <a href="../admin/uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
+        <a href="../../admin/uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
            target="_blank" class="btn btn-outline-light btn-sm">
           🧾 ดูรูปสลิป
         </a>
@@ -141,7 +141,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         ?>
         <tr>
           <td><?= $i + 1 ?></td>
-          <td><img src="../admin/uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded"></td>
+          <td><img src="../../admin/uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded"></td>
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
           <td><?= (int)$it['quantity'] ?></td>
           <td><?= number_format($it['price'], 2) ?></td>
