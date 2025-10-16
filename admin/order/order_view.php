@@ -7,7 +7,7 @@ include __DIR__ . "/../partials/connectdb.php";
 $id = $_GET['id'] ?? null;
 if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
 
-// ✅ ถ้ามีการกดปุ่มอนุมัติหรือปฏิเสธ
+// ✅ อนุมัติ / ปฏิเสธ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $action = $_POST['action'] ?? '';
   if ($action === 'approve') {
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 
-// ดึงข้อมูลคำสั่งซื้อ + ลูกค้า
+// ดึงข้อมูลคำสั่งซื้อ
 $sql = "SELECT o.*, c.name AS customer_name, c.phone, c.address
         FROM orders o
         LEFT JOIN customers c ON o.customer_id = c.customer_id
@@ -42,7 +42,7 @@ $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$order) die("❌ ไม่พบข้อมูลคำสั่งซื้อในฐานข้อมูล");
 
-// ดึงรายละเอียดสินค้าในออเดอร์
+// ดึงรายละเอียดสินค้า
 $details = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
                            FROM order_details d
                            LEFT JOIN product p ON d.p_id = p.p_id
@@ -80,20 +80,25 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <p><b>สถานะคำสั่งซื้อ:</b>
         <?php 
           $status = $order['order_status'] ?? 'รอดำเนินการ';
-          if ($status == 'เสร็จสิ้น') {
-              $statusColor = 'success';
-          } elseif ($status == 'กำลังดำเนินการ') {
-              $statusColor = 'warning';
-          } elseif ($status == 'ยกเลิก') {
-              $statusColor = 'danger';
-          } else {
-              $statusColor = 'secondary';
-          }
+          if ($status == 'เสร็จสิ้น') $statusColor = 'success';
+          elseif ($status == 'กำลังดำเนินการ') $statusColor = 'warning';
+          elseif ($status == 'ยกเลิก') $statusColor = 'danger';
+          else $statusColor = 'secondary';
         ?>
-        <span class="badge bg-<?= $statusColor ?>">
-          <?= htmlspecialchars($status) ?>
-        </span>
+        <span class="badge bg-<?= $statusColor ?>"><?= htmlspecialchars($status) ?></span>
       </p>
+
+      <!-- 🔹 ปุ่มดูรูปสลิป -->
+      <?php if (!empty($order['slip_image'])): ?>
+        <p><b>หลักฐานการชำระเงิน:</b></p>
+        <a href="../uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
+           target="_blank" class="btn btn-outline-light btn-sm">
+          🧾 ดูรูปสลิป
+        </a>
+      <?php else: ?>
+        <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
+      <?php endif; ?>
+
     </div>
   </div>
 </div>
@@ -122,8 +127,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         <tr>
           <td><?= $i + 1 ?></td>
           <td>
-            <img src="../uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" 
-                 width="50" class="rounded">
+            <img src="../uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded">
           </td>
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
           <td><?= (int)$it['quantity'] ?></td>
@@ -136,13 +140,12 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<!-- 🔹 ยอดรวม -->
+<!-- 🔹 ยอดรวม + ปุ่มจัดการ -->
 <div class="text-end mt-4">
   <h4 class="fw-bold text-success">
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
 
-  <!-- ปุ่มจัดการสถานะ -->
   <form method="post" class="mt-3 d-inline">
     <button type="submit" name="action" value="approve" class="btn btn-success"
             onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
