@@ -2,31 +2,39 @@
 session_start();
 include("connectdb.php");
 
+// ✅ ต้องล็อกอินก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
 }
 
+// ✅ ตรวจสอบว่ามี id ออเดอร์ไหม
 if (!isset($_GET['id'])) {
-  die("❌ ไม่พบรหัสคำสั่งซื้อ");
+  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสคำสั่งซื้อ</p>");
 }
 
 $order_id = intval($_GET['id']);
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ตรวจสอบว่าออเดอร์นี้เป็นของลูกค้าคนนี้จริงและยังไม่ถูกยกเลิก
-$stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ? AND payment_status != 'ยกเลิก'");
+// ✅ ตรวจสอบว่าออเดอร์เป็นของลูกค้าคนนี้จริงไหม และยังไม่ถูกยกเลิก
+$stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ? AND order_status != 'ยกเลิก'");
 $stmt->execute([$order_id, $customer_id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$order) {
-  die("<script>alert('ไม่พบคำสั่งซื้อนี้ หรือไม่สามารถยกเลิกได้');window.location='orders.php';</script>");
+  die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือถูกยกเลิกไปแล้ว</p>");
 }
 
-// ✅ อัปเดตสถานะเป็น “ยกเลิก”
-$update = $conn->prepare("UPDATE orders SET payment_status = 'ยกเลิก' WHERE order_id = ?");
-$update->execute([$order_id]);
+// ✅ อัปเดตสถานะการชำระเงินและคำสั่งซื้อให้เป็น "ยกเลิก"
+$update = $conn->prepare("
+  UPDATE orders 
+  SET payment_status = 'ยกเลิก',
+      order_status = 'ยกเลิก'
+  WHERE order_id = ? AND customer_id = ?
+");
+$update->execute([$order_id, $customer_id]);
 
-echo "<script>alert('✅ ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว');window.location='orders.php';</script>";
+// ✅ กลับไปหน้ารายละเอียดออเดอร์
+header("Location: order_detail.php?id=" . $order_id);
 exit;
 ?>
