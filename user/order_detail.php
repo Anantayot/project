@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อน
+// ✅ ตรวจสอบการเข้าสู่ระบบ
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
@@ -14,14 +14,14 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ตรวจสอบว่ามี id คำสั่งซื้อหรือไม่
+// ✅ ตรวจสอบว่ามี id หรือไม่
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสคำสั่งซื้อ</p>");
 }
 
 $order_id = intval($_GET['id']);
 
-// ✅ ดึงข้อมูลคำสั่งซื้อ (เฉพาะของลูกค้าคนนั้น)
+// ✅ ดึงข้อมูลคำสั่งซื้อของลูกค้าคนนี้
 $stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ?");
 $stmt->execute([$order_id, $customer_id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -30,7 +30,7 @@ if (!$order) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือคุณไม่มีสิทธิ์ดู</p>");
 }
 
-// ✅ ดึงข้อมูลสินค้าในคำสั่งซื้อนี้
+// ✅ ดึงรายการสินค้าในคำสั่งซื้อ
 $stmt2 = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
                          FROM order_details d 
                          LEFT JOIN product p ON d.p_id = p.p_id 
@@ -68,7 +68,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           <p><strong>วันที่สั่งซื้อ:</strong> <?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></p>
 
           <?php
-            // ✅ แปลงชื่อวิธีชำระเงินเป็นไทย
+            // ✅ แปลงชื่อวิธีชำระเงิน
             if ($order['payment_method'] === 'QR') {
               $methodText = '💳 ชำระด้วย QR Code';
             } elseif ($order['payment_method'] === 'COD') {
@@ -78,21 +78,26 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             }
 
             // ✅ สีของสถานะการชำระเงิน
-            $payment_status = $order['payment_status'] ?? 'รอดำเนินการ';
-            $paymentBadge = match($payment_status) {
-              'ชำระเงินแล้ว' => 'success',
-              'ยกเลิก' => 'danger',
-              default => 'warning'
-            };
+            $payment_status = isset($order['payment_status']) ? $order['payment_status'] : 'รอดำเนินการ';
+            if ($payment_status === 'ชำระเงินแล้ว') {
+              $paymentBadge = 'success';
+            } elseif ($payment_status === 'ยกเลิก') {
+              $paymentBadge = 'danger';
+            } else {
+              $paymentBadge = 'warning';
+            }
 
             // ✅ สีของสถานะคำสั่งซื้อ
-            $order_status = $order['order_status'] ?? 'รอดำเนินการ';
-            $orderBadge = match($order_status) {
-              'จัดส่งแล้ว' => 'success',
-              'กำลังจัดเตรียม' => 'info',
-              'ยกเลิก' => 'danger',
-              default => 'secondary'
-            };
+            $order_status = isset($order['order_status']) ? $order['order_status'] : 'รอดำเนินการ';
+            if ($order_status === 'จัดส่งแล้ว') {
+              $orderBadge = 'success';
+            } elseif ($order_status === 'กำลังจัดเตรียม') {
+              $orderBadge = 'info';
+            } elseif ($order_status === 'ยกเลิก') {
+              $orderBadge = 'danger';
+            } else {
+              $orderBadge = 'secondary';
+            }
           ?>
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
@@ -103,8 +108,12 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             <span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span>
           </p>
 
-          <?php if (!empty($order['shipped_date'])): ?>
+          <?php if (isset($order['shipped_date']) && !empty($order['shipped_date'])): ?>
             <p><strong>วันที่จัดส่ง:</strong> <?= date('d/m/Y H:i', strtotime($order['shipped_date'])) ?></p>
+          <?php endif; ?>
+
+          <?php if (isset($order['tracking_number']) && !empty($order['tracking_number'])): ?>
+            <p><strong>หมายเลขพัสดุ:</strong> 📦 <?= htmlspecialchars($order['tracking_number']) ?></p>
           <?php endif; ?>
 
           <?php if ($payment_status === 'รอดำเนินการ' && $order['payment_method'] === 'QR'): ?>
