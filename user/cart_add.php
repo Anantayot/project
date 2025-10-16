@@ -13,7 +13,8 @@ $qty = intval($_POST['qty'] ?? 1);
 
 // ✅ ถ้ายังไม่ล็อกอิน → ให้ไปหน้า login
 if (!isset($_SESSION['customer_id'])) {
-  echo "<script>alert('กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า'); window.location='login.php';</script>";
+  $_SESSION['toast_error'] = "⚠️ กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า";
+  header("Location: login.php");
   exit;
 }
 
@@ -23,7 +24,15 @@ $stmt->execute([$productId]);
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$product) {
-  echo "<script>alert('❌ ไม่พบสินค้านี้'); window.location='index.php';</script>";
+  $_SESSION['toast_error'] = "❌ ไม่พบสินค้านี้";
+  header("Location: index.php");
+  exit;
+}
+
+// ✅ ตรวจสอบว่าสินค้าหมดหรือไม่
+if ($product['p_stock'] <= 0) {
+  $_SESSION['toast_error'] = "❌ สินค้านี้หมดสต็อกแล้ว";
+  header("Location: index.php");
   exit;
 }
 
@@ -42,10 +51,10 @@ if (isset($_SESSION['cart'][$productId])) {
   ];
 }
 
-// ✅ แจ้งเตือนและกลับไปที่ตะกร้า
-echo "<script>
-  alert('✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!');
-  window.location='cart.php';
-</script>";
+// ✅ ตั้ง Toast แจ้งเตือน
+$_SESSION['toast_success'] = "✅ เพิ่มสินค้า <b>" . htmlspecialchars($product['p_name']) . "</b> ในตะกร้าเรียบร้อยแล้ว!";
+
+// ✅ กลับไปหน้าเดิม
+header("Location: index.php");
 exit;
 ?>
