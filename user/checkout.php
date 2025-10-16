@@ -36,11 +36,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     try {
       $conn->beginTransaction();
 
+      // ✅ คำนวณราคารวม
       $totalPrice = 0;
       foreach ($cart as $item) {
         $totalPrice += $item['price'] * $item['qty'];
       }
 
+      // ✅ เพิ่มคำสั่งซื้อ
       $stmt = $conn->prepare("INSERT INTO orders 
         (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
         VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
@@ -53,6 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $orderId = $conn->lastInsertId();
 
+      // ✅ เพิ่มรายละเอียดสินค้า
       $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
                                    VALUES (:oid, :pid, :qty, :price)");
       foreach ($cart as $item) {
@@ -65,10 +68,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       }
 
       $conn->commit();
-      unset($_SESSION['cart']);
 
-      // ✅ Toast แสดงชื่อผู้ใช้และ redirect อัตโนมัติ
+      // ✅ เคลียร์ตะกร้า + Toast + ไป orders.php เลย
+      unset($_SESSION['cart']);
       $_SESSION['toast_success'] = "✅ ขอบคุณคุณ " . htmlspecialchars($user['name']) . " 🎉 คำสั่งซื้อของคุณถูกบันทึกแล้ว";
+      header("Location: orders.php");
+      exit;
 
     } catch (Exception $e) {
       $conn->rollBack();
@@ -91,12 +96,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <!-- ✅ Toast แจ้งเตือน -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
   <?php if (isset($_SESSION['toast_success'])): ?>
-    <div class="toast align-items-center text-bg-success border-0 show" role="alert" id="autoRedirectToast">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
       <div class="d-flex">
-        <div class="toast-body fs-6 fw-semibold">
-          <?= $_SESSION['toast_success'] ?><br>
-          <small class="text-light">กำลังพาไปยังหน้ารายการคำสั่งซื้อ...</small>
-        </div>
+        <div class="toast-body fs-6 fw-semibold"><?= $_SESSION['toast_success'] ?></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
@@ -208,17 +210,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 document.addEventListener("DOMContentLoaded", () => {
   const toastElList = [].slice.call(document.querySelectorAll('.toast'));
   toastElList.forEach(toastEl => {
-    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    const toast = new bootstrap.Toast(toastEl, { delay: 3000, autohide: true });
     toast.show();
   });
-
-  // ✅ Redirect ไปหน้า orders.php หลัง Toast เด้ง 5 วินาที
-  const redirectToast = document.getElementById("autoRedirectToast");
-  if (redirectToast) {
-    setTimeout(() => {
-      window.location.href = "orders.php";
-    }, 5000);
-  }
 });
 </script>
 
