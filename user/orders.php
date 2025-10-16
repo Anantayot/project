@@ -13,7 +13,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-$sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date DESC";
+$sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date ASC";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':cid', $customer_id, PDO::PARAM_INT);
 $stmt->execute();
@@ -52,8 +52,9 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </tr>
         </thead>
         <tbody class="text-center">
-          <?php foreach ($orders as $o): ?>
-            <?php
+          <?php 
+            $index = 1; // ✅ ลำดับคำสั่งซื้อของลูกค้าคนนี้
+            foreach ($orders as $o): 
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
               if ($status === 'ชำระเงินแล้ว') {
                 $badgeClass = 'success';
@@ -62,15 +63,15 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               } else {
                 $badgeClass = 'warning';
               }
-            ?>
+          ?>
             <tr>
-              <td>#<?= $o['order_id'] ?></td>
+              <td>#<?= $index ?></td> <!-- ✅ ใช้ลำดับเฉพาะของลูกค้า -->
               <td><?= date('d/m/Y H:i', strtotime($o['order_date'])) ?></td>
               <td><?= htmlspecialchars($o['payment_method']) ?></td>
               <td><?= number_format($o['total_price'], 2) ?> บาท</td>
               <td><span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></td>
               <td>
-                <?php if ($status === 'รอดำเนินการ' && in_array($o['payment_method'], ['BANK_TRANSFER', 'QR'])): ?>
+                <?php if ($status === 'รอดำเนินการ' && $o['payment_method'] === 'QR'): ?>
                   <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
                     💰 แจ้งชำระเงิน
                   </a>
@@ -81,7 +82,10 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endif; ?>
               </td>
             </tr>
-          <?php endforeach; ?>
+          <?php 
+            $index++; 
+            endforeach; 
+          ?>
         </tbody>
       </table>
     </div>
