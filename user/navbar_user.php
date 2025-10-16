@@ -35,14 +35,21 @@ if (session_status() === PHP_SESSION_NONE) {
             </a>
           </li>
 
-          <!-- แสดงชื่อผู้ใช้ -->
+          <!-- 🔹 ปุ่มโปรไฟล์ -->
           <li class="nav-item">
-            <span class="nav-link text-info fw-semibold">
-              👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
-            </span>
+            <a href="profile.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active text-info' : '' ?>">
+              👤 โปรไฟล์
+            </a>
           </li>
 
-          <!-- ปุ่มออกจากระบบ -->
+          <!-- 🔹 แสดงชื่อผู้ใช้ -->
+          <li class="nav-item">
+            <span class="nav-link text-light fw-semibold">
+              สวัสดี, <?= htmlspecialchars($_SESSION['customer_name']) ?>
+            </span>
+          </li>
+          
+          <!-- 🔹 ปุ่มออกจากระบบ -->
           <li class="nav-item">
             <a href="logout.php" class="nav-link text-danger">
               🚪 ออกจากระบบ
@@ -50,7 +57,7 @@ if (session_status() === PHP_SESSION_NONE) {
           </li>
 
         <?php else: ?>
-          <!-- ยังไม่ล็อกอิน -->
+          <!-- 🔹 ยังไม่ล็อกอิน -->
           <li class="nav-item">
             <a href="login.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'login.php' ? 'active' : '' ?>">
               🔑 เข้าสู่ระบบ
