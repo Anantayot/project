@@ -137,7 +137,13 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
 
           <!-- 🔄 ปุ่มเปลี่ยนวิธีการชำระเงิน -->
-          <?php if ($payment_status === 'รอดำเนินการ'): ?>
+          <?php 
+          if (
+            $payment_status === 'รอดำเนินการ' &&
+            $order['admin_verified'] !== 'กำลังตรวจสอบ' &&
+            $order['admin_verified'] !== 'อนุมัติ'
+          ): 
+          ?>
             <form method="post" class="mt-2">
               <div class="input-group">
                 <select name="new_payment" class="form-select" required>
