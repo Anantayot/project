@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 
-// ดึงข้อมูลคำสั่งซื้อ
+// ✅ ดึงข้อมูลคำสั่งซื้อ
 $sql = "SELECT o.*, c.name AS customer_name, c.phone, c.address
         FROM orders o
         LEFT JOIN customers c ON o.customer_id = c.customer_id
@@ -42,7 +42,7 @@ $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if(!$order) die("❌ ไม่พบข้อมูลคำสั่งซื้อในฐานข้อมูล");
 
-// ดึงรายละเอียดสินค้า
+// ✅ ดึงรายละเอียดสินค้า
 $details = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
                            FROM order_details d
                            LEFT JOIN product p ON d.p_id = p.p_id
@@ -67,16 +67,30 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     <div class="col-md-6">
       <h5 class="fw-bold text-info"><i class="bi bi-clipboard-data"></i> ข้อมูลคำสั่งซื้อ</h5>
       <p><b>วันที่สั่งซื้อ:</b> <?= date("d/m/Y", strtotime($order['order_date'])) ?></p>
+
+      <!-- ✅ แสดงช่องทางการชำระเงิน -->
+      <?php 
+        $method = $order['payment_method'];
+        $methodText = ($method === 'QR') ? 'ชำระด้วย QR Code' :
+                      (($method === 'COD') ? 'เก็บเงินปลายทาง' : htmlspecialchars($method));
+      ?>
+      <p><b>ช่องทางการชำระเงิน:</b> <?= $methodText ?></p>
+
       <p><b>สถานะชำระเงิน:</b>
         <span class="badge bg-<?= ($order['payment_status']=='ชำระเงินแล้ว'?'success':($order['payment_status']=='ยกเลิก'?'danger':'warning')) ?>">
           <?= htmlspecialchars($order['payment_status']) ?>
         </span>
       </p>
+
+      <!-- ✅ แสดงเฉพาะถ้าไม่ใช่เก็บเงินปลายทาง -->
+      <?php if ($order['payment_method'] !== 'COD'): ?>
       <p><b>ตรวจสอบโดยแอดมิน:</b>
         <span class="badge bg-<?= ($order['admin_verified']=='อนุมัติ'?'success':($order['admin_verified']=='ปฏิเสธ'?'danger':($order['admin_verified']=='กำลังตรวจสอบ'?'info':'secondary'))) ?>">
           <?= htmlspecialchars($order['admin_verified'] ?? 'รอตรวจสอบ') ?>
         </span>
       </p>
+      <?php endif; ?>
+
       <p><b>สถานะคำสั่งซื้อ:</b>
         <?php 
           $status = $order['order_status'] ?? 'รอดำเนินการ';
@@ -89,14 +103,16 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       </p>
 
       <!-- 🔹 ปุ่มดูรูปสลิป -->
-      <?php if (!empty($order['slip_image'])): ?>
+      <?php if (!empty($order['slip_image']) && $order['payment_method'] !== 'COD'): ?>
         <p><b>หลักฐานการชำระเงิน:</b></p>
         <a href="../uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
            target="_blank" class="btn btn-outline-light btn-sm">
           🧾 ดูรูปสลิป
         </a>
       <?php else: ?>
-        <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
+        <?php if ($order['payment_method'] !== 'COD'): ?>
+          <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
+        <?php endif; ?>
       <?php endif; ?>
     </div>
   </div>
@@ -143,7 +159,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
 
-  <?php if ($order['admin_verified'] === 'กำลังตรวจสอบ'): ?>
+  <?php if ($order['admin_verified'] === 'กำลังตรวจสอบ' && $order['payment_method'] !== 'COD'): ?>
     <form method="post" class="mt-3 d-inline">
       <button type="submit" name="action" value="approve" class="btn btn-success"
               onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
