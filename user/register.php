@@ -10,13 +10,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $phone = trim($_POST['phone']);
   $address = trim($_POST['address']);
 
-  // ✅ ตรวจสอบเบอร์โทรศัพท์ (ต้องเป็นตัวเลข 10 หลัก)
+  // ✅ ตรวจสอบเบอร์โทรศัพท์ (ต้องเป็นตัวเลข 10 หลักเท่านั้น)
   if (!preg_match('/^[0-9]{10}$/', $phone)) {
-    $_SESSION['toast_error'] = "⚠️ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)";
+    $_SESSION['toast_error'] = "⚠️ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เฉพาะตัวเลข 10 หลัก)";
     header("Location: register.php");
     exit;
   }
 
+  // ✅ ตรวจสอบรหัสผ่านตรงกันไหม
   if ($password !== $confirm) {
     $_SESSION['toast_error'] = "❌ รหัสผ่านไม่ตรงกัน";
     header("Location: register.php");
@@ -35,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   // ✅ เข้ารหัสรหัสผ่าน
   $hashed = password_hash($password, PASSWORD_DEFAULT);
 
-  // ✅ บันทึกลงฐานข้อมูล
+  // ✅ บันทึกข้อมูลลงฐานข้อมูล
   $stmt = $conn->prepare("
     INSERT INTO customers (name, email, password, phone, address)
     VALUES (:name, :email, :password, :phone, :address)
@@ -113,8 +114,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <div class="mb-3">
           <label class="form-label">เบอร์โทรศัพท์</label>
-          <input type="text" name="phone" class="form-control" maxlength="10" pattern="\d{10}" 
-                 title="กรุณากรอกเบอร์โทรศัพท์ 10 หลัก" required>
+          <input type="text" name="phone" class="form-control" maxlength="10"
+                 pattern="^[0-9]{10}$" title="กรุณากรอกเฉพาะตัวเลข 10 หลัก" required
+                 oninput="this.value=this.value.replace(/[^0-9]/g,'');">
         </div>
 
         <div class="mb-3">
