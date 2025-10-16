@@ -26,7 +26,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>MyCommiss | ประวัติคำสั่งซื้อ</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <style>
     body { background-color: #f8f9fa; }
     .btn {
@@ -95,15 +94,15 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <td><span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></td>
               <td>
                 <div class="d-flex justify-content-center flex-wrap gap-2">
-                  <!-- 🔍 ดูรายละเอียด -->
-                  <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
-                    🔍 ดูรายละเอียด
-                  </a>
-
-                  <!-- 💰 แจ้งชำระเงิน (เฉพาะแบบ QR และรอดำเนินการ) -->
                   <?php if ($status === 'รอดำเนินการ' && $o['payment_method'] === 'QR'): ?>
+                    <!-- 💰 แจ้งชำระเงิน (เฉพาะ QR และรอดำเนินการ) -->
                     <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
                       💰 แจ้งชำระเงิน
+                    </a>
+                  <?php else: ?>
+                    <!-- 🔍 ดูรายละเอียด -->
+                    <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
+                      🔍 ดูรายละเอียด
                     </a>
                   <?php endif; ?>
                 </div>
