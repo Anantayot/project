@@ -129,7 +129,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       💰 แจ้งชำระเงินคำสั่งซื้อ #<?= $order_id ?>
     </div>
     <div class="card-body text-center">
-      <p><strong>ยอดที่ต้องชำระ:</strong> <?= number_format($order['total_price'], 2) ?> บาท</p>
       <p><strong>วิธีชำระ:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
 
       <?php if ($order['payment_method'] === 'QR'): ?>
