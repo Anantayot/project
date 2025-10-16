@@ -5,10 +5,10 @@ ini_set('display_errors', 1);
 $pageTitle = "รายละเอียดคำสั่งซื้อ";
 ob_start();
 
-include __DIR__ . "/../partials/connectdb.php"; // ✅ ปรับ path ให้ถูกกับโครงสร้างของคุณ
+include __DIR__ . "/../partials/connectdb.php"; // ✅ path ถูกต้องแล้ว
 
 $id = $_GET['id'] ?? null;
-if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
+if (!$id) die("❌ ไม่พบคำสั่งซื้อ");
 
 // ✅ อนุมัติ / ปฏิเสธ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt = $conn->prepare("UPDATE orders 
                             SET payment_status='ชำระเงินแล้ว', 
                                 admin_verified='อนุมัติ',
-                                order_status='กำลังดำเนินการ'
+                                order_status='กำลังจัดเตรียม'
                             WHERE order_id=?");
     $stmt->execute([$id]);
     echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='order_view.php?id=$id';</script>";
@@ -43,7 +43,7 @@ $stmt = $conn->prepare($sql);
 $stmt->execute([$id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if(!$order) die("❌ ไม่พบข้อมูลคำสั่งซื้อในฐานข้อมูล");
+if (!$order) die("❌ ไม่พบข้อมูลคำสั่งซื้อในฐานข้อมูล");
 
 // ✅ ดึงรายละเอียดสินค้า
 $details = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
@@ -58,6 +58,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
   <i class="bi bi-receipt"></i> รายละเอียดคำสั่งซื้อ #<?= htmlspecialchars($order['order_id']) ?>
 </h3>
 
+<!-- 🔹 ข้อมูลลูกค้า -->
 <div class="card p-4 shadow-lg border-0 mb-4" style="background:linear-gradient(145deg,#161b22,#0e1116);color:#fff;">
   <div class="row">
     <div class="col-md-6">
@@ -66,6 +67,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <p><b>เบอร์โทร:</b> <?= htmlspecialchars($order['phone']) ?></p>
       <p><b>ที่อยู่:</b> <?= htmlspecialchars($order['address']) ?></p>
     </div>
+
     <div class="col-md-6">
       <h5 class="fw-bold text-info"><i class="bi bi-clipboard-data"></i> ข้อมูลคำสั่งซื้อ</h5>
       <p><b>วันที่สั่งซื้อ:</b> <?= date("d/m/Y", strtotime($order['order_date'])) ?></p>
@@ -96,8 +98,9 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <p><b>สถานะคำสั่งซื้อ:</b>
         <?php 
           $status = $order['order_status'] ?? 'รอดำเนินการ';
-          if ($status == 'เสร็จสิ้น') $statusColor = 'success';
-          elseif ($status == 'กำลังดำเนินการ') $statusColor = 'warning';
+          if ($status == 'สำเร็จ') $statusColor = 'success';
+          elseif ($status == 'กำลังจัดเตรียม') $statusColor = 'warning';
+          elseif ($status == 'จัดส่งแล้ว') $statusColor = 'info';
           elseif ($status == 'ยกเลิก') $statusColor = 'danger';
           else $statusColor = 'secondary';
         ?>
