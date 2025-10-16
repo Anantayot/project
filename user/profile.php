@@ -119,17 +119,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <textarea name="address" rows="3" class="form-control"><?= htmlspecialchars($user['address']) ?></textarea>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าหลัก</a>
-          <button type="submit" class="btn btn-primary">💾 บันทึกข้อมูล</button>
+        <!-- ✅ ปุ่มจัดให้อยู่ในแถวเดียวกัน -->
+        <div class="d-flex justify-content-center align-items-center gap-3 mt-4 flex-wrap">
+          <a href="index.php" class="btn btn-secondary">
+            ⬅️ กลับหน้าหลัก
+          </a>
+
+          <a href="change_password.php" class="btn btn-info text-white">
+            🔑 เปลี่ยนรหัสผ่าน
+          </a>
+
+          <button type="submit" class="btn btn-primary">
+            💾 บันทึกข้อมูล
+          </button>
         </div>
       </form>
-
-      <hr class="my-4">
-
-      <div class="text-center">
-        <a href="change_password.php" class="btn btn-outline-danger btn-sm">🔑 เปลี่ยนรหัสผ่าน</a>
-      </div>
     </div>
   </div>
 </div>
