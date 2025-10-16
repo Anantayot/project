@@ -147,7 +147,11 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   </div>
 
   <!-- 🔹 ปุ่มยกเลิกคำสั่งซื้อ -->
-  <div class="text-center mt-5 d-flex justify-content-center gap-3 flex-wrap">
+  <div class="mt-5 d-flex justify-content-between align-items-center flex-wrap">
+    <a href="orders.php" class="btn btn-secondary px-4 py-2 fw-semibold">
+      ⬅️ กลับไปหน้าคำสั่งซื้อ
+    </a>
+
     <?php if ($status === 'รอดำเนินการ'): ?>
       <a href="order_cancel.php?id=<?= $order_id ?>" 
          class="btn btn-danger px-4 py-2 fw-semibold"
@@ -155,11 +159,8 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
          ❌ ยกเลิกคำสั่งซื้อ
       </a>
     <?php endif; ?>
-
-    <a href="orders.php" class="btn btn-secondary px-4 py-2 fw-semibold">
-      ⬅️ กลับไปหน้าคำสั่งซื้อ
-    </a>
   </div>
+
 
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
