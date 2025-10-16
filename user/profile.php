@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ⬅️ กลับหน้าหลัก
           </a>
 
-          <a href="change_password.php" class="btn btn-info text-white">
+          <a href="change_password.php" class="btn btn-danger text-white">
             🔑 เปลี่ยนรหัสผ่าน
           </a>
 
