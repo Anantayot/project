@@ -76,37 +76,27 @@ function crc16($data) {
 }
 
 /* =======================================================
-   ✅ ยืนยันการชำระเงิน (บันทึกไฟล์ใน admin/uploads/slips)
+   ✅ ยืนยันการชำระเงิน (เก็บใน project/admin/uploads/slips)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = __DIR__ . "../admin/uploads/slips/";
+  $uploadDir = __DIR__ . "/../admin/uploads/slips/"; // ✅ แก้ path ให้ถูกต้อง
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
   $fileName = "";
   if (!empty($_FILES['slip']['name'])) {
     $ext = pathinfo($_FILES['slip']['name'], PATHINFO_EXTENSION);
-    $fileName = "slip_" . time() . "_" . rand(1000,9999) . "." . $ext;
+    $fileName = "slip_" . time() . "_" . rand(1000, 9999) . "." . $ext;
     $targetFile = $uploadDir . $fileName;
     move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile);
   }
 
-  // ✅ ถ้ามีสลิป → กำหนดสถานะเป็น “กำลังตรวจสอบ”
-  if (!empty($fileName)) {
-    $stmt = $conn->prepare("UPDATE orders 
-                            SET payment_status = 'รอดำเนินการ', 
-                                admin_verified = 'กำลังตรวจสอบ',
-                                slip_image = :slip,
-                                payment_date = NOW()
-                            WHERE order_id = :oid AND customer_id = :cid");
-  } else {
-    // ❌ ถ้าไม่ได้แนบสลิป จะไม่เปลี่ยน admin_verified
-    $stmt = $conn->prepare("UPDATE orders 
-                            SET payment_status = 'รอดำเนินการ', 
-                                slip_image = :slip,
-                                payment_date = NOW()
-                            WHERE order_id = :oid AND customer_id = :cid");
-  }
-
+  // ✅ อัปเดตสถานะเป็น "รอดำเนินการ" และให้ admin ตรวจสอบ
+  $stmt = $conn->prepare("UPDATE orders 
+                          SET payment_status = 'รอดำเนินการ',
+                              admin_verified = 'กำลังตรวจสอบ',
+                              slip_image = :slip,
+                              payment_date = NOW()
+                          WHERE order_id = :oid AND customer_id = :cid");
   $stmt->execute([
     ':slip' => $fileName,
     ':oid' => $order_id,
@@ -114,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   ]);
 
   echo "<script>
-    alert('📤 ส่งสลิปเรียบร้อยแล้ว! กำลังรอแอดมินตรวจสอบ');
+    alert('✅ ส่งสลิปเรียบร้อยแล้ว! ระบบกำลังตรวจสอบการชำระเงินของคุณ');
     window.location='order_detail.php?id=$order_id';
   </script>";
   exit;
@@ -142,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       <?php if ($order['payment_method'] === 'QR'): ?>
         <?php
-          $shopPromptPay = "0903262100"; // หมายเลขพร้อมเพย์ของร้าน
+          $shopPromptPay = "0903262100"; // หมายเลขพร้อมเพย์ร้านค้า
           $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
         ?>
         <div class="text-center my-4">
@@ -165,12 +155,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="mb-3 text-start">
           <label for="slip" class="form-label">แนบสลิปการชำระเงิน</label>
           <input type="file" name="slip" id="slip" class="form-control" accept="image/*">
-          <small class="text-muted">* สามารถกดยืนยันโดยไม่ต้องแนบสลิปได้</small>
+          <small class="text-muted">* แนบสลิปแล้วกดยืนยัน ระบบจะตรวจสอบให้โดยอัตโนมัติ</small>
         </div>
 
         <div class="d-grid gap-2 mt-4">
           <button type="submit" class="btn btn-success">✅ ยืนยันการชำระเงิน</button>
-          <a href="orders.php" class="btn btn-secondary">⬅️ กลับไปหน้าคำสั่งซื้อ</a>
+          <a href="orders.php" class="btn btn-secondary">⬅️ กลับหน้าคำสั่งซื้อ</a>
           <a href="order_detail.php?id=<?= $order_id ?>" class="btn btn-outline-primary">🔍 ดูรายละเอียดสินค้า</a>
         </div>
       </form>
