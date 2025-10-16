@@ -155,10 +155,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </table>
     </div>
   <?php endif; ?>
-
-  <div class="text-center mt-4">
-    <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าหลัก</a>
-  </div>
 </div>
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
