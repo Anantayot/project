@@ -28,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // ✅ ตรวจสอบความถูกต้องของเบอร์โทรศัพท์ (10 หลัก ตัวเลขเท่านั้น)
   if (!preg_match('/^[0-9]{10}$/', $phone)) {
-    $msg = "❌ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)";
+    $toast_type = "danger";
+    $toast_message = "❌ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)";
   } else {
     // ✅ บันทึกข้อมูลลงฐานข้อมูล
     $stmt = $conn->prepare("UPDATE customers 
@@ -36,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             WHERE customer_id = ?");
     $stmt->execute([$name, $email, $phone, $address, $customer_id]);
 
-    $msg = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
+    $toast_type = "success";
+    $toast_message = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
     
     // อัปเดต session เผื่อมีการเปลี่ยนชื่อ
     $_SESSION['customer_name'] = $name;
@@ -70,11 +72,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       border-radius: 15px 15px 0 0;
     }
     .btn:hover { transform: scale(1.05); transition: 0.2s; }
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1055;
+    }
   </style>
 </head>
 <body>
 
 <?php include("navbar_user.php"); ?>
+
+<!-- 🔔 Toast แจ้งเตือน -->
+<div class="toast-container">
+  <?php if (!empty($toast_message)): ?>
+    <div class="toast align-items-center text-bg-<?= $toast_type ?> border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $toast_message ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast_success'] ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
+</div>
 
 <div class="container">
   <div class="profile-card">
@@ -82,11 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       👤 โปรไฟล์ของฉัน
     </div>
     <div class="card-body p-4">
-      <?php if (!empty($msg)): ?>
-        <div class="alert text-center <?= strpos($msg, '❌') !== false ? 'alert-danger' : 'alert-success' ?>">
-          <?= $msg ?>
-        </div>
-      <?php endif; ?>
 
       <form method="POST">
         <div class="mb-3">
@@ -119,13 +148,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <textarea name="address" rows="3" class="form-control"><?= htmlspecialchars($user['address']) ?></textarea>
         </div>
 
-        <!-- ✅ ปุ่มจัดให้อยู่ในแถวเดียวกัน -->
+        <!-- ✅ ปุ่มอยู่ในแถวเดียวกันและจัดตรงกลาง -->
         <div class="d-flex justify-content-center align-items-center gap-3 mt-4 flex-wrap">
           <a href="index.php" class="btn btn-secondary">
             ⬅️ กลับหน้าหลัก
           </a>
 
-          <a href="change_password.php" class="btn btn-danger text-white">
+          <a href="change_password.php" class="btn btn-success text-white">
             🔑 เปลี่ยนรหัสผ่าน
           </a>
 
@@ -142,5 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   © <?= date('Y') ?> MyCommiss | โปรไฟล์ผู้ใช้
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

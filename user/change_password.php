@@ -19,6 +19,9 @@ if (!$user) {
   die("<p class='text-center text-danger mt-5'>❌ ไม่พบข้อมูลผู้ใช้</p>");
 }
 
+$toast_type = ""; // สำหรับเก็บประเภทแจ้งเตือน
+$toast_message = "";
+
 // ✅ เมื่อกดเปลี่ยนรหัสผ่าน
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $old_pass = $_POST['old_password'];
@@ -26,9 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $confirm_pass = $_POST['confirm_password'];
 
   if (empty($old_pass) || empty($new_pass) || empty($confirm_pass)) {
-    $msg = "❌ กรุณากรอกข้อมูลให้ครบทุกช่อง";
+    $toast_type = "danger";
+    $toast_message = "❌ กรุณากรอกข้อมูลให้ครบทุกช่อง";
   } elseif ($new_pass !== $confirm_pass) {
-    $msg = "❌ รหัสผ่านใหม่และยืนยันไม่ตรงกัน";
+    $toast_type = "danger";
+    $toast_message = "❌ รหัสผ่านใหม่และยืนยันไม่ตรงกัน";
   } else {
     // ✅ ตรวจสอบรหัสผ่านเดิม
     if (password_verify($old_pass, $user['password'])) {
@@ -37,11 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $stmt = $conn->prepare("UPDATE customers SET password = ? WHERE customer_id = ?");
       $stmt->execute([$hash_new, $customer_id]);
 
-      // ✅ เปลี่ยนรหัสผ่านสำเร็จ → redirect ไปหน้าโปรไฟล์
-      header("Location: profile.php?msg=success");
+      // ✅ redirect ไปหน้า profile พร้อมแจ้งเตือน
+      $_SESSION['toast_success'] = "✅ เปลี่ยนรหัสผ่านเรียบร้อยแล้ว";
+      header("Location: profile.php");
       exit;
     } else {
-      $msg = "❌ รหัสผ่านเดิมไม่ถูกต้อง";
+      $toast_type = "danger";
+      $toast_message = "❌ รหัสผ่านเดิมไม่ถูกต้อง";
     }
   }
 }
@@ -68,11 +75,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       border-radius: 15px 15px 0 0;
     }
     .btn:hover { transform: scale(1.05); transition: 0.2s; }
+    /* 🔔 Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1055;
+    }
   </style>
 </head>
 <body>
 
 <?php include("navbar_user.php"); ?>
+
+<!-- 🔔 Toast Container -->
+<div class="toast-container">
+  <?php if (!empty($toast_message)): ?>
+    <div class="toast align-items-center text-bg-<?= $toast_type ?> border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $toast_message ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  <?php endif; ?>
+</div>
 
 <div class="container">
   <div class="password-card">
@@ -80,12 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       🔑 เปลี่ยนรหัสผ่าน
     </div>
     <div class="card-body p-4">
-      <?php if (!empty($msg)): ?>
-        <div class="alert text-center <?= strpos($msg, '❌') !== false ? 'alert-danger' : 'alert-success' ?>">
-          <?= $msg ?>
-        </div>
-      <?php endif; ?>
-
       <form method="POST">
         <div class="mb-3">
           <label class="form-label fw-semibold">รหัสผ่านเดิม</label>
@@ -119,5 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   © <?= date('Y') ?> MyCommiss | เปลี่ยนรหัสผ่าน
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
