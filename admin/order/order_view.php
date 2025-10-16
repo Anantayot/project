@@ -5,12 +5,11 @@ ob_start();
 include __DIR__ . "/../partials/connectdb.php";
 
 $id = $_GET['id'] ?? null;
-if (!$id) die("❌ ไม่พบคำสั่งซื้อ");
+if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
 
 // ✅ อนุมัติ / ปฏิเสธ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $action = $_POST['action'] ?? '';
-
   if ($action === 'approve') {
     $stmt = $conn->prepare("UPDATE orders 
                             SET payment_status='ชำระเงินแล้ว', 
@@ -18,24 +17,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 order_status='กำลังดำเนินการ'
                             WHERE order_id=?");
     $stmt->execute([$id]);
-
     echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='orders.php';</script>";
     exit;
-  } 
-  elseif ($action === 'reject') {
+  } elseif ($action === 'reject') {
     $stmt = $conn->prepare("UPDATE orders 
                             SET payment_status='ยกเลิก', 
                                 admin_verified='ปฏิเสธ',
                                 order_status='ยกเลิก'
                             WHERE order_id=?");
     $stmt->execute([$id]);
-
     echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='orders.php';</script>";
     exit;
   }
 }
 
-// ✅ ดึงข้อมูลคำสั่งซื้อ + ลูกค้า
+// ดึงข้อมูลคำสั่งซื้อ
 $sql = "SELECT o.*, c.name AS customer_name, c.phone, c.address
         FROM orders o
         LEFT JOIN customers c ON o.customer_id = c.customer_id
@@ -44,9 +40,9 @@ $stmt = $conn->prepare($sql);
 $stmt->execute([$id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$order) die("❌ ไม่พบข้อมูลคำสั่งซื้อในฐานข้อมูล");
+if(!$order) die("❌ ไม่พบข้อมูลคำสั่งซื้อในฐานข้อมูล");
 
-// ✅ ดึงรายละเอียดสินค้า
+// ดึงรายละเอียดสินค้า
 $details = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
                            FROM order_details d
                            LEFT JOIN product p ON d.p_id = p.p_id
@@ -64,29 +60,23 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
   <div class="row">
     <div class="col-md-6">
       <h5 class="fw-bold text-success"><i class="bi bi-person-circle"></i> ข้อมูลลูกค้า</h5>
-      <p><b>ชื่อ:</b> <?= htmlspecialchars($order['customer_name'] ?? '-') ?></p>
-      <p><b>เบอร์โทร:</b> <?= htmlspecialchars($order['phone'] ?? '-') ?></p>
-      <p><b>ที่อยู่:</b> <?= htmlspecialchars($order['address'] ?? '-') ?></p>
+      <p><b>ชื่อ:</b> <?= htmlspecialchars($order['customer_name']) ?></p>
+      <p><b>เบอร์โทร:</b> <?= htmlspecialchars($order['phone']) ?></p>
+      <p><b>ที่อยู่:</b> <?= htmlspecialchars($order['address']) ?></p>
     </div>
-
     <div class="col-md-6">
       <h5 class="fw-bold text-info"><i class="bi bi-clipboard-data"></i> ข้อมูลคำสั่งซื้อ</h5>
       <p><b>วันที่สั่งซื้อ:</b> <?= date("d/m/Y", strtotime($order['order_date'])) ?></p>
-
       <p><b>สถานะชำระเงิน:</b>
         <span class="badge bg-<?= ($order['payment_status']=='ชำระเงินแล้ว'?'success':($order['payment_status']=='ยกเลิก'?'danger':'warning')) ?>">
-          <?= htmlspecialchars($order['payment_status'] ?? 'รอดำเนินการ') ?>
+          <?= htmlspecialchars($order['payment_status']) ?>
         </span>
       </p>
-
       <p><b>ตรวจสอบโดยแอดมิน:</b>
-        <?php
-          $verify = $order['admin_verified'] ?? 'รอตรวจสอบ';
-          $verifyColor = ($verify=='อนุมัติ'?'success':($verify=='ปฏิเสธ'?'danger':($verify=='กำลังตรวจสอบ'?'info':'secondary')));
-        ?>
-        <span class="badge bg-<?= $verifyColor ?>"><?= htmlspecialchars($verify) ?></span>
+        <span class="badge bg-<?= ($order['admin_verified']=='อนุมัติ'?'success':($order['admin_verified']=='ปฏิเสธ'?'danger':($order['admin_verified']=='กำลังตรวจสอบ'?'info':'secondary'))) ?>">
+          <?= htmlspecialchars($order['admin_verified'] ?? 'รอตรวจสอบ') ?>
+        </span>
       </p>
-
       <p><b>สถานะคำสั่งซื้อ:</b>
         <?php 
           $status = $order['order_status'] ?? 'รอดำเนินการ';
@@ -99,17 +89,16 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       </p>
 
       <!-- 🔹 ปุ่มดูรูปสลิป -->
-      <?php 
-        $slipPath = "../uploads/slips/" . ($order['slip_image'] ?? '');
-        if (!empty($order['slip_image']) && file_exists(__DIR__ . "/../../uploads/slips/" . $order['slip_image'])):
-      ?>
+      <?php if (!empty($order['slip_image'])): ?>
         <p><b>หลักฐานการชำระเงิน:</b></p>
-        <a href="<?= $slipPath ?>" target="_blank" class="btn btn-outline-light btn-sm">
+        <a href="../uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
+           target="_blank" class="btn btn-outline-light btn-sm">
           🧾 ดูรูปสลิป
         </a>
       <?php else: ?>
         <p class="text-muted"><i>ยังไม่มีสลิปอัปโหลด</i></p>
       <?php endif; ?>
+
     </div>
   </div>
 </div>
@@ -132,9 +121,8 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <tbody>
         <?php 
         $totalSum = 0;
-        foreach ($items as $i => $it):
-          $subtotal = $it['subtotal'] ?? ($it['price'] * $it['quantity']);
-          $totalSum += $subtotal;
+        foreach ($items as $i => $it): 
+          $totalSum += $it['subtotal'];
         ?>
         <tr>
           <td><?= $i + 1 ?></td>
@@ -144,7 +132,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
           <td><?= (int)$it['quantity'] ?></td>
           <td><?= number_format($it['price'], 2) ?></td>
-          <td><?= number_format($subtotal, 2) ?></td>
+          <td><?= number_format($it['subtotal'], 2) ?></td>
         </tr>
         <?php endforeach; ?>
       </tbody>
