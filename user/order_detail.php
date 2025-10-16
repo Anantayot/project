@@ -30,6 +30,37 @@ if (!$order) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือคุณไม่มีสิทธิ์ดู</p>");
 }
 
+// ✅ ฟังก์ชัน Toast
+function setToast($type, $msg) {
+  $_SESSION["toast_" . $type] = $msg;
+}
+
+// ✅ เปลี่ยนวิธีการชำระเงิน
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['new_payment'])) {
+  $new_payment = $_POST['new_payment'];
+
+  // อนุญาตเฉพาะ 2 แบบเท่านั้น
+  if (!in_array($new_payment, ['COD', 'QR'])) {
+    setToast('error', '❌ วิธีชำระเงินไม่ถูกต้อง');
+    header("Location: order_detail.php?id={$order_id}");
+    exit;
+  }
+
+  // อัปเดตฐานข้อมูล
+  $stmt = $conn->prepare("UPDATE orders 
+                          SET payment_method = :method, payment_status = 'รอดำเนินการ', admin_verified = NULL 
+                          WHERE order_id = :oid AND customer_id = :cid");
+  $stmt->execute([
+    ':method' => $new_payment,
+    ':oid' => $order_id,
+    ':cid' => $customer_id
+  ]);
+
+  setToast('success', '✅ เปลี่ยนวิธีชำระเงินเรียบร้อยแล้ว');
+  header("Location: order_detail.php?id={$order_id}");
+  exit;
+}
+
 // ✅ ดึงรายการสินค้าในคำสั่งซื้อ
 $stmt2 = $conn->prepare("SELECT d.*, p.p_name, p.p_image 
                          FROM order_details d 
@@ -50,7 +81,6 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     .btn:hover { transform: scale(1.05); }
     .badge { font-size: 0.9rem; padding: 6px 10px; }
     .card-header { background: #212529 !important; color: #fff; }
-    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
   </style>
 </head>
 <body class="bg-light">
@@ -107,14 +137,26 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           $orderBadge = ($order_status === 'จัดส่งแล้ว') ? 'success' :
                         (($order_status === 'กำลังจัดเตรียม') ? 'info' :
                         (($order_status === 'ยกเลิก') ? 'danger' : 'secondary'));
-
-          // ✅ สีของ admin_verified
           $adminBadge = ($admin_verified === 'อนุมัติ') ? 'success' :
                         (($admin_verified === 'ปฏิเสธ') ? 'danger' : 'warning text-dark');
           ?>
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
-          <p><strong>สถานะการชำระเงิน:</strong>
+
+          <!-- 🔄 ปุ่มเปลี่ยนวิธีการชำระเงิน -->
+          <?php if ($payment_status === 'รอดำเนินการ'): ?>
+            <form method="post" class="mt-2">
+              <div class="input-group">
+                <select name="new_payment" class="form-select" required>
+                  <option value="COD" <?= $order['payment_method'] === 'COD' ? 'selected' : '' ?>>เก็บเงินปลายทาง</option>
+                  <option value="QR" <?= $order['payment_method'] === 'QR' ? 'selected' : '' ?>>ชำระด้วย QR Code</option>
+                </select>
+                <button type="submit" class="btn btn-outline-primary">🔄 เปลี่ยน</button>
+              </div>
+            </form>
+          <?php endif; ?>
+
+          <p class="mt-3"><strong>สถานะการชำระเงิน:</strong>
             <span class="badge bg-<?= $paymentBadge ?>"><?= htmlspecialchars($payment_status) ?></span>
           </p>
           <p><strong>สถานะคำสั่งซื้อ:</strong>
@@ -207,7 +249,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 document.addEventListener("DOMContentLoaded", () => {
   const toastElList = [].slice.call(document.querySelectorAll('.toast'));
   toastElList.forEach(toastEl => {
-    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    const toast = new bootstrap.Toast(toastEl, { delay: 4000, autohide: true });
     toast.show();
   });
 });
