@@ -93,7 +93,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         <tr>
           <td><?= $i + 1 ?></td>
           <td>
-            <img src="../../assets/img/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" 
+            <img src="/../uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" 
                  width="50" class="rounded">
           </td>
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
