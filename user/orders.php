@@ -44,25 +44,17 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- ✅ Toast แจ้งเตือน -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
-  <?php if (isset($_SESSION['toast_success'])): ?>
-    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
-      <div class="d-flex">
-        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+  <?php foreach (['success' => 'success', 'error' => 'danger'] as $key => $color): ?>
+    <?php if (isset($_SESSION["toast_{$key}"])): ?>
+      <div class="toast align-items-center text-bg-<?= $color ?> border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body"><?= $_SESSION["toast_{$key}"] ?></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
       </div>
-    </div>
-    <?php unset($_SESSION['toast_success']); ?>
-  <?php endif; ?>
-
-  <?php if (isset($_SESSION['toast_error'])): ?>
-    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
-      <div class="d-flex">
-        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    </div>
-    <?php unset($_SESSION['toast_error']); ?>
-  <?php endif; ?>
+      <?php unset($_SESSION["toast_{$key}"]); ?>
+    <?php endif; ?>
+  <?php endforeach; ?>
 </div>
 
 <div class="container mt-4">
@@ -89,42 +81,43 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </thead>
         <tbody class="text-center">
           <?php 
-            $index = 1; 
-            foreach ($orders as $o): 
-              $status = $o['payment_status'] ?? 'รอดำเนินการ';
-              $order_status = $o['order_status'] ?? 'รอดำเนินการ';
-              
-              // ✅ สีของ payment_status
-              if ($status === 'ชำระเงินแล้ว') {
-                $badgeClass = 'success';
-              } elseif ($status === 'ยกเลิก') {
-                $badgeClass = 'danger';
-              } else {
-                $badgeClass = 'warning';
-              }
+          $index = 1; 
+          foreach ($orders as $o): 
+            $status = $o['payment_status'] ?? 'รอดำเนินการ';
+            $order_status = $o['order_status'] ?? 'รอดำเนินการ';
+            $admin_verified = $o['admin_verified'] ?? 'รอตรวจสอบ';
 
-              // ✅ สีของ order_status
-              if ($order_status === 'จัดส่งแล้ว') {
-                $orderBadge = 'success';
-              } elseif ($order_status === 'กำลังจัดเตรียม') {
-                $orderBadge = 'info';
-              } elseif ($order_status === 'ยกเลิก') {
-                $orderBadge = 'danger';
-              } else {
-                $orderBadge = 'secondary';
-              }
+            // ✅ สีของ payment_status
+            if ($status === 'ชำระเงินแล้ว') {
+              $badgeClass = 'success';
+            } elseif ($status === 'ยกเลิก') {
+              $badgeClass = 'danger';
+            } else {
+              $badgeClass = 'warning';
+            }
 
-              // ✅ แปลง payment_method เป็นภาษาไทย
-              if ($o['payment_method'] === 'QR') {
-                $methodText = 'ชำระด้วย QR Code';
-              } elseif ($o['payment_method'] === 'COD') {
-                $methodText = 'เก็บเงินปลายทาง';
-              } else {
-                $methodText = htmlspecialchars($o['payment_method']);
-              }
+            // ✅ สีของ order_status
+            if ($order_status === 'จัดส่งแล้ว') {
+              $orderBadge = 'success';
+            } elseif ($order_status === 'กำลังจัดเตรียม') {
+              $orderBadge = 'info';
+            } elseif ($order_status === 'ยกเลิก') {
+              $orderBadge = 'danger';
+            } else {
+              $orderBadge = 'secondary';
+            }
 
-              // ✅ ถ้าเป็นคำสั่งซื้อที่ยกเลิก → แถวสีแดง
-              $rowClass = ($order_status === 'ยกเลิก') ? 'table-danger' : '';
+            // ✅ แปลง payment_method เป็นภาษาไทย
+            if ($o['payment_method'] === 'QR') {
+              $methodText = 'ชำระด้วย QR Code';
+            } elseif ($o['payment_method'] === 'COD') {
+              $methodText = 'เก็บเงินปลายทาง';
+            } else {
+              $methodText = htmlspecialchars($o['payment_method']);
+            }
+
+            // ✅ ถ้าเป็นคำสั่งซื้อที่ยกเลิก → แถวสีแดง
+            $rowClass = ($order_status === 'ยกเลิก') ? 'table-danger' : '';
           ?>
             <tr class="<?= $rowClass ?>">
               <td>#<?= $index ?></td>
@@ -135,7 +128,14 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <td><span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span></td>
               <td>
                 <div class="d-flex justify-content-center flex-wrap gap-2">
-                  <?php if ($status === 'รอดำเนินการ' && $o['payment_method'] === 'QR'): ?>
+                  <?php
+                  // ✅ แสดงปุ่ม "แจ้งชำระเงิน" เฉพาะเงื่อนไข
+                  if (
+                    $o['payment_method'] === 'QR' &&
+                    $status === 'รอดำเนินการ' &&
+                    !in_array($admin_verified, ['กำลังตรวจสอบ', 'อนุมัติ'])
+                  ):
+                  ?>
                     <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
                       💰 แจ้งชำระเงิน
                     </a>
@@ -148,8 +148,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               </td>
             </tr>
           <?php 
-            $index++; 
-            endforeach; 
+          $index++; 
+          endforeach; 
           ?>
         </tbody>
       </table>
