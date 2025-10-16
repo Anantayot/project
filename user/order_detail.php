@@ -69,11 +69,14 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
           <?php
             // ✅ แปลงชื่อวิธีชำระเงินเป็นไทย
-            $methodText = match($order['payment_method']) {
-              'QR' => '💳 ชำระด้วย QR Code',
-              'COD' => '💵 เก็บเงินปลายทาง',
-              default => htmlspecialchars($order['payment_method'])
-            };
+            if ($order['payment_method'] === 'QR') {
+              $methodText = 'ชำระด้วย QR Code';
+            } elseif ($order['payment_method'] === 'COD') {
+              $methodText = 'เก็บเงินปลายทาง';
+            } else {
+              $methodText = htmlspecialchars($order['payment_method']);
+            }
+            
 
             $status = $order['payment_status'] ?? 'รอดำเนินการ';
             $badgeClass = match($status) {
