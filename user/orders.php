@@ -41,6 +41,39 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <?php include("navbar_user.php"); ?>
+<!-- ✅ Toast แจ้งเตือน -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_error'])): ?>
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_error']); ?>
+  <?php endif; ?>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">📦 ประวัติคำสั่งซื้อของคุณ</h3>
@@ -140,6 +173,16 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | ประวัติคำสั่งซื้อ
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 </body>
 </html>
