@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 $pageTitle = "รายละเอียดคำสั่งซื้อ";
 ob_start();
 
-include __DIR__ . "/../../user/connectdb.php"; // ✅ ปรับ path ให้ถูกกับโครงสร้างของคุณ
+include __DIR__ . "/../partials/connectdb.ph"; // ✅ ปรับ path ให้ถูกกับโครงสร้างของคุณ
 
 $id = $_GET['id'] ?? null;
 if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
@@ -182,5 +182,5 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
 
 <?php
 $pageContent = ob_get_clean();
-include __DIR__ . "/../../partials/layout.php";
+include __DIR__ . "/../partials/layout.php";
 ?>
