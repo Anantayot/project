@@ -32,16 +32,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // ✅ เปิด Toast แบบ auto-hide 3 วินาที
-  const toastElList = [].slice.call(document.querySelectorAll('.toast'))
-  const toastList = toastElList.map(function (toastEl) {
-    return new bootstrap.Toast(toastEl, { delay: 3000 })
-  });
-  toastList.forEach(toast => toast.show());
-</script>
-
+  
 <!-- 🔔 Toast แสดงเมื่อบันทึกโปรไฟล์สำเร็จ -->
 <?php if (isset($_SESSION['toast_success'])): ?>
   <div class="toast-container position-fixed top-0 end-0 p-3">
@@ -129,6 +120,15 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | หน้าร้าน
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ✅ เปิด Toast แบบ auto-hide 3 วินาที
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'))
+  const toastList = toastElList.map(function (toastEl) {
+    return new bootstrap.Toast(toastEl, { delay: 3000 })
+  });
+  toastList.forEach(toast => toast.show());
+</script>
 
 </body>
 </html>
