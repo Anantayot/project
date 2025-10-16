@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 $pageTitle = "รายละเอียดคำสั่งซื้อ";
 ob_start();
 
-include __DIR__ . "/../partials/connectdb.ph"; // ✅ ปรับ path ให้ถูกกับโครงสร้างของคุณ
+include __DIR__ . "/../partials/connectdb.php"; // ✅ ปรับ path ให้ถูกกับโครงสร้างของคุณ
 
 $id = $_GET['id'] ?? null;
 if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
