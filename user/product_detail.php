@@ -28,7 +28,8 @@ if (!file_exists($imgPath) || empty($product['p_image'])) {
 // ✅ เมื่อกดเพิ่มลงตะกร้า (เฉพาะคนล็อกอินเท่านั้น)
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (!isset($_SESSION['customer_id'])) {
-    echo "<script>alert('กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า'); window.location='login.php';</script>";
+    $_SESSION['toast_error'] = "⚠️ กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า";
+    header("Location: login.php");
     exit;
   }
 
@@ -50,10 +51,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ];
   }
 
-  echo "<script>
-    alert('✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!');
-    window.location='cart.php';
-  </script>";
+  // ✅ Toast แจ้งเตือนเพิ่มสำเร็จ
+  $_SESSION['toast_success'] = "✅ เพิ่มสินค้าในตะกร้าเรียบร้อย!";
+  header("Location: cart.php");
   exit;
 }
 ?>
@@ -63,11 +63,46 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8">
   <title><?= htmlspecialchars($product['p_name']) ?> | รายละเอียดสินค้า</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 3000;
+    }
+  </style>
 </head>
 <body class="bg-light">
 
 <!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
+
+<!-- ✅ Toast แจ้งเตือน -->
+<div class="toast-container">
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast_success'] ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_error'])): ?>
+    <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast_error'] ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_error']); ?>
+  <?php endif; ?>
+</div>
 
 <div class="container mt-4">
   <div class="card shadow border-0 p-4">
@@ -119,6 +154,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | รายละเอียดสินค้า
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 </body>
 </html>
