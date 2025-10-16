@@ -13,6 +13,7 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
+// ✅ ดึงเฉพาะออเดอร์ของลูกค้าคนนี้ (เรียงจากเก่าไปใหม่)
 $sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date ASC";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':cid', $customer_id, PDO::PARAM_INT);
@@ -53,9 +54,10 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </thead>
         <tbody class="text-center">
           <?php 
-            $index = 1; // ✅ ลำดับคำสั่งซื้อของลูกค้าคนนี้
+            $index = 1; 
             foreach ($orders as $o): 
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
+              
               if ($status === 'ชำระเงินแล้ว') {
                 $badgeClass = 'success';
               } elseif ($status === 'ยกเลิก') {
@@ -66,13 +68,12 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
               // ✅ แปลง payment_method เป็นภาษาไทย
               if ($o['payment_method'] === 'QR') {
-                $methodText = 'ชำระด้วย QR Code';
+                $methodText = '💳 ชำระด้วย QR Code';
               } elseif ($o['payment_method'] === 'COD') {
-                $methodText = 'เก็บเงินปลายทาง';
+                $methodText = '💵 เก็บเงินปลายทาง';
               } else {
                 $methodText = htmlspecialchars($o['payment_method']);
               }
-              
           ?>
             <tr>
               <td>#<?= $index ?></td>
@@ -81,9 +82,18 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <td><?= number_format($o['total_price'], 2) ?> บาท</td>
               <td><span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></td>
               <td>
-                <?php if ($status === 'รอดำเนินการ' && $o['payment_method'] === 'QR'): ?>
-                  <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
-                    💰 แจ้งชำระเงิน
+                <?php if ($status === 'รอดำเนินการ'): ?>
+                  <?php if ($o['payment_method'] === 'QR'): ?>
+                    <a href="payment_confirm.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-warning">
+                      💰 แจ้งชำระเงิน
+                    </a>
+                  <?php endif; ?>
+                  
+                  <!-- ✅ ปุ่มยกเลิกคำสั่งซื้อ -->
+                  <a href="order_cancel.php?id=<?= $o['order_id'] ?>" 
+                     class="btn btn-sm btn-danger"
+                     onclick="return confirm('แน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?');">
+                     ❌ ยกเลิก
                   </a>
                 <?php else: ?>
                   <a href="order_detail.php?id=<?= $o['order_id'] ?>" class="btn btn-sm btn-outline-primary">
