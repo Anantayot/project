@@ -19,32 +19,27 @@ if (!$user) {
   die("<p class='text-center text-danger mt-5'>❌ ไม่พบข้อมูลผู้ใช้</p>");
 }
 
-// ✅ อัปเดตข้อมูลเมื่อกดบันทึก
+// ✅ เมื่อกดบันทึกข้อมูล
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $name = trim($_POST['name']);
   $email = trim($_POST['email']);
   $phone = trim($_POST['phone']);
   $address = trim($_POST['address']);
 
-  // ✅ ตรวจสอบความถูกต้องของเบอร์โทรศัพท์ (10 หลัก ตัวเลขเท่านั้น)
+  // ✅ ตรวจสอบเบอร์โทรศัพท์
   if (!preg_match('/^[0-9]{10}$/', $phone)) {
     $_SESSION['toast_error'] = "❌ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)";
     header("Location: profile.php");
     exit;
   } else {
-    // ✅ บันทึกข้อมูลลงฐานข้อมูล
+    // ✅ อัปเดตข้อมูล
     $stmt = $conn->prepare("UPDATE customers 
                             SET name = ?, email = ?, phone = ?, address = ? 
                             WHERE customer_id = ?");
     $stmt->execute([$name, $email, $phone, $address, $customer_id]);
 
-    // ✅ อัปเดต session เผื่อมีการเปลี่ยนชื่อ
     $_SESSION['customer_name'] = $name;
-
-    // ✅ บันทึก Toast ข้อความไว้ใน session
     $_SESSION['toast_success'] = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
-
-    // ✅ กลับไปหน้า index.php พร้อม Toast
     header("Location: index.php");
     exit;
   }
@@ -76,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 1055;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -87,23 +82,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- 🔔 Toast แจ้งเตือน -->
 <div class="toast-container">
   <?php if (isset($_SESSION['toast_error'])): ?>
-    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
-        <div class="toast-body">
-          <?= $_SESSION['toast_error'] ?>
-        </div>
+        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
     <?php unset($_SESSION['toast_error']); ?>
   <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
 </div>
 
 <div class="container">
   <div class="profile-card">
-    <div class="card-header text-center py-3">
-      👤 โปรไฟล์ของฉัน
-    </div>
+    <div class="card-header text-center py-3">👤 โปรไฟล์ของฉัน</div>
     <div class="card-body p-4">
 
       <form method="POST">
@@ -119,17 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
           <label class="form-label fw-semibold">เบอร์โทรศัพท์</label>
-          <input 
-            type="text" 
-            name="phone" 
-            value="<?= htmlspecialchars($user['phone']) ?>" 
-            class="form-control"
-            maxlength="10"
-            pattern="[0-9]{10}"
-            title="กรุณากรอกหมายเลขโทรศัพท์ 10 หลัก"
-            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);"
-            required
-          >
+          <input type="text" name="phone" value="<?= htmlspecialchars($user['phone']) ?>" 
+                 class="form-control" maxlength="10" pattern="[0-9]{10}"
+                 oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10);" required>
         </div>
 
         <div class="mb-3">
@@ -137,19 +130,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <textarea name="address" rows="3" class="form-control"><?= htmlspecialchars($user['address']) ?></textarea>
         </div>
 
-        <!-- ✅ ปุ่มอยู่ในแถวเดียวกันและจัดตรงกลาง -->
         <div class="d-flex justify-content-center align-items-center gap-3 mt-4 flex-wrap">
-          <a href="index.php" class="btn btn-secondary">
-            ⬅️ กลับหน้าหลัก
-          </a>
-
-          <a href="change_password.php" class="btn btn-success text-white">
-            🔑 เปลี่ยนรหัสผ่าน
-          </a>
-
-          <button type="submit" class="btn btn-primary">
-            💾 บันทึกข้อมูล
-          </button>
+          <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าหลัก</a>
+          <a href="change_password.php" class="btn btn-success">🔑 เปลี่ยนรหัสผ่าน</a>
+          <button type="submit" class="btn btn-primary">💾 บันทึกข้อมูล</button>
         </div>
       </form>
     </div>
@@ -162,12 +146,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // ✅ ตั้งเวลาให้ Toast แสดง 5 วิ แล้วปิดอัตโนมัติ
-  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
-  const toastList = toastElList.map(function (toastEl) {
-    return new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+  // ✅ Toast แสดง 5 วิแล้วปิดอัตโนมัติ
+  document.addEventListener("DOMContentLoaded", () => {
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.forEach(toastEl => {
+      const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+      toast.show();
+    });
   });
-  toastList.forEach(toast => toast.show());
 </script>
 
 </body>
