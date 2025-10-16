@@ -146,6 +146,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           </p>
         </div>
 
+        <script>
+          const qrContainer = document.getElementById("qrcode");
+          const payload = "<?= $payload ?>";
+          const qr = new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
+        </script>
       <?php endif; ?>
 
       <form method="post" enctype="multipart/form-data" class="mt-4">
