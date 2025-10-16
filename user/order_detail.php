@@ -50,11 +50,51 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     .btn:hover { transform: scale(1.05); }
     .badge { font-size: 0.9rem; padding: 6px 10px; }
     .card-header { background: #212529 !important; color: #fff; }
+
+    /* ✅ Toast style */
+    .toast-container { 
+      position: fixed; 
+      top: 20px; 
+      right: 20px; 
+      z-index: 3000; 
+    }
+    .toast {
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: slideDown 0.4s ease forwards;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    @keyframes slideDown {
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body class="bg-light">
 
 <?php include("navbar_user.php"); ?>
+
+<!-- ✅ Toast แจ้งเตือน -->
+<div class="toast-container">
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div id="toastSuccess" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_error'])): ?>
+    <div id="toastError" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_error']); ?>
+  <?php endif; ?>
+</div>
 
 <div class="container mt-4 mb-5">
   <h3 class="fw-bold text-center mb-4">📦 รายละเอียดคำสั่งซื้อ #<?= $order_id ?></h3>
@@ -187,6 +227,18 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | รายละเอียดคำสั่งซื้อ
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // ✅ แสดง Toast 5 วิ แล้วปิดอัตโนมัติ
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 </body>
 </html>
