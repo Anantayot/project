@@ -17,7 +17,8 @@ $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
 
 $cart = $_SESSION['cart'] ?? [];
 if (empty($cart)) {
-  echo "<script>alert('ตะกร้าสินค้าว่าง'); window.location='cart.php';</script>";
+  $_SESSION['toast_error'] = "⚠️ ตะกร้าสินค้าว่าง กรุณาเลือกสินค้าก่อนสั่งซื้อ";
+  header("Location: cart.php");
   exit;
 }
 
@@ -28,21 +29,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $payment = $_POST['payment'];
 
   if (empty($address) || empty($phone)) {
-    echo "<script>alert('กรุณากรอกที่อยู่และเบอร์โทรให้ครบถ้วน');</script>";
+    $_SESSION['toast_error'] = "❌ กรุณากรอกที่อยู่และเบอร์โทรให้ครบถ้วน";
   } else {
     try {
       $conn->beginTransaction();
 
-      // ✅ เพิ่มคำสั่งซื้อให้ตรงกับฟิลด์ในฐานข้อมูลจริง
-      $stmt = $conn->prepare("INSERT INTO orders 
-        (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
-        VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
-
+      // ✅ คำนวณราคารวม
       $totalPrice = 0;
       foreach ($cart as $item) {
         $totalPrice += $item['price'] * $item['qty'];
       }
 
+      // ✅ เพิ่มคำสั่งซื้อ
+      $stmt = $conn->prepare("INSERT INTO orders 
+        (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
+        VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
       $stmt->execute([
         ':cid' => $cid,
         ':address' => $address,
@@ -52,10 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $orderId = $conn->lastInsertId();
 
-      // ✅ เพิ่มรายละเอียดสินค้าในตาราง order_details
+      // ✅ เพิ่มรายละเอียดสินค้า
       $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
                                    VALUES (:oid, :pid, :qty, :price)");
-
       foreach ($cart as $item) {
         $stmtDetail->execute([
           ':oid' => $orderId,
@@ -67,10 +67,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $conn->commit();
       unset($_SESSION['cart']);
-      echo "<script>alert('✅ สั่งซื้อสำเร็จ!'); window.location='orders.php';</script>";
+      $_SESSION['toast_success'] = "✅ สั่งซื้อสำเร็จ! หมายเลขคำสั่งซื้อ #{$orderId}";
+      header("Location: orders.php");
+      exit;
     } catch (Exception $e) {
       $conn->rollBack();
-      echo "<script>alert('❌ Error: " . addslashes($e->getMessage()) . "');</script>";
+      $_SESSION['toast_error'] = "❌ เกิดข้อผิดพลาด: " . $e->getMessage();
     }
   }
 }
@@ -84,8 +86,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar -->
 <?php include("navbar_user.php"); ?>
+
+<!-- ✅ Toast แจ้งเตือน -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_error'])): ?>
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_error']); ?>
+  <?php endif; ?>
+</div>
 
 <div class="container mt-4">
   <h3 class="fw-bold mb-4 text-center">💳 ยืนยันคำสั่งซื้อ</h3>
@@ -175,6 +199,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | ชำระเงิน
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 </body>
 </html>
