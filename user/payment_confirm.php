@@ -79,7 +79,7 @@ function crc16($data) {
    ✅ ยืนยันการชำระเงิน (บันทึกไฟล์ใน admin/uploads/slips)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = __DIR__ . "/admin/uploads/slips/";
+  $uploadDir = __DIR__ . "../admin/uploads/slips/";
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
   $fileName = "";
