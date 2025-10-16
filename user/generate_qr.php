@@ -3,7 +3,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use chillerlan\QRCode\{QRCode, QROptions};
 
 // ✅ รับค่าเบอร์พร้อมเพย์และยอดจาก URL
-$promptpay = $_GET['pp'] ?? '0812345678'; // เบอร์พร้อมเพย์ของร้าน
+$promptpay = $_GET['pp'] ?? '0903262100'; // เบอร์พร้อมเพย์ของร้าน
 $amount = floatval($_GET['amount'] ?? 0.00);
 
 // ✅ สร้าง payload สำหรับ QR PromptPay (พร้อมเพย์)
