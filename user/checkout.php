@@ -22,13 +22,34 @@ if (empty($cart)) {
   exit;
 }
 
+// ✅ ฟังก์ชันสร้าง QR พร้อมเพย์ (ไม่ใช้ Composer)
+function generatePromptPayQR($promptPayID, $amount){
+  $mobile = preg_replace('/[^0-9]/', '', $promptPayID);
+  $payload = "00020101021129370016A00000067701011101130066{$mobile}5802TH5303764540" . number_format($amount, 2, '.', '') . "6304";
+  $crc = strtoupper(dechex(crc16($payload)));
+  return $payload . $crc;
+}
+
+function crc16($data){
+  $crc = 0xFFFF;
+  for ($i = 0; $i < strlen($data); $i++) {
+    $crc ^= ord($data[$i]) << 8;
+    for ($j = 0; $j < 8; $j++) {
+      if ($crc & 0x8000) $crc = ($crc << 1) ^ 0x1021;
+      else $crc <<= 1;
+      $crc &= 0xFFFF;
+    }
+  }
+  return $crc;
+}
+
 // ✅ เมื่อกดยืนยันคำสั่งซื้อ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $address = trim($_POST['address']);
   $phone = trim($_POST['phone']);
   $payment = $_POST['payment'];
 
-  // ✅ ตรวจสอบข้อมูลให้ครบ และเบอร์โทรต้องเป็นตัวเลข 10 หลัก
+  // ✅ ตรวจสอบเบอร์โทรให้ถูกต้อง
   if (empty($address) || empty($phone)) {
     $_SESSION['toast_error'] = "❌ กรุณากรอกที่อยู่และเบอร์โทรให้ครบถ้วน";
   } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
@@ -71,7 +92,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $conn->commit();
       unset($_SESSION['cart']);
       $_SESSION['toast_success'] = "✅ สั่งซื้อสำเร็จ! หมายเลขคำสั่งซื้อ #{$orderId}";
-      header("Location: orders.php");
+      $_SESSION['order_total'] = $totalPrice;
+      $_SESSION['order_payment'] = $payment;
+      header("Location: payment_show.php?order_id={$orderId}");
       exit;
     } catch (Exception $e) {
       $conn->rollBack();
@@ -164,24 +187,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <form method="post">
             <div class="mb-3">
               <label class="form-label">ชื่อผู้ใช้</label>
-              <input type="text" class="form-control" 
-                     value="<?= htmlspecialchars($user['name'] ?? $_SESSION['customer_name'] ?? '') ?>" disabled>
+              <input type="text" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" disabled>
             </div>
             <div class="mb-3">
               <label class="form-label">อีเมล</label>
-              <input type="text" class="form-control" 
-                     value="<?= htmlspecialchars($user['email'] ?? '') ?>" disabled>
+              <input type="text" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" disabled>
             </div>
             <div class="mb-3">
               <label class="form-label">ที่อยู่จัดส่ง</label>
-              <textarea name="address" class="form-control" rows="3" required><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+              <textarea name="address" class="form-control" rows="3" required><?= htmlspecialchars($user['address']) ?></textarea>
             </div>
             <div class="mb-3">
               <label class="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" name="phone" class="form-control" maxlength="10" pattern="^[0-9]{10}$"
-                     title="กรุณากรอกเฉพาะตัวเลข 10 หลัก" 
-                     value="<?= htmlspecialchars($user['phone'] ?? '') ?>" 
-                     oninput="this.value=this.value.replace(/[^0-9]/g,'');" required>
+              <input type="text" name="phone" maxlength="10" pattern="^[0-9]{10}$"
+                     title="กรุณากรอกเฉพาะตัวเลข 10 หลัก"
+                     oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+                     class="form-control" value="<?= htmlspecialchars($user['phone']) ?>" required>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>
