@@ -79,12 +79,14 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             
 
             $status = $order['payment_status'] ?? 'รอดำเนินการ';
-            $badgeClass = match($status) {
-              'ชำระเงินแล้ว' => 'success',
-              'ยกเลิก' => 'danger',
-              default => 'warning'
-            };
-          ?>
+            if ($status === 'ชำระเงินแล้ว') {
+              $badgeClass = 'success';
+            } elseif ($status === 'ยกเลิก') {
+              $badgeClass = 'danger';
+            } else {
+              $badgeClass = 'warning';
+            }
+            
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
           <p><strong>สถานะการชำระเงิน:</strong>
