@@ -30,42 +30,59 @@ if (!$order) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือคุณไม่มีสิทธิ์ดู</p>");
 }
 
-// ✅ ฟังก์ชันสร้าง Payload พร้อมเพย์ (เวอร์ชันใช้งานจริง)
+/* =======================================================
+   ✅ ฟังก์ชันสร้าง QR พร้อมเพย์ (มาตรฐาน EMVCo ใช้งานจริง)
+   ======================================================= */
 function generatePromptPayPayload($promptPayID, $amount = 0.00) {
-  $mobile = preg_replace('/[^0-9]/', '', $promptPayID);
-  if (strlen($mobile) == 10) {
-    $mobile = '0066' . substr($mobile, 1);
+  $id = preg_replace('/[^0-9]/', '', $promptPayID);
+  if (strlen($id) == 10) { // ถ้าเป็นเบอร์โทร
+    $id = '0066' . substr($id, 1);
   }
 
-  $payloadFormatIndicator = '000201';
-  $pointOfInitiation = '010211';
-  $merchantAccountInfo = '29370016A0000006770101110113' . sprintf('%02d', strlen($mobile)) . $mobile;
-  $countryCode = '5802TH';
-  $currencyCode = '5303764';
-  $amountField = $amount > 0 ? '54' . sprintf('%02d', strlen(number_format($amount, 2, '.', ''))) . number_format($amount, 2, '.', '') : '';
-  $checksumField = '6304';
+  // ฟิลด์ตามมาตรฐาน EMVCo
+  $data = [
+    '00' => '01', // Payload Format Indicator
+    '01' => '11', // Point of Initiation Method
+    '29' => formatField('00', 'A000000677010111') . formatField('01', $id),
+    '53' => '764', // THB
+    '54' => sprintf('%0.2f', $amount),
+    '58' => 'TH',
+  ];
 
-  $payload = $payloadFormatIndicator . $pointOfInitiation . $merchantAccountInfo . $countryCode . $currencyCode . $amountField . $checksumField;
-  return $payload . strtoupper(dechex(crc16($payload)));
+  $payload = '';
+  foreach ($data as $id => $val) {
+    $payload .= $id . sprintf('%02d', strlen($val)) . $val;
+  }
+  $payload .= '6304'; // CRC placeholder
+  return $payload . strtoupper(crc16($payload));
 }
 
-// ✅ คำนวณ CRC16 CCITT (มาตรฐานพร้อมเพย์)
+// ฟอร์แมตฟิลด์
+function formatField($id, $value) {
+  return $id . sprintf('%02d', strlen($value)) . $value;
+}
+
+// ✅ คำนวณ CRC16 CCITT-FALSE
 function crc16($data) {
   $crc = 0xFFFF;
   for ($i = 0; $i < strlen($data); $i++) {
     $crc ^= ord($data[$i]) << 8;
     for ($j = 0; $j < 8; $j++) {
-      if ($crc & 0x8000) $crc = ($crc << 1) ^ 0x1021;
-      else $crc <<= 1;
+      if ($crc & 0x8000)
+        $crc = ($crc << 1) ^ 0x1021;
+      else
+        $crc <<= 1;
       $crc &= 0xFFFF;
     }
   }
-  return $crc;
+  return strtoupper(str_pad(dechex($crc), 4, '0', STR_PAD_LEFT));
 }
 
-// ✅ เมื่อกดปุ่มยืนยันการชำระเงิน
+/* =======================================================
+   ✅ ยืนยันการชำระเงิน
+   ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = "../admin/uploads/slips/";
+  $uploadDir = "uploads/slips/";
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
   $fileName = "";
@@ -76,7 +93,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile);
   }
 
-  // ✅ อัปเดตสถานะการชำระเงิน
   $stmt = $conn->prepare("UPDATE orders 
                           SET payment_status = 'ชำระเงินแล้ว', 
                               slip_image = :slip,
@@ -118,21 +134,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       <?php if ($order['payment_method'] === 'QR'): ?>
         <?php
-          // ✅ ใส่เบอร์พร้อมเพย์ของร้านจริง
-          $shopPromptPay = "0903262100"; // 👉 เปลี่ยนเป็นเบอร์พร้อมเพย์ของร้านคุณ
+          // 👉 ใส่หมายเลขพร้อมเพย์ของร้าน (โทรศัพท์ / บัตรประชาชน / เลขบัญชี)
+          $shopPromptPay = "0903262100"; // แก้ตรงนี้ให้เป็นของจริง
           $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
         ?>
         <div class="text-center my-4">
           <h5>📱 สแกน QR พร้อมเพย์ เพื่อชำระเงิน</h5>
           <div id="qrcode" class="border p-3 rounded d-inline-block bg-white"></div>
-          <p class="mt-3 mb-0 text-muted">ยอดชำระ <?= number_format($order['total_price'], 2) ?> บาท</p>
-          <small class="text-muted">PromptPay: <?= htmlspecialchars($shopPromptPay) ?></small>
+          <p class="mt-3 text-muted">
+            💵 ยอดชำระ <?= number_format($order['total_price'], 2) ?> บาท<br>
+            ☎️ พร้อมเพย์: <?= htmlspecialchars($shopPromptPay) ?>
+          </p>
+          <button id="downloadQR" class="btn btn-outline-primary btn-sm mt-2">⬇️ ดาวน์โหลด QR</button>
         </div>
+
         <script>
-          new QRCode(document.getElementById("qrcode"), {
-            text: "<?= $payload ?>",
-            width: 200,
-            height: 200
+          const qrContainer = document.getElementById("qrcode");
+          const payload = "<?= $payload ?>";
+          const qr = new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
+
+          // ✅ ปุ่มดาวน์โหลด QR Code
+          document.getElementById("downloadQR").addEventListener("click", () => {
+            const img = qrContainer.querySelector("img");
+            if (img) {
+              const a = document.createElement("a");
+              a.href = img.src;
+              a.download = "promptpay_qr_<?= $order_id ?>.png";
+              a.click();
+            }
           });
         </script>
       <?php endif; ?>
