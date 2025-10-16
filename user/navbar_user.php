@@ -35,18 +35,12 @@ if (session_status() === PHP_SESSION_NONE) {
             </a>
           </li>
 
-          <!-- 🔹 ปุ่มโปรไฟล์ -->
+          <!-- 🔹 ชื่อผู้ใช้ (กดเพื่อไปหน้าโปรไฟล์) -->
           <li class="nav-item">
-            <a href="profile.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active text-info' : '' ?>">
-              👤 โปรไฟล์
+            <a href="profile.php" 
+               class="nav-link fw-semibold <?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'text-info active' : 'text-light' ?>">
+              👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
             </a>
-          </li>
-
-          <!-- 🔹 แสดงชื่อผู้ใช้ -->
-          <li class="nav-item">
-            <span class="nav-link text-light fw-semibold">
-              สวัสดี, <?= htmlspecialchars($_SESSION['customer_name']) ?>
-            </span>
           </li>
           
           <!-- 🔹 ปุ่มออกจากระบบ -->
