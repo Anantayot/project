@@ -73,14 +73,17 @@ if (session_status() === PHP_SESSION_NONE) {
 .user-link {
   color: #0dcaf0 !important; /* สีฟ้า Bootstrap */
   transition: 0.2s ease;
+  text-decoration: none !important;
 }
 .user-link:hover {
-  color: #31d2f2 !important;
-  text-decoration:;
+  color: #31d2f2 !important; /* ฟ้าอ่อนตอน hover */
+  text-decoration: none !important; /* ❌ ไม่ขีดเส้นใต้ */
 }
 /* 💡 ถ้าอยู่หน้า profile ให้เป็นฟ้าเข้มกว่าปกติ */
 .user-link.active {
   color: #58d6f7 !important;
   text-shadow: 0 0 6px rgba(13, 202, 240, 0.6);
+  text-decoration: none !important;
 }
 </style>
+
