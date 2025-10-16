@@ -7,6 +7,30 @@ include __DIR__ . "/../partials/connectdb.php";
 $id = $_GET['id'] ?? null;
 if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
 
+// ✅ ถ้ามีการกดปุ่มอนุมัติหรือปฏิเสธ
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $action = $_POST['action'] ?? '';
+  if ($action === 'approve') {
+    $stmt = $conn->prepare("UPDATE orders 
+                            SET payment_status='ชำระเงินแล้ว', 
+                                admin_verified='อนุมัติ',
+                                order_status='กำลังดำเนินการ'
+                            WHERE order_id=?");
+    $stmt->execute([$id]);
+    echo "<script>alert('✅ อนุมัติการชำระเงินเรียบร้อยแล้ว');window.location='order_detail.php?id=$id';</script>";
+    exit;
+  } elseif ($action === 'reject') {
+    $stmt = $conn->prepare("UPDATE orders 
+                            SET payment_status='ยกเลิก', 
+                                admin_verified='ปฏิเสธ',
+                                order_status='ยกเลิก'
+                            WHERE order_id=?");
+    $stmt->execute([$id]);
+    echo "<script>alert('❌ ปฏิเสธคำสั่งซื้อนี้แล้ว');window.location='order_detail.php?id=$id';</script>";
+    exit;
+  }
+}
+
 // ดึงข้อมูลคำสั่งซื้อ + ลูกค้า
 $sql = "SELECT o.*, c.name AS customer_name, c.phone, c.address
         FROM orders o
@@ -44,8 +68,13 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <h5 class="fw-bold text-info"><i class="bi bi-clipboard-data"></i> ข้อมูลคำสั่งซื้อ</h5>
       <p><b>วันที่สั่งซื้อ:</b> <?= date("d/m/Y", strtotime($order['order_date'])) ?></p>
       <p><b>สถานะชำระเงิน:</b>
-        <span class="badge bg-<?= ($order['payment_status']=='ชำระแล้ว'?'success':'warning') ?>">
+        <span class="badge bg-<?= ($order['payment_status']=='ชำระเงินแล้ว'?'success':($order['payment_status']=='ยกเลิก'?'danger':'warning')) ?>">
           <?= htmlspecialchars($order['payment_status']) ?>
+        </span>
+      </p>
+      <p><b>ตรวจสอบโดยแอดมิน:</b>
+        <span class="badge bg-<?= ($order['admin_verified']=='อนุมัติ'?'success':($order['admin_verified']=='ปฏิเสธ'?'danger':($order['admin_verified']=='กำลังตรวจสอบ'?'info':'secondary'))) ?>">
+          <?= htmlspecialchars($order['admin_verified'] ?? 'รอตรวจสอบ') ?>
         </span>
       </p>
       <p><b>สถานะคำสั่งซื้อ:</b>
@@ -112,6 +141,22 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
   <h4 class="fw-bold text-success">
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
+
+  <!-- ปุ่มจัดการสถานะ -->
+  <form method="post" class="mt-3 d-inline">
+    <button type="submit" name="action" value="approve" class="btn btn-success"
+            onclick="return confirm('ยืนยันการอนุมัติคำสั่งซื้อนี้หรือไม่?');">
+      ✅ อนุมัติการชำระเงิน
+    </button>
+  </form>
+
+  <form method="post" class="mt-3 d-inline">
+    <button type="submit" name="action" value="reject" class="btn btn-danger"
+            onclick="return confirm('ต้องการปฏิเสธคำสั่งซื้อนี้หรือไม่?');">
+      ❌ ปฏิเสธคำสั่งซื้อ
+    </button>
+  </form>
+
   <a href="orders.php" class="btn btn-secondary mt-3">
     <i class="bi bi-arrow-left-circle"></i> กลับ
   </a>
