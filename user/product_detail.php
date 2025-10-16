@@ -2,12 +2,6 @@
 session_start();
 include("connectdb.php");
 
-// ✅ ต้องเข้าสู่ระบบก่อนเข้าหน้านี้
-if (!isset($_SESSION['customer_id'])) {
-  header("Location: login.php");
-  exit;
-}
-
 // ✅ ตรวจสอบว่ามี id สินค้าหรือไม่
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสสินค้า</p>");
@@ -31,8 +25,13 @@ if (!file_exists($imgPath) || empty($product['p_image'])) {
   $imgPath = "img/default.png"; // รูปสำรอง
 }
 
-// ✅ เมื่อกดเพิ่มลงตะกร้า
+// ✅ เมื่อกดเพิ่มลงตะกร้า (เฉพาะคนล็อกอินเท่านั้น)
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  if (!isset($_SESSION['customer_id'])) {
+    echo "<script>alert('กรุณาเข้าสู่ระบบก่อนสั่งซื้อสินค้า'); window.location='login.php';</script>";
+    exit;
+  }
+
   $pid = $product['p_id'];
   $qty = intval($_POST['qty'] ?? 1);
 
@@ -88,18 +87,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </h4>
         <p><?= nl2br(htmlspecialchars($product['p_description'])) ?></p>
 
-        <form method="post" class="mt-3">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <label for="qty" class="fw-semibold">จำนวน:</label>
-            <input type="number" name="qty" id="qty" min="1" value="1" class="form-control w-25">
-          </div>
-          <button type="submit" class="btn btn-success">
-            🛒 เพิ่มลงตะกร้า
-          </button>
-          <a href="index.php" class="btn btn-secondary">
-            ⬅️ กลับหน้าร้าน
-          </a>
-        </form>
+        <div class="mt-3">
+          <?php if (isset($_SESSION['customer_id'])): ?>
+            <!-- ✅ ถ้าล็อกอินแล้ว -->
+            <form method="post">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <label for="qty" class="fw-semibold">จำนวน:</label>
+                <input type="number" name="qty" id="qty" min="1" value="1" class="form-control w-25">
+              </div>
+              <button type="submit" class="btn btn-success">
+                🛒 เพิ่มลงตะกร้า
+              </button>
+              <a href="index.php" class="btn btn-secondary">
+                ⬅️ กลับหน้าร้าน
+              </a>
+            </form>
+          <?php else: ?>
+            <!-- 🚫 ถ้ายังไม่ล็อกอิน -->
+            <div class="alert alert-warning">
+              🔑 กรุณาเข้าสู่ระบบก่อนเพื่อทำการสั่งซื้อ
+            </div>
+            <a href="login.php" class="btn btn-primary">เข้าสู่ระบบ</a>
+            <a href="index.php" class="btn btn-secondary">⬅️ กลับหน้าร้าน</a>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
   </div>
