@@ -37,16 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             WHERE customer_id = ?");
     $stmt->execute([$name, $email, $phone, $address, $customer_id]);
 
-    $toast_type = "success";
-    $toast_message = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
-    
-    // อัปเดต session เผื่อมีการเปลี่ยนชื่อ
+    // ✅ อัปเดต session เผื่อมีการเปลี่ยนชื่อ
     $_SESSION['customer_name'] = $name;
 
-    // โหลดข้อมูลใหม่
-    $stmt = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
-    $stmt->execute([$customer_id]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // ✅ บันทึก Toast ข้อความไว้ใน session
+    $_SESSION['toast_success'] = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
+
+    // ✅ กลับไปหน้า index.php พร้อม Toast
+    header("Location: index.php");
+    exit;
   }
 }
 ?>
@@ -84,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php include("navbar_user.php"); ?>
 
-<!-- 🔔 Toast แจ้งเตือน -->
+<!-- 🔔 Toast แจ้งเตือนเมื่อมีข้อผิดพลาด -->
 <div class="toast-container">
   <?php if (!empty($toast_message)): ?>
     <div class="toast align-items-center text-bg-<?= $toast_type ?> border-0 show" role="alert">
@@ -95,18 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
-  <?php endif; ?>
-
-  <?php if (isset($_SESSION['toast_success'])): ?>
-    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
-      <div class="d-flex">
-        <div class="toast-body">
-          <?= $_SESSION['toast_success'] ?>
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    </div>
-    <?php unset($_SESSION['toast_success']); ?>
   <?php endif; ?>
 </div>
 

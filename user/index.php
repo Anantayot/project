@@ -32,7 +32,20 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-
+<!-- 🔔 Toast แสดงเมื่อบันทึกโปรไฟล์สำเร็จ -->
+<?php if (isset($_SESSION['toast_success'])): ?>
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          <?= $_SESSION['toast_success'] ?>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+  <?php unset($_SESSION['toast_success']); ?>
+<?php endif; ?>
 <!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
 
