@@ -1,8 +1,11 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $pageTitle = "รายละเอียดคำสั่งซื้อ";
 ob_start();
 
-include __DIR__ . "/../partials/connectdb.php";
+include __DIR__ . "/../../user/connectdb.php"; // ✅ ปรับ path ให้ถูกกับโครงสร้างของคุณ
 
 $id = $_GET['id'] ?? null;
 if(!$id) die("❌ ไม่พบคำสั่งซื้อ");
@@ -55,8 +58,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
   <i class="bi bi-receipt"></i> รายละเอียดคำสั่งซื้อ #<?= htmlspecialchars($order['order_id']) ?>
 </h3>
 
-<!-- 🔹 ข้อมูลลูกค้า -->
-<div class="card p-4 shadow-lg border-0 mb-4" style="background: linear-gradient(145deg,#161b22,#0e1116);color:#fff;">
+<div class="card p-4 shadow-lg border-0 mb-4" style="background:linear-gradient(145deg,#161b22,#0e1116);color:#fff;">
   <div class="row">
     <div class="col-md-6">
       <h5 class="fw-bold text-success"><i class="bi bi-person-circle"></i> ข้อมูลลูกค้า</h5>
@@ -68,7 +70,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       <h5 class="fw-bold text-info"><i class="bi bi-clipboard-data"></i> ข้อมูลคำสั่งซื้อ</h5>
       <p><b>วันที่สั่งซื้อ:</b> <?= date("d/m/Y", strtotime($order['order_date'])) ?></p>
 
-      <!-- ✅ แสดงช่องทางการชำระเงิน -->
+      <!-- ✅ ช่องทางการชำระเงิน -->
       <?php 
         $method = $order['payment_method'];
         $methodText = ($method === 'QR') ? 'ชำระด้วย QR Code' :
@@ -82,7 +84,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         </span>
       </p>
 
-      <!-- ✅ แสดงเฉพาะถ้าไม่ใช่เก็บเงินปลายทาง -->
+      <!-- ✅ ตรวจสอบโดยแอดมิน (เฉพาะถ้าไม่ใช่ COD) -->
       <?php if ($order['payment_method'] !== 'COD'): ?>
       <p><b>ตรวจสอบโดยแอดมิน:</b>
         <span class="badge bg-<?= ($order['admin_verified']=='อนุมัติ'?'success':($order['admin_verified']=='ปฏิเสธ'?'danger':($order['admin_verified']=='กำลังตรวจสอบ'?'info':'secondary'))) ?>">
@@ -102,10 +104,10 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         <span class="badge bg-<?= $statusColor ?>"><?= htmlspecialchars($status) ?></span>
       </p>
 
-      <!-- 🔹 ปุ่มดูรูปสลิป -->
+      <!-- 🔹 สลิป (เฉพาะ QR) -->
       <?php if (!empty($order['slip_image']) && $order['payment_method'] !== 'COD'): ?>
         <p><b>หลักฐานการชำระเงิน:</b></p>
-        <a href="../uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
+        <a href="../../user/uploads/slips/<?= htmlspecialchars($order['slip_image']) ?>" 
            target="_blank" class="btn btn-outline-light btn-sm">
           🧾 ดูรูปสลิป
         </a>
@@ -139,7 +141,7 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
         ?>
         <tr>
           <td><?= $i + 1 ?></td>
-          <td><img src="../uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded"></td>
+          <td><img src="../../user/uploads/<?= htmlspecialchars($it['p_image'] ?? 'noimg.png') ?>" width="50" class="rounded"></td>
           <td class="text-start"><?= htmlspecialchars($it['p_name']) ?></td>
           <td><?= (int)$it['quantity'] ?></td>
           <td><?= number_format($it['price'], 2) ?></td>
@@ -157,7 +159,6 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     <i class="bi bi-cash-stack"></i> ยอดรวมทั้งหมด: <?= number_format($totalSum, 2) ?> ฿
   </h4>
 
-  <!-- ✅ แสดงปุ่มอนุมัติ/ปฏิเสธเฉพาะตอน "กำลังตรวจสอบ" -->
   <?php if (trim($order['admin_verified']) === 'กำลังตรวจสอบ' && $order['payment_method'] !== 'COD'): ?>
     <form method="post" class="mt-3 d-inline">
       <button type="submit" name="action" value="approve" class="btn btn-success"
@@ -181,5 +182,5 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
 
 <?php
 $pageContent = ob_get_clean();
-include __DIR__ . "/../partials/layout.php";
+include __DIR__ . "/../../partials/layout.php";
 ?>
