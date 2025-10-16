@@ -2,30 +2,38 @@
 session_start();
 include("connectdb.php");
 
-// ต้องเข้าสู่ระบบก่อน
+// ✅ ต้องเข้าสู่ระบบก่อน
 if (!isset($_SESSION['customer_id'])) {
   header("Location: login.php");
   exit;
 }
 
 $cid = $_SESSION['customer_id'];
+
+// ✅ ดึงข้อมูลลูกค้าจากฐานข้อมูล
+$stmtUser = $conn->prepare("SELECT * FROM customers WHERE customer_id = ?");
+$stmtUser->execute([$cid]);
+$user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
 $cart = $_SESSION['cart'] ?? [];
 if (empty($cart)) {
   echo "<script>alert('ตะกร้าสินค้าว่าง'); window.location='cart.php';</script>";
   exit;
 }
 
+// ✅ เมื่อกดยืนยันคำสั่งซื้อ
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $address = trim($_POST['address']);
+  $phone = trim($_POST['phone']);
   $payment = $_POST['payment'];
 
-  if (empty($address)) {
-    echo "<script>alert('กรุณากรอกที่อยู่จัดส่ง');</script>";
+  if (empty($address) || empty($phone)) {
+    echo "<script>alert('กรุณากรอกที่อยู่และเบอร์โทรให้ครบถ้วน');</script>";
   } else {
     try {
       $conn->beginTransaction();
 
-      // ✅ เพิ่มคำสั่งซื้อให้ตรงกับฟิลด์จริง
+      // ✅ เพิ่มคำสั่งซื้อให้ตรงกับฟิลด์ในฐานข้อมูลจริง
       $stmt = $conn->prepare("INSERT INTO orders 
         (customer_id, shipping_address, payment_method, total_price, order_date, payment_status) 
         VALUES (:cid, :address, :payment, :total, NOW(), 'รอดำเนินการ')");
@@ -44,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       $orderId = $conn->lastInsertId();
 
-      // ✅ ตาราง order_details ต้องใช้ p_id (จากตาราง product)
+      // ✅ เพิ่มรายละเอียดสินค้าในตาราง order_details
       $stmtDetail = $conn->prepare("INSERT INTO order_details (order_id, p_id, quantity, price)
                                    VALUES (:oid, :pid, :qty, :price)");
 
@@ -67,8 +75,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 ?>
-
-?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -78,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
-<!-- ✅ Navbar ส่วนกลาง -->
+<!-- ✅ Navbar -->
 <?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
@@ -123,7 +129,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>
     </div>
 
-    <!-- 🔹 ฟอร์มชำระเงิน -->
+    <!-- 🔹 ฟอร์มข้อมูลผู้สั่งซื้อ -->
     <div class="col-md-5">
       <div class="card shadow-sm">
         <div class="card-header bg-dark text-white fw-semibold">ข้อมูลผู้สั่งซื้อ</div>
@@ -131,11 +137,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <form method="post">
             <div class="mb-3">
               <label class="form-label">ชื่อผู้ใช้</label>
-              <input type="text" class="form-control" value="<?= htmlspecialchars($user['name']) ?>" disabled>
+              <input type="text" class="form-control" 
+                     value="<?= htmlspecialchars($user['name'] ?? $_SESSION['customer_name'] ?? '') ?>" disabled>
             </div>
             <div class="mb-3">
               <label class="form-label">อีเมล</label>
-              <input type="text" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" disabled>
+              <input type="text" class="form-control" 
+                     value="<?= htmlspecialchars($user['email'] ?? '') ?>" disabled>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">ที่อยู่จัดส่ง</label>
+              <textarea name="address" class="form-control" rows="3" required><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">เบอร์โทรศัพท์</label>
+              <input type="text" name="phone" class="form-control" 
+                     value="<?= htmlspecialchars($user['phone'] ?? '') ?>" required>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>
