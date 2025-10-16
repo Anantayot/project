@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 include("connectdb.php");
 
@@ -10,14 +14,14 @@ if (!isset($_SESSION['customer_id'])) {
 
 $customer_id = $_SESSION['customer_id'];
 
-// ✅ ตรวจสอบว่า id ถูกส่งมาหรือไม่
+// ✅ ตรวจสอบว่ามี id คำสั่งซื้อหรือไม่
 if (!isset($_GET['id'])) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบรหัสคำสั่งซื้อ</p>");
 }
 
 $order_id = intval($_GET['id']);
 
-// ✅ ดึงข้อมูลคำสั่งซื้อ
+// ✅ ดึงข้อมูลคำสั่งซื้อของลูกค้าคนนั้น
 $stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ? AND customer_id = ?");
 $stmt->execute([$order_id, $customer_id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,7 +30,7 @@ if (!$order) {
   die("<p class='text-center mt-5 text-danger'>❌ ไม่พบคำสั่งซื้อนี้ หรือคุณไม่มีสิทธิ์ดู</p>");
 }
 
-// ✅ เมื่อส่งฟอร์มแจ้งชำระเงิน
+// ✅ เมื่อกดปุ่มยืนยันการชำระเงิน
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $uploadDir = "uploads/slips/";
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
@@ -39,11 +43,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile);
   }
 
-  // ✅ อัปเดตสถานะในฐานข้อมูล
+  // ✅ อัปเดตสถานะการชำระเงิน (แม้ไม่มีสลิป)
   $stmt = $conn->prepare("UPDATE orders 
                           SET payment_status = 'ชำระเงินแล้ว', 
                               slip_image = :slip,
-                              payment_date = NOW() 
+                              payment_date = NOW()
                           WHERE order_id = :oid AND customer_id = :cid");
   $stmt->execute([
     ':slip' => $fileName,
@@ -51,7 +55,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ':cid' => $customer_id
   ]);
 
-  echo "<script>alert('✅ แจ้งชำระเงินเรียบร้อยแล้ว'); window.location='order_detail.php?id=$order_id';</script>";
+  echo "<script>
+    alert('✅ ยืนยันการชำระเงินเรียบร้อยแล้ว!');
+    window.location='order_detail.php?id=$order_id';
+  </script>";
   exit;
 }
 ?>
@@ -79,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="mb-3">
           <label for="slip" class="form-label">แนบสลิปการชำระเงิน (ถ้ามี)</label>
           <input type="file" name="slip" id="slip" class="form-control" accept="image/*">
-          <small class="text-muted">* สามารถแนบไฟล์สลิปหรือหลักฐานการชำระเงินได้</small>
+          <small class="text-muted">* สามารถกดยืนยันโดยไม่ต้องแนบสลิปได้</small>
         </div>
 
         <div class="d-grid gap-2 mt-4">
