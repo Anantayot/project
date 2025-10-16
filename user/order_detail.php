@@ -35,6 +35,11 @@ function setToast($type, $msg) {
   $_SESSION["toast_" . $type] = $msg;
 }
 
+// ✅ ถ้าสถานะคือ “กำลังตรวจสอบ” ให้แสดง Toast แจ้งเตือน
+if ($order['admin_verified'] === 'กำลังตรวจสอบ') {
+  $_SESSION['toast_info'] = "⚙️ อยู่ระหว่างตรวจสอบสลิป กรุณารอการอนุมัติจากแอดมิน";
+}
+
 // ✅ เปลี่ยนวิธีการชำระเงิน
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['new_payment'])) {
   $new_payment = $_POST['new_payment'];
@@ -87,25 +92,17 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
 <!-- ✅ Toast แจ้งเตือน -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
-  <?php if (isset($_SESSION['toast_success'])): ?>
-    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
-      <div class="d-flex">
-        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+  <?php foreach (['success' => 'success', 'error' => 'danger', 'info' => 'info'] as $key => $color): ?>
+    <?php if (isset($_SESSION["toast_{$key}"])): ?>
+      <div class="toast align-items-center text-bg-<?= $color ?> border-0 show" role="alert">
+        <div class="d-flex">
+          <div class="toast-body"><?= $_SESSION["toast_{$key}"] ?></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
       </div>
-    </div>
-    <?php unset($_SESSION['toast_success']); ?>
-  <?php endif; ?>
-
-  <?php if (isset($_SESSION['toast_error'])): ?>
-    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
-      <div class="d-flex">
-        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    </div>
-    <?php unset($_SESSION['toast_error']); ?>
-  <?php endif; ?>
+      <?php unset($_SESSION["toast_{$key}"]); ?>
+    <?php endif; ?>
+  <?php endforeach; ?>
 </div>
 
 <div class="container mt-4 mb-5">
@@ -175,13 +172,14 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           <?php endif; ?>
 
           <?php
-        // ✅ แสดงปุ่มแจ้งชำระเงิน เฉพาะกรณีที่ยังไม่มีการตรวจสอบ
-           if (
-             $payment_status === 'รอดำเนินการ' &&
+          // ✅ แสดงปุ่มแจ้งชำระเงินเฉพาะกรณีที่ยังไม่ตรวจสอบ และยังไม่ชำระ
+          if (
             $order['payment_method'] === 'QR' &&
-            ($order['admin_verified'] !== 'กำลังตรวจสอบ')
-              ):
-            ?>
+            $payment_status === 'รอดำเนินการ' &&
+            !in_array($order['admin_verified'], ['กำลังตรวจสอบ', 'อนุมัติ']) &&
+            $payment_status !== 'ชำระเงินแล้ว'
+          ):
+          ?>
             <a href="payment_confirm.php?id=<?= $order_id ?>" class="btn btn-warning mt-2">
               💰 แจ้งชำระเงิน
             </a>
