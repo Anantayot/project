@@ -63,11 +63,18 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               } else {
                 $badgeClass = 'warning';
               }
+
+              // ✅ แปลง payment_method เป็นภาษาไทย
+              $methodText = match($o['payment_method']) {
+                'QR' => '💳 ชำระด้วยคิวอาร์โค้ด',
+                'COD' => '💵 เก็บเงินปลายทาง',
+                default => htmlspecialchars($o['payment_method'])
+              };
           ?>
             <tr>
-              <td>#<?= $index ?></td> <!-- ✅ ใช้ลำดับเฉพาะของลูกค้า -->
+              <td>#<?= $index ?></td>
               <td><?= date('d/m/Y H:i', strtotime($o['order_date'])) ?></td>
-              <td><?= htmlspecialchars($o['payment_method']) ?></td>
+              <td><?= $methodText ?></td>
               <td><?= number_format($o['total_price'], 2) ?> บาท</td>
               <td><span class="badge bg-<?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span></td>
               <td>
