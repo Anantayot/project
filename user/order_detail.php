@@ -174,7 +174,14 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             <p><strong>หมายเลขพัสดุ:</strong> 📦 <?= htmlspecialchars($order['tracking_number']) ?></p>
           <?php endif; ?>
 
-          <?php if ($payment_status === 'รอดำเนินการ' && $order['payment_method'] === 'QR'): ?>
+          <?php
+        // ✅ แสดงปุ่มแจ้งชำระเงิน เฉพาะกรณีที่ยังไม่มีการตรวจสอบ
+           if (
+             $payment_status === 'รอดำเนินการ' &&
+            $order['payment_method'] === 'QR' &&
+            ($order['admin_verified'] !== 'กำลังตรวจสอบ')
+              ):
+            ?>
             <a href="payment_confirm.php?id=<?= $order_id ?>" class="btn btn-warning mt-2">
               💰 แจ้งชำระเงิน
             </a>
