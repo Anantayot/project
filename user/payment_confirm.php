@@ -144,25 +144,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             💵 ยอดชำระ <?= number_format($order['total_price'], 2) ?> บาท<br>
             ☎️ พร้อมเพย์: <?= htmlspecialchars($shopPromptPay) ?>
           </p>
-          <button id="downloadQR" class="btn btn-outline-primary btn-sm mt-2">⬇️ ดาวน์โหลด QR</button>
         </div>
 
-        <script>
-          const qrContainer = document.getElementById("qrcode");
-          const payload = "<?= $payload ?>";
-          const qr = new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
-
-          // ✅ ปุ่มดาวน์โหลด QR Code
-          document.getElementById("downloadQR").addEventListener("click", () => {
-            const img = qrContainer.querySelector("img");
-            if (img) {
-              const a = document.createElement("a");
-              a.href = img.src;
-              a.download = "promptpay_qr_<?= $order_id ?>.png";
-              a.click();
-            }
-          });
-        </script>
       <?php endif; ?>
 
       <form method="post" enctype="multipart/form-data" class="mt-4">
