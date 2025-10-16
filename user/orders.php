@@ -55,11 +55,13 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <?php foreach ($orders as $o): ?>
             <?php
               $status = $o['payment_status'] ?? 'รอดำเนินการ';
-              $badgeClass = match ($status) {
-                'ชำระเงินแล้ว' => 'success',
-                'ยกเลิก' => 'danger',
-                default => 'warning'
-              };
+              if ($status === 'ชำระเงินแล้ว') {
+                $badgeClass = 'success';
+              } elseif ($status === 'ยกเลิก') {
+                $badgeClass = 'danger';
+              } else {
+                $badgeClass = 'warning';
+              }
             ?>
             <tr>
               <td>#<?= $o['order_id'] ?></td>
