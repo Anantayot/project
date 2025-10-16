@@ -28,8 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $phone = trim($_POST['phone']);
   $payment = $_POST['payment'];
 
+  // ✅ ตรวจสอบข้อมูลให้ครบ และเบอร์โทรต้องเป็นตัวเลข 10 หลัก
   if (empty($address) || empty($phone)) {
     $_SESSION['toast_error'] = "❌ กรุณากรอกที่อยู่และเบอร์โทรให้ครบถ้วน";
+  } elseif (!preg_match('/^[0-9]{10}$/', $phone)) {
+    $_SESSION['toast_error'] = "⚠️ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เฉพาะตัวเลข 10 หลัก)";
   } else {
     try {
       $conn->beginTransaction();
@@ -175,8 +178,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
             <div class="mb-3">
               <label class="form-label">เบอร์โทรศัพท์</label>
-              <input type="text" name="phone" class="form-control" 
-                     value="<?= htmlspecialchars($user['phone'] ?? '') ?>" required>
+              <input type="text" name="phone" class="form-control" maxlength="10" pattern="^[0-9]{10}$"
+                     title="กรุณากรอกเฉพาะตัวเลข 10 หลัก" 
+                     value="<?= htmlspecialchars($user['phone'] ?? '') ?>" 
+                     oninput="this.value=this.value.replace(/[^0-9]/g,'');" required>
             </div>
             <div class="mb-3">
               <label class="form-label">วิธีชำระเงิน</label>
