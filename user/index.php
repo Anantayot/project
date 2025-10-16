@@ -30,23 +30,33 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>MyCommiss | หน้าร้าน</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .toast {
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body class="bg-light">
   
 <!-- 🔔 Toast แสดงเมื่อบันทึกโปรไฟล์สำเร็จ -->
 <?php if (isset($_SESSION['toast_success'])): ?>
   <div class="toast-container position-fixed top-0 end-0 p-3">
-    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
           <?= $_SESSION['toast_success'] ?>
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
   </div>
   <?php unset($_SESSION['toast_success']); ?>
 <?php endif; ?>
+
 <!-- ✅ Navbar ส่วนกลาง -->
 <?php include("navbar_user.php"); ?>
 
@@ -120,12 +130,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <footer class="text-center py-3 mt-5 bg-dark text-white">
   © <?= date('Y') ?> MyCommiss | หน้าร้าน
 </footer>
+
+<!-- ✅ Bootstrap Toast 5 วินาที -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // ✅ เปิด Toast แบบ auto-hide 3 วินาที
-  const toastElList = [].slice.call(document.querySelectorAll('.toast'))
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
   const toastList = toastElList.map(function (toastEl) {
-    return new bootstrap.Toast(toastEl, { delay: 3000 })
+    return new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
   });
   toastList.forEach(toast => toast.show());
 </script>
