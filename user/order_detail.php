@@ -74,9 +74,9 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 <?php include("navbar_user.php"); ?>
 
 <!-- ✅ Toast แจ้งเตือน -->
-<div class="toast-container">
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
   <?php if (isset($_SESSION['toast_success'])): ?>
-    <div id="toastSuccess" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
       <div class="d-flex">
         <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -86,7 +86,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   <?php endif; ?>
 
   <?php if (isset($_SESSION['toast_error'])): ?>
-    <div id="toastError" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
       <div class="d-flex">
         <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -95,6 +95,18 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     <?php unset($_SESSION['toast_error']); ?>
   <?php endif; ?>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
+
 
 <div class="container mt-4 mb-5">
   <h3 class="fw-bold text-center mb-4">📦 รายละเอียดคำสั่งซื้อ #<?= $order_id ?></h3>
