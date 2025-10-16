@@ -48,7 +48,7 @@ try {
   $update->execute([$order_id]);
 
   // ✅ Toast แจ้งเตือนสำเร็จ
-  $_SESSION['toast_success'] = "✅ ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว";
+  $_SESSION['toast_error'] = "✅ ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว";
 } catch (PDOException $e) {
   // ✅ กรณีมีปัญหาการเชื่อมต่อหรือ SQL error
   $_SESSION['toast_error'] = "❌ เกิดข้อผิดพลาดในการยกเลิกคำสั่งซื้อ: " . $e->getMessage();
