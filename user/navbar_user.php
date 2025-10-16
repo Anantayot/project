@@ -38,7 +38,7 @@ if (session_status() === PHP_SESSION_NONE) {
           <!-- 🔹 ชื่อผู้ใช้ (กดเพื่อไปหน้าโปรไฟล์) -->
           <li class="nav-item">
             <a href="profile.php" 
-               class="nav-link fw-semibold <?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'text-info active' : 'text-light' ?>">
+               class="nav-link fw-semibold user-link <?= basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : '' ?>">
               👤 <?= htmlspecialchars($_SESSION['customer_name']) ?>
             </a>
           </li>
@@ -67,3 +67,20 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
   </div>
 </nav>
+
+<style>
+/* 💡 ปรับสีชื่อผู้ใช้ให้เด่น */
+.user-link {
+  color: #0dcaf0 !important; /* สีฟ้า Bootstrap */
+  transition: 0.2s ease;
+}
+.user-link:hover {
+  color: #31d2f2 !important;
+  text-decoration: underline;
+}
+/* 💡 ถ้าอยู่หน้า profile ให้เป็นฟ้าเข้มกว่าปกติ */
+.user-link.active {
+  color: #58d6f7 !important;
+  text-shadow: 0 0 6px rgba(13, 202, 240, 0.6);
+}
+</style>
