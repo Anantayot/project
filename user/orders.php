@@ -14,7 +14,7 @@ if (!isset($_SESSION['customer_id'])) {
 $customer_id = $_SESSION['customer_id'];
 
 // ✅ ดึงเฉพาะออเดอร์ของลูกค้าคนนี้ (เรียงจากใหม่ไปเก่า)
-$sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date DESC";
+$sql = "SELECT * FROM orders WHERE customer_id = :cid ORDER BY order_date ASC";
 $stmt = $conn->prepare($sql);
 $stmt->bindParam(':cid', $customer_id, PDO::PARAM_INT);
 $stmt->execute();
