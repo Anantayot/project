@@ -54,13 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['new_payment'])) {
     ':cid' => $customer_id
   ]);
 
-  // ถ้าเปลี่ยนเป็น QR → เด้งไปแจ้งชำระเงิน
-  if ($new_payment === 'QR') {
-    setToast('success', '✅ เปลี่ยนเป็นชำระด้วย QR Code แล้ว กรุณาแจ้งชำระเงิน');
-    header("Location: payment_confirm.php?id={$order_id}");
-    exit;
-  }
-
   setToast('success', '✅ เปลี่ยนวิธีชำระเงินเรียบร้อยแล้ว');
   header("Location: order_detail.php?id={$order_id}");
   exit;
@@ -146,6 +139,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
 
+          <!-- 🔄 ปุ่มเปลี่ยนวิธีการชำระเงิน -->
           <?php if ($payment_status === 'รอดำเนินการ'): ?>
             <form method="post" class="mt-2">
               <div class="input-group">
