@@ -2,12 +2,7 @@
 session_start();
 include("connectdb.php");
 
-// ✅ ตรวจสอบการเข้าสู่ระบบ
-if (!isset($_SESSION['customer_id'])) {
-  header("Location: login.php");
-  exit;
-}
-
+// 🔹 รับค่าค้นหา
 $search = $_GET['search'] ?? '';
 $cat = $_GET['cat'] ?? '';
 
@@ -42,7 +37,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
-  <!-- 🔍 ค้นหา -->
+  <!-- 🔍 ฟอร์มค้นหา -->
   <form class="row mb-4" method="get">
     <div class="col-md-4">
       <select name="cat" class="form-select">
@@ -70,7 +65,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php
           $imagePath = "../admin/uploads/" . $p['p_image'];
           if (!file_exists($imagePath) || empty($p['p_image'])) {
-            $imagePath = "img/default.png";
+            $imagePath = "img/default.png"; // ใช้ภาพสำรอง
           }
         ?>
         <div class="col">
@@ -81,9 +76,23 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?= htmlspecialchars($p['p_name']) ?>
               </h6>
               <p class="text-muted mb-2"><?= number_format($p['p_price'], 2) ?> บาท</p>
-              <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-sm btn-outline-primary w-100">
+              <a href="product_detail.php?id=<?= $p['p_id'] ?>" 
+                 class="btn btn-sm btn-outline-primary w-100">
                 ดูรายละเอียด
               </a>
+
+              <?php if (isset($_SESSION['customer_id'])): ?>
+                <!-- ✅ ถ้าล็อกอินแล้ว แสดงปุ่มซื้อ -->
+                <form method="post" action="cart_add.php" class="mt-2">
+                  <input type="hidden" name="id" value="<?= $p['p_id'] ?>">
+                  <button type="submit" class="btn btn-success btn-sm w-100">🛒 หยิบใส่ตะกร้า</button>
+                </form>
+              <?php else: ?>
+                <!-- 🚫 ถ้ายังไม่ล็อกอิน -->
+                <a href="login.php" class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                  🔑 เข้าสู่ระบบเพื่อสั่งซื้อ
+                </a>
+              <?php endif; ?>
             </div>
           </div>
         </div>
@@ -95,7 +104,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <footer class="text-center py-3 mt-5 bg-dark text-white">
-  © <?= date('Y') ?> MyCommiss | หน้าแรก
+  © <?= date('Y') ?> MyCommiss | หน้าร้าน
 </footer>
 
 </body>
