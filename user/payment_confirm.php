@@ -31,7 +31,7 @@ if (!$order) {
 }
 
 /* =======================================================
-   ✅ ฟังก์ชันสร้าง QR พร้อมเพย์ (มาตรฐาน EMVCo ใช้งานจริง)
+   ✅ ฟังก์ชันสร้าง QR พร้อมเพย์ (มาตรฐาน EMVCo)
    ======================================================= */
 function generatePromptPayPayload($promptPayID, $amount = 0.00) {
   $id = preg_replace('/[^0-9]/', '', $promptPayID);
@@ -39,7 +39,6 @@ function generatePromptPayPayload($promptPayID, $amount = 0.00) {
     $id = '0066' . substr($id, 1);
   }
 
-  // ฟิลด์ตามมาตรฐาน EMVCo
   $data = [
     '00' => '01',
     '01' => '11',
@@ -77,10 +76,10 @@ function crc16($data) {
 }
 
 /* =======================================================
-   ✅ ยืนยันการชำระเงิน (บันทึกไฟล์ใน admin/uploads/slips)
+   ✅ ยืนยันการชำระเงิน (เก็บสลิป + อัปเดตสถานะ)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $uploadDir = __DIR__ . "/admin/uploads/slips/"; // ← เปลี่ยนตำแหน่งที่เก็บไฟล์
+  $uploadDir = __DIR__ . "/admin/uploads/slips/";
   if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
   $fileName = "";
@@ -88,11 +87,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $ext = pathinfo($_FILES['slip']['name'], PATHINFO_EXTENSION);
     $fileName = "slip_" . time() . "_" . rand(1000,9999) . "." . $ext;
     $targetFile = $uploadDir . $fileName;
-    move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile);
+
+    if (!move_uploaded_file($_FILES['slip']['tmp_name'], $targetFile)) {
+      die("<p class='text-danger text-center mt-5'>❌ ไม่สามารถอัปโหลดไฟล์ได้</p>");
+    }
   }
 
+  // ✅ อัปเดตสถานะเป็น “กำลังตรวจสอบ”
   $stmt = $conn->prepare("UPDATE orders 
-                          SET payment_status = 'ชำระเงินแล้ว', 
+                          SET payment_status = 'รอดำเนินการ', 
+                              admin_verified = 'กำลังตรวจสอบ',
                               slip_image = :slip,
                               payment_date = NOW()
                           WHERE order_id = :oid AND customer_id = :cid");
@@ -103,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   ]);
 
   echo "<script>
-    alert('✅ ยืนยันการชำระเงินเรียบร้อยแล้ว!');
+    alert('✅ แจ้งชำระเงินเรียบร้อยแล้ว! ระบบจะทำการตรวจสอบโดยแอดมิน');
     window.location='order_detail.php?id=$order_id';
   </script>";
   exit;
@@ -131,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       <?php if ($order['payment_method'] === 'QR'): ?>
         <?php
-          $shopPromptPay = "0903262100"; // ใส่หมายเลขพร้อมเพย์จริง
+          $shopPromptPay = "0903262100"; // ✅ หมายเลขพร้อมเพย์ร้าน
           $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
         ?>
         <div class="text-center my-4">
@@ -152,15 +156,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
       <form method="post" enctype="multipart/form-data" class="mt-4">
         <div class="mb-3 text-start">
-          <label for="slip" class="form-label">แนบสลิปการชำระเงิน</label>
+          <label for="slip" class="form-label">แนบสลิปการชำระเงิน (ถ้ามี)</label>
           <input type="file" name="slip" id="slip" class="form-control" accept="image/*">
-          <small class="text-muted">* สามารถกดยืนยันโดยไม่ต้องแนบสลิปได้</small>
+          <small class="text-muted">* หากไม่มีสลิป สามารถกดยืนยันได้ ระบบจะรอตรวจสอบโดยแอดมิน</small>
         </div>
 
         <div class="d-grid gap-2 mt-4">
           <button type="submit" class="btn btn-success">✅ ยืนยันการชำระเงิน</button>
-          <a href="orders.php" class="btn btn-secondary">⬅️ กลับไปหน้าคำสั่งซื้อ</a>
-          <a href="order_detail.php?id=<?= $order_id ?>" class="btn btn-outline-primary">🔍 ดูรายละเอียดสินค้า</a>
+          <a href="orders.php" class="btn btn-secondary">⬅️ กลับหน้าคำสั่งซื้อ</a>
+          <a href="order_detail.php?id=<?= $order_id ?>" class="btn btn-outline-primary">🔍 ดูรายละเอียดคำสั่งซื้อ</a>
         </div>
       </form>
     </div>
