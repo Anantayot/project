@@ -4,7 +4,7 @@ include __DIR__ . "/../partials/connectdb.php";
 ob_start();
 
 try {
-    $sql = "SELECT o.order_id, o.order_date, o.total_price, o.order_status, c.name AS customer_name 
+    $sql = "SELECT o.order_id, o.order_date, o.total_price, o.order_status, o.admin_verified, c.name AS customer_name 
             FROM orders o 
             LEFT JOIN customers c ON o.customer_id = c.customer_id 
             ORDER BY o.order_id ASC";
@@ -33,13 +33,14 @@ try {
              style="border-radius:10px; overflow:hidden;">
         <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
           <tr>
-            <th style="width:50px;">#</th>
+            <th>#</th>
             <th>รหัสคำสั่งซื้อ</th>
             <th>ชื่อลูกค้า</th>
             <th>วันที่สั่งซื้อ</th>
             <th>ราคารวม (฿)</th>
-            <th>สถานะ</th>
-            <th style="width:120px;">จัดการ</th>
+            <th>สถานะคำสั่งซื้อ</th>
+            <th>ตรวจสอบโดยแอดมิน</th>
+            <th>จัดการ</th>
           </tr>
         </thead>
         <tbody>
@@ -50,21 +51,35 @@ try {
             <td class="text-white"><?= htmlspecialchars($o['customer_name'] ?? 'ไม่ระบุ') ?></td>
             <td><?= date("d/m/Y", strtotime($o['order_date'])) ?></td>
             <td class="fw-semibold text-success"><?= number_format($o['total_price'], 2) ?></td>
+
+            <!-- 🔹 สถานะคำสั่งซื้อ -->
             <td>
               <?php
                 $status = $o['order_status'] ?? 'รอดำเนินการ';
-                if ($status == 'เสร็จสิ้น') {
-                    $badge = 'success';
-                } elseif ($status == 'กำลังดำเนินการ') {
-                    $badge = 'warning text-dark';
-                } elseif ($status == 'ยกเลิก') {
-                    $badge = 'danger';
-                } else {
-                    $badge = 'secondary';
-                }
+                if ($status == 'สำเร็จ') $badge = 'success';
+                elseif ($status == 'กำลังจัดเตรียม') $badge = 'warning text-dark';
+                elseif ($status == 'จัดส่งแล้ว') $badge = 'info';
+                elseif ($status == 'ยกเลิก') $badge = 'danger';
+                else $badge = 'secondary';
               ?>
               <span class="badge bg-<?= $badge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($status) ?></span>
             </td>
+
+            <!-- 🔹 ตรวจสอบโดยแอดมิน -->
+            <td>
+              <?php
+                $verify = $o['admin_verified'] ?? 'รอตรวจสอบ';
+                if ($verify == 'อนุมัติ') $vbadge = 'success';
+                elseif ($verify == 'ปฏิเสธ') $vbadge = 'danger';
+                elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'info';
+                else $vbadge = 'secondary';
+              ?>
+              <span class="badge bg-<?= $vbadge ?> px-3 py-2 rounded-pill">
+                <?= htmlspecialchars($verify) ?>
+              </span>
+            </td>
+
+            <!-- 🔹 ปุ่มจัดการ -->
             <td>
               <a href="order_view.php?id=<?= $o['order_id'] ?>" 
                  class="btn btn-outline-light btn-sm"
@@ -86,7 +101,7 @@ $pageContent = ob_get_clean();
 include __DIR__ . "/../partials/layout.php";
 ?>
 
-<!-- ✅ โหลดสคริปต์ DataTables หลัง Layout -->
+<!-- ✅ โหลดสคริปต์ DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -108,11 +123,10 @@ $(document).ready(function() {
     responsive: true,
     order: [[0, "asc"]],
     columnDefs: [
-      { orderable: false, targets: [6] } // ปิด sort ที่ปุ่ม "จัดการ"
+      { orderable: false, targets: [7] } // ปิด sort ที่ปุ่ม "จัดการ"
     ]
   });
 
-  // 🎨 ปรับสไตล์ช่องค้นหาและ dropdown
   $(".dataTables_filter input")
     .addClass("form-control form-control-sm ms-2")
     .css({
