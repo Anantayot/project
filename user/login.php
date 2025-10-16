@@ -13,10 +13,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if ($user && password_verify($password, $user['password'])) {
     $_SESSION['customer_id'] = $user['customer_id'];
     $_SESSION['customer_name'] = $user['name'];
-    echo "<script>alert('✅ เข้าสู่ระบบสำเร็จ'); window.location='index.php';</script>";
+
+    // ✅ ใช้ Toast แทน alert
+    $_SESSION['toast_success'] = "✅ เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ " . htmlspecialchars($user['name']);
+    header("Location: index.php");
     exit;
   } else {
-    $error = "❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+    $_SESSION['toast_error'] = "❌ อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+    header("Location: login.php");
+    exit;
   }
 }
 ?>
@@ -29,13 +34,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </head>
 <body class="bg-light">
 
+<!-- ✅ Toast แจ้งเตือน -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
+  <?php if (isset($_SESSION['toast_success'])): ?>
+    <div class="toast align-items-center text-bg-success border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_success'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_success']); ?>
+  <?php endif; ?>
+
+  <?php if (isset($_SESSION['toast_error'])): ?>
+    <div class="toast align-items-center text-bg-danger border-0 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><?= $_SESSION['toast_error'] ?></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    <?php unset($_SESSION['toast_error']); ?>
+  <?php endif; ?>
+</div>
+
 <div class="container mt-5" style="max-width:500px;">
   <div class="card shadow border-0">
     <div class="card-header bg-dark text-white text-center fw-bold">เข้าสู่ระบบ</div>
     <div class="card-body">
-      <?php if (!empty($error)): ?>
-        <div class="alert alert-danger"><?= $error ?></div>
-      <?php endif; ?>
       <form method="post">
         <div class="mb-3">
           <label class="form-label">อีเมล</label>
@@ -56,6 +81,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <a href="index.php" class="btn btn-secondary btn-sm mt-2">⬅️ กลับหน้าหลัก</a>
   </div>
 </div>
+
+<footer class="text-center py-3 mt-5 bg-dark text-white">
+  © <?= date('Y') ?> MyCommiss | เข้าสู่ระบบ
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+  toastElList.forEach(toastEl => {
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000, autohide: true });
+    toast.show();
+  });
+});
+</script>
 
 </body>
 </html>
