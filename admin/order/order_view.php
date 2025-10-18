@@ -163,15 +163,19 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     switch ($adminStatus) {
       case 'อนุมัติ':
         $adminColor = 'approve';
+        $icon = '';
         break;
       case 'ปฏิเสธ':
         $adminColor = 'reject';
+        $icon = '';
         break;
       case 'กำลังตรวจสอบ':
         $adminColor = 'progress';
+        $icon = '';
         break;
       default:
         $adminColor = 'waiting';
+        $icon = '';
     }
   ?>
   <span class="badge-status bg-<?= $adminColor ?>">
@@ -188,21 +192,27 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
     switch ($status) {
       case 'สำเร็จ':
         $statusColor = 'complete';
+        $icon = '';
         break;
       case 'กำลังจัดเตรียม':
         $statusColor = 'progress';
+        $icon = '';
         break;
       case 'จัดส่งแล้ว':
         $statusColor = 'progress';
+        $icon = '';
         break;
       case 'ยกเลิก':
         $statusColor = 'reject';
+        $icon = '';
         break;
       case 'รอดำเนินการ':
         $statusColor = 'waiting';
+        $icon = '';
         break;
       default:
         $statusColor = 'default';
+        $icon = '';
     }
   ?>
   <span class="badge-status bg-<?= $statusColor ?>">
