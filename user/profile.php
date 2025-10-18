@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $email = trim($_POST['email']);
   $phone = trim($_POST['phone']);
   $address = trim($_POST['address']);
+  $subscribe = isset($_POST['subscribe']) ? 1 : 0; // ✅ subscribe toggle
 
   if (!preg_match('/^[0-9]{10}$/', $phone)) {
     $_SESSION['toast_error'] = "❌ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)";
@@ -32,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   } else {
     $stmt = $conn->prepare("UPDATE customers 
-                            SET name = ?, email = ?, phone = ?, address = ? 
+                            SET name = ?, email = ?, phone = ?, address = ?, subscribe = ? 
                             WHERE customer_id = ?");
-    $stmt->execute([$name, $email, $phone, $address, $customer_id]);
+    $stmt->execute([$name, $email, $phone, $address, $subscribe, $customer_id]);
 
     $_SESSION['customer_name'] = $name;
     $_SESSION['toast_success'] = "✅ บันทึกข้อมูลเรียบร้อยแล้ว";
@@ -76,19 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       letter-spacing: 0.5px;
     }
 
-    .form-label {
-      font-weight: 500;
-      color: #333;
-    }
+    .form-label { font-weight: 500; color: #333; }
 
-    .btn {
-      border-radius: 10px;
-      transition: all 0.2s ease-in-out;
-      font-weight: 500;
-    }
+    .btn { border-radius: 10px; transition: all 0.2s ease-in-out; font-weight: 500; }
     .btn:hover { transform: scale(1.05); }
 
-    /* ปุ่มสีหลัก */
     .btn-primary, .btn-outline-primary:hover {
       background-color: var(--red);
       border-color: var(--red);
@@ -100,10 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       color: var(--red);
     }
 
-    .btn-success {
-      background-color: #28a745;
-      border: none;
-    }
+    .btn-success { background-color: #28a745; border: none; }
 
     footer {
       background-color: var(--red);
@@ -173,6 +163,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
           <label class="form-label">ที่อยู่จัดส่ง</label>
           <textarea name="address" rows="3" class="form-control"><?= htmlspecialchars($user['address']) ?></textarea>
+        </div>
+
+        <!-- ✅ สมัครข่าวสาร -->
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="subscribe" name="subscribe" 
+                 value="1" <?= $user['subscribe'] ? 'checked' : '' ?>>
+          <label class="form-check-label" for="subscribe">
+            📩 สมัครรับข่าวสารและโปรโมชั่นจาก MyCommiss
+          </label>
         </div>
 
         <div class="d-flex justify-content-center align-items-center gap-3 mt-4 flex-wrap">
