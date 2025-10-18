@@ -165,14 +165,16 @@ if (empty($search) && empty($cat_id)) {
 
   <!-- 🔍 กล่องค้นหา -->
   <form method="get" class="search-bar d-flex justify-content-between align-items-center flex-wrap">
-    <select name="cat" class="form-select me-2" style="border:none;width:25%;">
-      <option value="">-- ประเภทสินค้า --</option>
-      <?php foreach ($cats as $c): ?>
-        <option value="<?= $c['cat_id'] ?>" <?= $cat_id == $c['cat_id'] ? 'selected' : '' ?>>
-          <?= htmlspecialchars($c['cat_name']) ?>
-        </option>
-      <?php endforeach; ?>
-    </select>
+  <select name="cat" class="form-select me-2" style="border:none;width:25%;">
+  <option value="">-- ประเภทสินค้า --</option>
+  <option value="all" <?= $cat_id == 'all' ? 'selected' : '' ?>>สินค้าทั้งหมด</option>
+  <?php foreach ($cats as $c): ?>
+    <option value="<?= $c['cat_id'] ?>" <?= $cat_id == $c['cat_id'] ? 'selected' : '' ?>>
+      <?= htmlspecialchars($c['cat_name']) ?>
+    </option>
+  <?php endforeach; ?>
+</select>
+
 
     <input type="text" name="search" placeholder="🔍 ค้นหาสินค้า..." value="<?= htmlspecialchars($search) ?>" class="flex-grow-1 me-2">
     <button type="submit"><i class="bi bi-search"></i></button>
@@ -278,6 +280,40 @@ if (empty($search) && empty($cat_id)) {
     </div>
 
   <?php endif; ?>
+  <!-- 🛒 สินค้าทั้งหมด -->
+<h3 class="section-title">สินค้าทั้งหมด</h3>
+<div class="row row-cols-1 row-cols-md-4 g-4">
+  <?php
+  $allProducts = $conn->query("
+    SELECT p.*, c.cat_name 
+    FROM product p 
+    LEFT JOIN category c ON p.cat_id = c.cat_id
+    ORDER BY p_id DESC
+  ")->fetchAll(PDO::FETCH_ASSOC);
+
+  if (count($allProducts) > 0):
+    foreach ($allProducts as $p):
+      $img = "../admin/uploads/" . $p['p_image'];
+      if (!file_exists($img) || empty($p['p_image'])) $img = "img/default.png";
+  ?>
+    <div class="col">
+      <div class="product-card card h-100">
+        <img src="<?= $img ?>" alt="<?= htmlspecialchars($p['p_name']) ?>">
+        <div class="card-body">
+          <h6 class="text-truncate"><?= htmlspecialchars($p['p_name']) ?></h6>
+          <p class="fw-bold text-danger"><?= number_format($p['p_price'], 2) ?> บาท</p>
+          <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-sm w-100 text-white">ดูรายละเอียด</a>
+        </div>
+      </div>
+    </div>
+  <?php
+    endforeach;
+  else:
+    echo "<p class='text-center text-muted'>ไม่พบสินค้า</p>";
+  endif;
+  ?>
+</div>
+
 </div>
 
 <footer class="text-center mt-5">
