@@ -37,19 +37,10 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: #212529;
       font-family: "Prompt", sans-serif;
     }
-
-    /* 🔹 Navbar */
-    .navbar {
-      background: linear-gradient(90deg, #0066ff, #0040ff);
+    .section-title {
+      font-weight: 700;
+      color: #0040ff;
     }
-    .navbar-brand {
-      font-weight: bold;
-      color: #fff !important;
-      font-size: 1.6rem;
-      letter-spacing: 0.5px;
-    }
-
-    /* 🔹 Search bar */
     .form-select, .form-control {
       border-radius: 8px;
     }
@@ -61,8 +52,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .btn-primary:hover {
       background: linear-gradient(90deg, #0040ff, #0066ff);
     }
-
-    /* 🔹 Card สินค้า */
     .card {
       border: 1px solid #e6e6e6;
       border-radius: 12px;
@@ -76,11 +65,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
       font-weight: 600;
       color: #000;
     }
-    .card p {
-      color: #555;
-    }
-
-    /* 🔹 Footer */
+    .card p { color: #555; }
     footer {
       background: #f8f9fa;
       color: #666;
@@ -88,28 +73,18 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
       margin-top: 50px;
       border-top: 1px solid #e0e0e0;
     }
-
-    /* 🔹 Heading */
-    .section-title {
-      font-weight: 700;
-      color: #0040ff;
-    }
   </style>
 </head>
 <body>
 
-<!-- ✅ Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-  <div class="container">
-    <a class="navbar-brand" href="index.php"><i class="bi bi-cpu"></i> MyCommiss</a>
-  </div>
-</nav>
+<!-- ✅ Navbar (ขาว-น้ำเงิน) -->
+<?php include("navbar_user.php"); ?>
 
 <!-- 🔍 ส่วนค้นหา -->
-<div class="container mt-5">
+<div class="container mt-4">
   <div class="text-center mb-4">
     <h2 class="section-title">💻 สินค้าทั้งหมด</h2>
-    <p class="text-muted">ค้นหาและเลือกซื้ออุปกรณ์คอมพิวเตอร์ได้ง่ายๆ</p>
+    <p class="text-muted">ค้นหาและเลือกซื้ออุปกรณ์คอมพิวเตอร์ได้ง่าย ๆ</p>
   </div>
 
   <form class="row g-3 mb-4" method="get">
@@ -143,7 +118,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         ?>
         <div class="col">
           <div class="card h-100 shadow-sm">
-            <img src="<?= $imagePath ?>" class="card-img-top rounded-top" style="height:200px;object-fit:cover;">
+            <img src="<?= $imagePath ?>" class="card-img-top" style="height:200px;object-fit:cover;">
             <div class="card-body">
               <h6 class="card-title text-truncate" title="<?= htmlspecialchars($p['p_name']) ?>">
                 <?= htmlspecialchars($p['p_name']) ?>
