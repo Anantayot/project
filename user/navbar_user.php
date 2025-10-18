@@ -93,25 +93,25 @@ function confirmLogout(e) {
   font-weight: 500;
 }
 .nav-link:hover {
-  color: #0d6efd !important;
+  color: #D10024 !important;
 }
 .nav-link.active {
-  color: #0d6efd !important;
-  border-bottom: 2px solid #0d6efd;
+  color: #D10024 !important;
+  border-bottom: 2px solid #D10024;
 }
 
 /* 💎 ปรับสีชื่อผู้ใช้ */
 .user-link {
-  color: #0d6efd !important;
+  color: #D10024 !important;
   transition: 0.2s ease;
   text-decoration: none !important;
 }
 .user-link:hover {
-  color: #0040ff !important;
+  color: #D10024 !important;
   text-decoration: none !important;
 }
 .user-link.active {
-  color: #0d6efd !important;
+  color: #D10024 !important;
   text-shadow: 0 0 6px rgba(13, 110, 253, 0.4);
   text-decoration: none !important;
 }

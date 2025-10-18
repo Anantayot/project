@@ -45,12 +45,12 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
       border-radius: 8px;
     }
     .btn-primary {
-      background: linear-gradient(90deg, #0066ff, #0040ff);
+      background: linear-gradient(90deg, #D10024, #D10024);
       border: none;
       border-radius: 8px;
     }
     .btn-primary:hover {
-      background: linear-gradient(90deg, #0040ff, #0066ff);
+      background: linear-gradient(90deg, #D10024, #D10024);
     }
     .card {
       border: 1px solid #e6e6e6;
