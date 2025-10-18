@@ -42,15 +42,18 @@ if (empty($search) && empty($cat_id)) {
   ";
   $params = [];
 
+  // ✅ ถ้ามีคำค้นหา
   if (!empty($search)) {
     $sql .= " AND (p.p_name LIKE :kw OR c.cat_name LIKE :kw)";
     $params['kw'] = "%$search%";
   }
 
-  if (!empty($cat_id)) {
+  // ✅ เงื่อนไขกรองหมวดหมู่ (เพิ่มสินค้าทั้งหมด)
+  if (!empty($cat_id) && $cat_id !== 'all') {
     $sql .= " AND p.cat_id = :cat";
     $params['cat'] = $cat_id;
   }
+  // ถ้าเลือกสินค้าทั้งหมด → ไม่ต้องกรอง cat_id
 
   $sql .= " ORDER BY p.p_id DESC";
   $stmt = $conn->prepare($sql);
@@ -165,16 +168,15 @@ if (empty($search) && empty($cat_id)) {
 
   <!-- 🔍 กล่องค้นหา -->
   <form method="get" class="search-bar d-flex justify-content-between align-items-center flex-wrap">
-  <select name="cat" class="form-select me-2" style="border:none;width:25%;">
-  <option value="">-- ประเภทสินค้า --</option>
-  <option value="all" <?= $cat_id == 'all' ? 'selected' : '' ?>>สินค้าทั้งหมด</option>
-  <?php foreach ($cats as $c): ?>
-    <option value="<?= $c['cat_id'] ?>" <?= $cat_id == $c['cat_id'] ? 'selected' : '' ?>>
-      <?= htmlspecialchars($c['cat_name']) ?>
-    </option>
-  <?php endforeach; ?>
-</select>
-
+    <select name="cat" class="form-select me-2" style="border:none;width:25%;">
+      <option value="">-- ประเภทสินค้า --</option>
+      <option value="all" <?= $cat_id == 'all' ? 'selected' : '' ?>>สินค้าทั้งหมด</option>
+      <?php foreach ($cats as $c): ?>
+        <option value="<?= $c['cat_id'] ?>" <?= $cat_id == $c['cat_id'] ? 'selected' : '' ?>>
+          <?= htmlspecialchars($c['cat_name']) ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
 
     <input type="text" name="search" placeholder="🔍 ค้นหาสินค้า..." value="<?= htmlspecialchars($search) ?>" class="flex-grow-1 me-2">
     <button type="submit"><i class="bi bi-search"></i></button>
@@ -294,8 +296,8 @@ if (empty($search) && empty($cat_id)) {
       slidesPerView: 5,
       spaceBetween: 20,
       autoplay: {
-        delay: 3000, // 🔁 3 วินาทีต่อการเลื่อน
-        disableOnInteraction: false // 🧠 ยังเลื่อนต่อหลังจากผู้ใช้เลื่อนเอง
+        delay: 3000,
+        disableOnInteraction: false
       },
       navigation: {
         nextEl: swiperEl.querySelector('.swiper-button-next'),
@@ -310,7 +312,5 @@ if (empty($search) && empty($cat_id)) {
     });
   });
 </script>
-
-
 </body>
 </html>
