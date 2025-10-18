@@ -10,14 +10,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $phone = trim($_POST['phone']);
   $address = trim($_POST['address']);
 
-  // ✅ ตรวจสอบเบอร์โทรศัพท์ (ต้องเป็นตัวเลข 10 หลักเท่านั้น)
+  // ✅ ตรวจสอบเบอร์โทรศัพท์ (เฉพาะตัวเลข 10 หลัก)
   if (!preg_match('/^[0-9]{10}$/', $phone)) {
     $_SESSION['toast_error'] = "⚠️ กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (เฉพาะตัวเลข 10 หลัก)";
     header("Location: register.php");
     exit;
   }
 
-  // ✅ ตรวจสอบรหัสผ่านตรงกันไหม
+  // ✅ ตรวจสอบรหัสผ่านตรงกัน
   if ($password !== $confirm) {
     $_SESSION['toast_error'] = "❌ รหัสผ่านไม่ตรงกัน";
     header("Location: register.php");
@@ -61,11 +61,89 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8">
   <title>สมัครสมาชิก | MyCommiss</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    <?php include("header.php"); ?>
 
-<!-- 🔔 Toast แจ้งเตือน -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:3000;">
+    body {
+      background: #F6F7F8;
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .register-wrapper {
+      background: #FFF;
+      border-radius: 20px;
+      border: 1px solid #E4E7ED;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      padding: 50px 60px;
+      width: 520px;
+      transition: all 0.3s ease;
+    }
+
+    .register-wrapper:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .register-title {
+      color: #2B2D42;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .register-title i {
+      color: #D10024;
+      margin-right: 8px;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .btn-danger {
+      background-color: #D10024;
+      border: none;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .btn-danger:hover {
+      background-color: #b0001f;
+    }
+
+    .text-secondary {
+      color: #6c757d !important;
+    }
+
+    footer {
+      background-color: #1E1F29;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      width: 100%;
+      margin-top: 40px;
+    }
+
+    /* Toast */
+    .toast-container {
+      z-index: 3000;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ✅ Toast แจ้งเตือน -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
   <?php if (isset($_SESSION['toast_success'])): ?>
     <div class="toast align-items-center text-bg-success border-0 show" role="alert">
       <div class="d-flex">
@@ -87,57 +165,56 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <?php endif; ?>
 </div>
 
-<div class="container mt-5" style="max-width:600px;">
-  <div class="card shadow border-0">
-    <div class="card-header bg-dark text-white text-center fw-bold">สมัครสมาชิก</div>
-    <div class="card-body">
-      <form method="post">
-        <div class="mb-3">
-          <label class="form-label">ชื่อ-นามสกุล</label>
-          <input type="text" name="name" class="form-control" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">อีเมล</label>
-          <input type="email" name="email" class="form-control" required>
-        </div>
+<!-- ✅ กล่องสมัครสมาชิก -->
+<div class="register-wrapper">
+  <form method="post">
+    <h3 class="register-title"><i class="fa fa-user-plus"></i> สมัครสมาชิก</h3>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">รหัสผ่าน</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">ยืนยันรหัสผ่าน</label>
-            <input type="password" name="confirm" class="form-control" required>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">เบอร์โทรศัพท์</label>
-          <input type="text" name="phone" class="form-control" maxlength="10"
-                 pattern="^[0-9]{10}$" title="กรุณากรอกเฉพาะตัวเลข 10 หลัก" required
-                 oninput="this.value=this.value.replace(/[^0-9]/g,'');">
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">ที่อยู่</label>
-          <textarea name="address" class="form-control" rows="3"></textarea>
-        </div>
-
-        <div class="d-grid">
-          <button type="submit" class="btn btn-success">✅ สมัครสมาชิก</button>
-        </div>
-      </form>
+    <div class="mb-3">
+      <label class="form-label">ชื่อ-นามสกุล</label>
+      <input type="text" name="name" class="form-control" required>
     </div>
-  </div>
 
-  <div class="text-center mt-3">
-    <a href="login.php" class="text-decoration-none">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</a><br>
-    <a href="index.php" class="btn btn-secondary btn-sm mt-2">⬅️ กลับหน้าหลัก</a>
-  </div>
+    <div class="mb-3">
+      <label class="form-label">อีเมล</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">รหัสผ่าน</label>
+        <input type="password" name="password" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">ยืนยันรหัสผ่าน</label>
+        <input type="password" name="confirm" class="form-control" required>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">เบอร์โทรศัพท์</label>
+      <input type="text" name="phone" class="form-control" maxlength="10"
+             pattern="^[0-9]{10}$" title="กรุณากรอกเฉพาะตัวเลข 10 หลัก" required
+             oninput="this.value=this.value.replace(/[^0-9]/g,'');">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">ที่อยู่</label>
+      <textarea name="address" class="form-control" rows="3"></textarea>
+    </div>
+
+    <div class="d-grid">
+      <button type="submit" class="btn btn-danger">สมัครสมาชิก</button>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="login.php" class="text-decoration-none">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</a><br>
+      <a href="index.php" class="text-secondary small"><i class="fa fa-arrow-left"></i> กลับหน้าหลัก</a>
+    </div>
+  </form>
 </div>
 
-<footer class="text-center py-3 mt-5 bg-dark text-white">
+<footer>
   © <?= date('Y') ?> MyCommiss | สมัครสมาชิก
 </footer>
 
