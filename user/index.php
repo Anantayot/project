@@ -37,21 +37,50 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: #212529;
       font-family: "Prompt", sans-serif;
     }
-    .section-title {
+
+    /* 🔹 Navbar */
+    .navbar {
+      background-color: #fff;
+      border-bottom: 3px solid #D10024;
+    }
+    .navbar-brand {
+      color: #D10024 !important;
       font-weight: 700;
-      color: #0040ff;
+      font-size: 1.6rem;
+      letter-spacing: 0.5px;
     }
-    .form-select, .form-control {
-      border-radius: 8px;
+    .navbar-brand:hover { color: #a5001b !important; }
+
+    .nav-link {
+      color: #333 !important;
+      font-weight: 500;
+      transition: 0.2s ease;
     }
+    .nav-link:hover,
+    .nav-link.active {
+      color: #D10024 !important;
+      font-weight: 600;
+    }
+
+    /* 🔹 ปุ่มหลัก */
     .btn-primary {
-      background: linear-gradient(90deg, #D10024, #D10024);
+      background-color: #D10024;
       border: none;
       border-radius: 8px;
     }
     .btn-primary:hover {
-      background: linear-gradient(90deg, #D10024, #D10024);
+      background-color: #a5001b;
     }
+    .btn-outline-primary {
+      color: #D10024;
+      border-color: #D10024;
+    }
+    .btn-outline-primary:hover {
+      background-color: #D10024;
+      color: #fff;
+    }
+
+    /* 🔹 การ์ดสินค้า */
     .card {
       border: 1px solid #e6e6e6;
       border-radius: 12px;
@@ -60,25 +89,80 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-color: #D10024;
     }
     .card-title {
       font-weight: 600;
       color: #000;
     }
     .card p { color: #555; }
+
+    /* 🔹 ชื่อผู้ใช้ */
+    .user-link {
+      color: #D10024 !important;
+      transition: 0.2s ease;
+      text-decoration: none !important;
+    }
+    .user-link:hover {
+      color: #a5001b !important;
+    }
+    .user-link.active {
+      color: #D10024 !important;
+      text-shadow: 0 0 6px rgba(209, 0, 36, 0.4);
+    }
+
+    /* 🔹 ส่วนหัวและ Footer */
+    .section-title {
+      font-weight: 700;
+      color: #D10024;
+    }
     footer {
       background: #f8f9fa;
       color: #666;
       padding: 20px;
       margin-top: 50px;
-      border-top: 1px solid #e0e0e0;
+      border-top: 3px solid #D10024;
     }
   </style>
 </head>
 <body>
 
-<!-- ✅ Navbar (ขาว-น้ำเงิน) -->
-<?php include("navbar_user.php"); ?>
+<!-- ✅ Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand" href="index.php"><i class="bi bi-cpu"></i> MyCommiss</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a href="index.php" class="nav-link <?= basename($_SERVER['PHP_SELF'])=='index.php'?'active':'' ?>">🏠 หน้าร้าน</a></li>
+        <li class="nav-item"><a href="cart.php" class="nav-link <?= basename($_SERVER['PHP_SELF'])=='cart.php'?'active':'' ?>">🛒 ตะกร้า</a></li>
+
+        <?php if (isset($_SESSION['customer_id'])): ?>
+          <li class="nav-item"><a href="orders.php" class="nav-link <?= basename($_SERVER['PHP_SELF'])=='orders.php'?'active':'' ?>">📦 คำสั่งซื้อของฉัน</a></li>
+          <li class="nav-item"><a href="profile.php" class="nav-link user-link <?= basename($_SERVER['PHP_SELF'])=='profile.php'?'active':'' ?>">👤 <?= htmlspecialchars($_SESSION['customer_name']) ?></a></li>
+          <li class="nav-item"><a href="#" class="nav-link text-danger fw-semibold" onclick="confirmLogout(event)">🚪 ออกจากระบบ</a></li>
+        <?php else: ?>
+          <li class="nav-item"><a href="login.php" class="nav-link <?= basename($_SERVER['PHP_SELF'])=='login.php'?'active':'' ?>">🔑 เข้าสู่ระบบ</a></li>
+          <li class="nav-item"><a href="register.php" class="nav-link <?= basename($_SERVER['PHP_SELF'])=='register.php'?'active':'' ?>">📝 สมัครสมาชิก</a></li>
+        <?php endif; ?>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ✅ Confirm Logout -->
+<script>
+function confirmLogout(e) {
+  e.preventDefault();
+  if (confirm("คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?")) {
+    window.location = "logout.php";
+  }
+}
+</script>
 
 <!-- 🔍 ส่วนค้นหา -->
 <div class="container mt-4">
@@ -124,7 +208,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?= htmlspecialchars($p['p_name']) ?>
               </h6>
               <p class="mb-1"><i class="bi bi-tags"></i> <?= htmlspecialchars($p['cat_name']) ?></p>
-              <p class="text-primary fw-bold"><?= number_format($p['p_price'], 2) ?> บาท</p>
+              <p class="fw-bold" style="color:#D10024;"><?= number_format($p['p_price'], 2) ?> บาท</p>
 
               <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-outline-primary btn-sm w-100 mb-2">
                 🔎 ดูรายละเอียด
@@ -133,7 +217,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php if (isset($_SESSION['customer_id'])): ?>
                 <form method="post" action="cart_add.php">
                   <input type="hidden" name="id" value="<?= $p['p_id'] ?>">
-                  <button type="submit" class="btn btn-success btn-sm w-100">🛒 หยิบใส่ตะกร้า</button>
+                  <button type="submit" class="btn btn-primary btn-sm w-100">🛒 หยิบใส่ตะกร้า</button>
                 </form>
               <?php else: ?>
                 <a href="login.php" class="btn btn-outline-secondary btn-sm w-100">🔑 เข้าสู่ระบบเพื่อสั่งซื้อ</a>
@@ -143,9 +227,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
       <?php endforeach; ?>
     <?php else: ?>
-      <div class="col text-center text-muted">
-        <p>😢 ไม่พบสินค้าที่ค้นหา</p>
-      </div>
+      <div class="col text-center text-muted"><p>😢 ไม่พบสินค้าที่ค้นหา</p></div>
     <?php endif; ?>
   </div>
 </div>
