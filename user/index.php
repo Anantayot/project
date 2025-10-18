@@ -7,10 +7,11 @@ $cats = $conn->query("SELECT * FROM category ORDER BY cat_name ASC")->fetchAll(P
 
 // รับค่าค้นหา
 $search = $_GET['search'] ?? '';
-$cat_id = $_GET['cat'] ?? '';
+$cat_id = $_GET['cat'] ?? [];
+if (!is_array($cat_id)) $cat_id = [$cat_id];
 
 // 🔹 ดึงข้อมูลสินค้า 3 ประเภท (เมื่อไม่มีการค้นหา)
-if (empty($search) && empty($cat_id)) {
+if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
   $newProducts = $conn->query("
     SELECT p.*, c.cat_name FROM product p 
     LEFT JOIN category c ON p.cat_id = c.cat_id 
@@ -33,7 +34,7 @@ if (empty($search) && empty($cat_id)) {
     ORDER BY RAND() LIMIT 10
   ")->fetchAll(PDO::FETCH_ASSOC);
 } else {
-  // 🔍 ดึงข้อมูลตามการค้นหา + หมวดหมู่
+  // 🔍 ดึงข้อมูลตามการค้นหา + หมวดหมู่ (หลายค่าได้)
   $sql = "
     SELECT p.*, c.cat_name 
     FROM product p
@@ -43,13 +44,15 @@ if (empty($search) && empty($cat_id)) {
   $params = [];
 
   if (!empty($search)) {
-    $sql .= " AND (p.p_name LIKE :kw OR c.cat_name LIKE :kw)";
-    $params['kw'] = "%$search%";
+    $sql .= " AND (p.p_name LIKE ? OR c.cat_name LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
   }
 
-  if (!empty($cat_id)) {
-    $sql .= " AND p.cat_id = :cat";
-    $params['cat'] = $cat_id;
+  if (!empty($cat_id) && !in_array('', $cat_id)) {
+    $in = str_repeat('?,', count($cat_id) - 1) . '?';
+    $sql .= " AND p.cat_id IN ($in)";
+    $params = array_merge($params, $cat_id);
   }
 
   $sql .= " ORDER BY p.p_id DESC";
@@ -86,7 +89,7 @@ if (empty($search) && empty($cat_id)) {
       border-radius: 50px;
       padding: 15px 25px;
       margin: 30px auto;
-      max-width: 800px;
+      max-width: 900px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .search-bar input, .search-bar select {
@@ -97,11 +100,12 @@ if (empty($search) && empty($cat_id)) {
     }
     .search-bar select {
       color: #333;
-      width: 25%;
+      width: 30%;
       cursor: pointer;
+      height: 100px;
     }
     .search-bar input {
-      width: 55%;
+      width: 50%;
     }
     .search-bar button {
       background: #D10024;
@@ -165,10 +169,11 @@ if (empty($search) && empty($cat_id)) {
 
   <!-- 🔍 กล่องค้นหา -->
   <form method="get" class="search-bar d-flex justify-content-between align-items-center flex-wrap">
-    <select name="cat" class="form-select me-2" style="border:none;width:25%;">
-      <option value="">-- ทุกหมวดหมู่ --</option>
+    <select name="cat[]" multiple class="form-select me-2" style="border:none;width:30%;height:100px;">
+      <option value="">-- ประเภทสินค้า --</option>
       <?php foreach ($cats as $c): ?>
-        <option value="<?= $c['cat_id'] ?>" <?= $cat_id == $c['cat_id'] ? 'selected' : '' ?>>
+        <option value="<?= $c['cat_id'] ?>" 
+          <?= (is_array($cat_id) && in_array($c['cat_id'], $cat_id)) ? 'selected' : '' ?>>
           <?= htmlspecialchars($c['cat_name']) ?>
         </option>
       <?php endforeach; ?>
@@ -178,7 +183,7 @@ if (empty($search) && empty($cat_id)) {
     <button type="submit"><i class="bi bi-search"></i></button>
   </form>
 
-  <?php if (!empty($search) || !empty($cat_id)): ?>
+  <?php if (!empty($search) || (!empty($cat_id) && !in_array('', $cat_id))): ?>
     <!-- 🔍 ผลลัพธ์การค้นหา -->
     <h3 class="section-title">ผลการค้นหา</h3>
     <div class="row row-cols-1 row-cols-md-4 g-4">
@@ -205,7 +210,7 @@ if (empty($search) && empty($cat_id)) {
   <?php else: ?>
 
     <!-- 🆕 สินค้าใหม่ล่าสุด -->
-    <h3 class="section-title">🆕 สินค้าใหม่ล่าสุด</h3>
+    <h3 class="section-title">สินค้าใหม่ล่าสุด</h3>
     <div class="swiper mySwiper">
       <div class="swiper-wrapper">
         <?php foreach ($newProducts as $p):
@@ -229,7 +234,7 @@ if (empty($search) && empty($cat_id)) {
     </div>
 
     <!-- 🔥 สินค้าขายดีที่สุด -->
-    <h3 class="section-title">🔥 สินค้าขายดีที่สุด</h3>
+    <h3 class="section-title">สินค้าขายดีที่สุด</h3>
     <div class="swiper mySwiper">
       <div class="swiper-wrapper">
         <?php foreach ($bestSellers as $p):
@@ -254,7 +259,7 @@ if (empty($search) && empty($cat_id)) {
     </div>
 
     <!-- 🎲 สินค้าแนะนำ -->
-    <h3 class="section-title">🎲 สินค้าแนะนำ</h3>
+    <h3 class="section-title">สินค้าแนะนำ</h3>
     <div class="swiper mySwiper">
       <div class="swiper-wrapper">
         <?php foreach ($randomProducts as $p):
@@ -296,6 +301,11 @@ if (empty($search) && empty($cat_id)) {
         nextEl: swiperEl.querySelector('.swiper-button-next'),
         prevEl: swiperEl.querySelector('.swiper-button-prev'),
       },
+      autoplay: {
+        delay: 7000, // ⏱ 7 วินาทีต่อสไลด์
+        disableOnInteraction: false // ให้เลื่อนต่อแม้ผู้ใช้จะคลิกเอง
+      },
+      loop: true, // 🔁 สไลด์วนลูป
       breakpoints: {
         320: { slidesPerView: 2 },
         768: { slidesPerView: 3 },
@@ -305,6 +315,7 @@ if (empty($search) && empty($cat_id)) {
     });
   });
 </script>
+
 
 </body>
 </html>
