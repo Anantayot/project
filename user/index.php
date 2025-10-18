@@ -30,61 +30,69 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>🖥️ MyCommiss | หน้าร้าน</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
     body {
-      background: linear-gradient(135deg, #0d1117, #1b2735);
-      color: #eaeaea;
-      min-height: 100vh;
+      background-color: #ffffff;
+      color: #212529;
+      font-family: "Prompt", sans-serif;
     }
+
+    /* 🔹 Navbar */
     .navbar {
-      background: linear-gradient(90deg, #0d6efd, #6610f2);
+      background: linear-gradient(90deg, #0066ff, #0040ff);
     }
     .navbar-brand {
       font-weight: bold;
       color: #fff !important;
-      font-size: 1.5rem;
-      letter-spacing: 1px;
+      font-size: 1.6rem;
+      letter-spacing: 0.5px;
     }
+
+    /* 🔹 Search bar */
     .form-select, .form-control {
-      border-radius: 10px;
+      border-radius: 8px;
     }
     .btn-primary {
-      background: linear-gradient(90deg, #0d6efd, #6610f2);
+      background: linear-gradient(90deg, #0066ff, #0040ff);
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
     }
     .btn-primary:hover {
-      background: linear-gradient(90deg, #6610f2, #0d6efd);
+      background: linear-gradient(90deg, #0040ff, #0066ff);
     }
+
+    /* 🔹 Card สินค้า */
     .card {
-      background-color: #161b22;
-      border: 1px solid #2d313a;
-      border-radius: 15px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid #e6e6e6;
+      border-radius: 12px;
+      transition: all 0.3s ease;
     }
     .card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .card-title {
       font-weight: 600;
-      color: #fff;
+      color: #000;
     }
     .card p {
-      color: #a0a0a0;
+      color: #555;
     }
+
+    /* 🔹 Footer */
     footer {
-      background: #0d1117;
-      color: #bbb;
+      background: #f8f9fa;
+      color: #666;
       padding: 20px;
       margin-top: 50px;
+      border-top: 1px solid #e0e0e0;
     }
-    .toast {
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
-    }
-    .toast.show {
-      opacity: 1;
+
+    /* 🔹 Heading */
+    .section-title {
+      font-weight: 700;
+      color: #0040ff;
     }
   </style>
 </head>
@@ -94,17 +102,14 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
   <div class="container">
     <a class="navbar-brand" href="index.php"><i class="bi bi-cpu"></i> MyCommiss</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
   </div>
 </nav>
 
 <!-- 🔍 ส่วนค้นหา -->
 <div class="container mt-5">
   <div class="text-center mb-4">
-    <h2 class="fw-bold text-light">💻 สินค้าทั้งหมด</h2>
-    <p class="text-secondary">ค้นหาและเลือกซื้ออุปกรณ์คอมพิวเตอร์ที่คุณต้องการได้ที่นี่</p>
+    <h2 class="section-title">💻 สินค้าทั้งหมด</h2>
+    <p class="text-muted">ค้นหาและเลือกซื้ออุปกรณ์คอมพิวเตอร์ได้ง่ายๆ</p>
   </div>
 
   <form class="row g-3 mb-4" method="get">
@@ -137,16 +142,16 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
           }
         ?>
         <div class="col">
-          <div class="card h-100 shadow-lg">
+          <div class="card h-100 shadow-sm">
             <img src="<?= $imagePath ?>" class="card-img-top rounded-top" style="height:200px;object-fit:cover;">
             <div class="card-body">
               <h6 class="card-title text-truncate" title="<?= htmlspecialchars($p['p_name']) ?>">
                 <?= htmlspecialchars($p['p_name']) ?>
               </h6>
-              <p class="mb-1">หมวดหมู่: <?= htmlspecialchars($p['cat_name']) ?></p>
-              <p class="text-info fw-bold"><?= number_format($p['p_price'], 2) ?> บาท</p>
+              <p class="mb-1"><i class="bi bi-tags"></i> <?= htmlspecialchars($p['cat_name']) ?></p>
+              <p class="text-primary fw-bold"><?= number_format($p['p_price'], 2) ?> บาท</p>
 
-              <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-outline-light btn-sm w-100 mb-2">
+              <a href="product_detail.php?id=<?= $p['p_id'] ?>" class="btn btn-outline-primary btn-sm w-100 mb-2">
                 🔎 ดูรายละเอียด
               </a>
 
@@ -175,8 +180,6 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <p>© <?= date('Y') ?> MyCommiss | ระบบร้านค้าออนไลน์คอมพิวเตอร์</p>
 </footer>
 
-<!-- ✅ Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </body>
 </html>
