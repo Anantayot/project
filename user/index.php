@@ -284,7 +284,6 @@ if (empty($search) && empty($cat_id)) {
   <p>© <?= date('Y') ?> MyCommiss | ระบบร้านค้าออนไลน์คอมพิวเตอร์</p>
 </footer>
 
-<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 <script>
@@ -292,6 +291,10 @@ if (empty($search) && empty($cat_id)) {
     new Swiper(swiperEl, {
       slidesPerView: 5,
       spaceBetween: 20,
+      autoplay: {
+        delay: 3000, // 🔁 3 วินาทีต่อการเลื่อน
+        disableOnInteraction: false // 🧠 ยังเลื่อนต่อหลังจากผู้ใช้เลื่อนเอง
+      },
       navigation: {
         nextEl: swiperEl.querySelector('.swiper-button-next'),
         prevEl: swiperEl.querySelector('.swiper-button-prev'),
@@ -305,6 +308,7 @@ if (empty($search) && empty($cat_id)) {
     });
   });
 </script>
+
 
 </body>
 </html>
