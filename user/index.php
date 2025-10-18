@@ -103,7 +103,14 @@ if (empty($search)) {
       border-color: #D10024;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .product-card img { height: 180px; object-fit: cover; width: 100%; }
+    .product-card img {
+      height: 190px;
+      object-fit: cover;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
     .product-card .card-body { text-align: center; }
     .product-card .btn {
       background-color: #D10024;
