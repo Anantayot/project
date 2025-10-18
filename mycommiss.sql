@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 16, 2025 at 07:56 PM
+-- Generation Time: Oct 18, 2025 at 03:27 PM
 -- Server version: 10.5.29-MariaDB-0+deb11u1
 -- PHP Version: 7.4.33
 
@@ -93,15 +93,20 @@ CREATE TABLE `customers` (
   `password` varchar(255) DEFAULT NULL,
   `phone` varchar(10) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `subscribe` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `created_at`) VALUES
-(1, 'อนันตยศ อินทราพงษ์', '67010974018@msu.ac.th', '$2y$10$g2TOwNeq8WS/qknez/Dml.eHW.AdPRzysgMa7RcKhqjHCaeDQkUYi', '0903262100', 'ประจวบ', '2025-10-16 09:11:21');
+INSERT INTO `customers` (`customer_id`, `name`, `email`, `password`, `phone`, `address`, `created_at`, `subscribe`) VALUES
+(1, 'อนันตยศ อินทราพงษ์', '67010974018@msu.ac.th', '$2y$10$g2TOwNeq8WS/qknez/Dml.eHW.AdPRzysgMa7RcKhqjHCaeDQkUYi', '0903262100', 'ประจวบ', '2025-10-16 09:11:21', 0),
+(2, 'นายวีรภัทร สุพร', '67010974016@msu.ac.th', '$2y$10$0BEEyQ050EjANd8vHl2Qju.15EijEZGyb2BT6zSf9xAuW9r9hDRHe', '0933705611', '57/4', '2025-10-18 01:53:15', 0),
+(3, 'Ronaldo', '67010974003@msu.ac.th', '$2y$10$333UZ7MH5uDB/Jle9GNxVeTPdZpNA7zbuGMqu6S3SWnxTU58wWE5i', '0622301236', 'โปรตุเกต', '2025-10-18 06:10:54', 0),
+(4, 'ฟหกฟหกฟห', 'aatad@asdasd', '$2y$10$eLOcVFss4Zc9V83ebKcIgut/1NsuLIIPR/Ly6cPHd8vXaCXbnVopu', '4894984894', '84894', '2025-10-18 06:28:08', 0),
+(5, 'รัฐศาสตร์ บรรจงกุล', '67010974013@msu.ac.th', '$2y$10$XeqiNnPnqjtg2zre/VEZGeqI9CDy0rGDEsEUrvOiKj3NPU43UXTkK', '0826968780', 'ปารีส', '2025-10-18 06:46:38', 0);
 
 -- --------------------------------------------------------
 
@@ -132,7 +137,7 @@ CREATE TABLE `orders` (
 
 INSERT INTO `orders` (`order_id`, `customer_id`, `total_price`, `shipping_address`, `payment_method`, `slip_image`, `payment_date`, `payment_status`, `admin_verified`, `order_status`, `order_date`, `shipped_date`, `tracking_number`, `note`) VALUES
 (4, 1, '44880.00', 'ประจวบ', 'COD', NULL, NULL, 'ชำระเงินแล้ว', 'รอตรวจสอบ', 'สำเร็จ', '2025-10-16 11:02:03', NULL, NULL, NULL),
-(5, 1, '35890.00', 'ประจวบ', 'COD', NULL, NULL, 'ชำระเงินแล้ว', 'อนุมัติ', 'กำลังจัดเตรียม', '2025-10-16 11:03:32', NULL, NULL, NULL),
+(5, 1, '35890.00', 'ประจวบ', 'COD', NULL, NULL, 'ชำระเงินแล้ว', 'อนุมัติ', 'สำเร็จ', '2025-10-16 11:03:32', NULL, NULL, NULL),
 (6, 1, '39890.00', 'ประจวบ', 'COD', NULL, NULL, 'รอดำเนินการ', 'รอตรวจสอบ', 'รอดำเนินการ', '2025-10-16 11:04:17', NULL, NULL, NULL),
 (7, 1, '19900.00', 'ประจวบ', 'QR', 'slip_1760616764_5719.jpeg', '2025-10-16 19:12:44', 'ชำระเงินแล้ว', 'อนุมัติ', 'กำลังจัดเตรียม', '2025-10-16 11:08:54', NULL, NULL, NULL),
 (8, 1, '23900.00', 'ประจวบ', 'QR', 'slip_1760618196_5197.jpeg', '2025-10-16 19:36:36', 'ชำระเงินแล้ว', 'อนุมัติ', 'กำลังจัดเตรียม', '2025-10-16 11:09:18', NULL, NULL, NULL),
@@ -141,7 +146,12 @@ INSERT INTO `orders` (`order_id`, `customer_id`, `total_price`, `shipping_addres
 (11, 1, '29790.00', 'ประจวบ', 'QR', 'slip_1760615261_6906.jpeg', '2025-10-16 18:47:41', 'ชำระเงินแล้ว', NULL, 'รอดำเนินการ', '2025-10-16 11:18:20', NULL, NULL, NULL),
 (12, 1, '13990.00', 'ประจวบ', 'QR', 'slip_1760616090_7031.jpeg', '2025-10-16 19:01:30', 'รอดำเนินการ', 'กำลังตรวจสอบ', 'รอดำเนินการ', '2025-10-16 11:20:37', NULL, NULL, NULL),
 (13, 1, '250.00', 'ประจวบ', 'QR', 'slip_1760615717_4074.jpeg', '2025-10-16 18:55:17', 'ยกเลิก', 'ปฏิเสธ', 'ยกเลิก', '2025-10-16 11:22:47', NULL, NULL, NULL),
-(14, 1, '55960.00', 'ประจวบ', 'COD', NULL, NULL, 'รอดำเนินการ', NULL, 'รอดำเนินการ', '2025-10-16 11:46:23', NULL, NULL, NULL);
+(14, 1, '55960.00', 'ประจวบ', 'QR', NULL, NULL, 'ยกเลิก', NULL, 'ยกเลิก', '2025-10-16 11:46:23', NULL, NULL, NULL),
+(15, 3, '19900.00', 'ซาอุดิอารเบีย - โปรตุเกต', 'QR', NULL, NULL, 'ยกเลิก', 'รอตรวจสอบ', 'ยกเลิก', '2025-10-18 06:11:28', NULL, NULL, NULL),
+(16, 4, '23900.00', '84894', 'QR', NULL, NULL, 'รอดำเนินการ', NULL, 'รอดำเนินการ', '2025-10-18 06:33:26', NULL, NULL, NULL),
+(17, 4, '23000.00', '84894', 'COD', NULL, NULL, 'รอดำเนินการ', 'รอตรวจสอบ', 'รอดำเนินการ', '2025-10-18 06:39:00', NULL, NULL, NULL),
+(18, 5, '40900.00', 'ปารีส', 'QR', NULL, NULL, 'รอดำเนินการ', 'รอตรวจสอบ', 'รอดำเนินการ', '2025-10-18 06:47:57', NULL, NULL, NULL),
+(19, 1, '23900.00', 'ประจวบ', 'QR', NULL, NULL, 'รอดำเนินการ', NULL, 'รอดำเนินการ', '2025-10-18 06:52:39', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -176,9 +186,14 @@ INSERT INTO `order_details` (`id`, `order_id`, `p_id`, `quantity`, `price`) VALU
 (17, 10, 3, 1, '23900.00'),
 (18, 11, 3, 1, '23900.00'),
 (19, 11, 19, 1, '5890.00'),
-(20, 12, 2, 1, '13990.00'),
+(20, 12, NULL, 1, '13990.00'),
 (21, 13, 12, 1, '250.00'),
-(22, 14, 2, 4, '13990.00');
+(22, 14, NULL, 4, '13990.00'),
+(23, 15, 8, 1, '19900.00'),
+(24, 16, 3, 1, '23900.00'),
+(25, 17, 5, 1, '23000.00'),
+(26, 18, 162, 1, '40900.00'),
+(27, 19, 3, 1, '23900.00');
 
 -- --------------------------------------------------------
 
@@ -202,8 +217,6 @@ CREATE TABLE `product` (
 --
 
 INSERT INTO `product` (`p_id`, `p_name`, `p_price`, `p_stock`, `p_description`, `p_image`, `cat_id`, `created_at`) VALUES
-(1, 'ASUS VIVOBOOK GO 14 M1404FA-EB562WA - COOL SILVER', '15990.00', 50, 'Asus Vivobook Go 14 M1404FA-EB562WA โน้ตบุ๊กบางเบาเพียง 17.9 มม. และ 1.38 กก. มาพร้อมจอ FHD\r\nIPS 14 นิ้ว ถนอมสายตา ทนทานตามมาตรฐาน US MIL-STD-810H และบานพับ 180° ใช้งานสะดวก\r\nมี AI ตัดเสียงรบกวน, NumberPad บนทัชแพด พร้อม Windows 11 Home, Office Home 2024 และ Microsoft 365 Basic\r\n\r\n• ซีพียู : AMD Ryzen 5 7520U\r\n• แรม : 16GB LPDDR5 on board\r\n• เอสเอสดี : 512GB PCIe 3/NVMe M.2 SSD\r\n• จอแสดงผล : 14.0&quot; FHD (1920 x 1080) 16:9 aspect ratio, 45% NTSC color gamut\r\n• กราฟิก : AMD Radeon Graphics (Integrated)\r\n• ซอฟต์แวร์ : Windows 11 Home / Office Home 2024 / Microsoft 365 Basic', '1759726233_1.jpg', 1, '2025-10-06 04:28:08'),
-(2, 'HP 15-FD0600TU – SILVER', '13990.00', 18, 'HP Laptop 15 โน้ตบุ๊กดีไซน์บางเบา พร้อมตอบโจทย์การใช้งานในชีวิตประจำวัน ไม่ว่าจะทำงาน เรียน\r\nหรือใช้งานด้านบันเทิง มาพร้อมหน้าจอขนาดใหญ่ ใช้งานได้อย่างต่อเนื่องและลื่นไหล\r\nเหมาะสำหรับผู้ที่มองหาโน้ตบุ๊กที่คุ้มค่าและครบครันในเครื่องเดียว\r\n• ซีพียู : Intel Core i3-1315U\r\n• แรม : 8GB DDR4\r\n• เอสเอสดี : 512GB PCIe/NVMe M.2 SSD\r\n• จอแสดงผล : 15.6&quot; FHD (1920x1080) IPS\r\n• กราฟิก : Intel UHD Graphics (Integrated)\r\n• ซอฟต์แวร์ : Windows 11 Home / Office Home &amp; Student 2024 / Microsoft 365 Basic', '1759726362_2.jpg', 1, '2025-10-06 04:41:33'),
 (3, 'ACER ASPIRE7 A715-59G-550T - TITANIUM BLACK', '23900.00', 6, 'Acer Aspire 7 คือโน้ตบุ๊กที่รวมความแรงและความหรูไว้ในเครื่องเดียว ดีไซน์เรียบเท่เหมาะกับทุกโอกาส มอบประสบการณ์ใช้งานลื่นไหลทั้งทำงานและเล่นเกม พกพาสะดวก ใช้งานได้มั่นใจในทุกสถานการณ์\r\n\r\n• ซีพียู : Intel Core i5-13420H\r\n• แรม : 16GB DDR4\r\n• เอสเอสดี : 512GB PCIe 4/NVMe M.2 SSD\r\n• จอแสดงผล : 15.6\" FHD (1920x1080) IPS 144Hz\r\n• กราฟิก : Nvidia GeForce RTX3050 6GB GDDR6\r\n• ซอฟต์แวร์ : Windows 11 Home\r\n', '1759726356_3.jpg', 1, '2025-10-06 04:48:35'),
 (4, 'ACER ASPIRE LITE 15 AL15-52P-586H – SILVER', '15990.00', 15, 'Acer Aspire Lite แล็ปท็อปบางเบา ดีไซน์หลากหลาย ตอบโจทย์ทุกไลฟ์สไตล์ รวมความสวยงามและประสิทธิภาพ มอบประสบการณ์ใช้งานที่ครบครันทั้งด้านดีไซน์และการประมวลผล\r\n\r\n• ซีพียู : Intel Core 5 120U\r\n• แรม : 16GB DDR5\r\n• เอสเอสดี : 512GB PCIe/NVMe M.2 SSD\r\n• จอแสดงผล : 15.6\" FHD (1920x1080) IPS\r\n• กราฟิก : Intel Graphics (Integrated)\r\n• ซอฟต์แวร์ : Windows 11 Home / Office Home & Student 2024\r\n', '1759726597_4.jpg', 1, '2025-10-06 04:56:37'),
 (5, 'ASUS VIVOBOOK 16 M1607KA-MB556WA - QUIET BLUE', '23000.00', 8, 'ASUS Vivobook 16 M1607KA-MB556WA มาพร้อมซีพียู AMD Ryzen AI 5 330 แรม 16GB DDR5 และ SSD ความจุ 512GB ให้ประสิทธิภาพที่รวดเร็ว หน้าจอ 16 นิ้ว WUXGA IPS รองรับการทำงานและความบันเทิงได้อย่างลงตัว กราฟิก AMD Radeon พร้อม Windows 11 Home และ Office Home 2024 ที่ใช้งานได้ทันที\r\n\r\n• ซีพียู : AMD Ryzen AI 5 330\r\n• แรม : 16GB DDR5 on board\r\n• เอสเอสดี : 512GB PCIe 4/NVMe M.2 SSD\r\n• จอแสดงผล : 16.0\" WUXGA (1920 x 1200) IPS-level Panel 60Hz refresh rate Anti-glare\r\n• กราฟิก : AMD Radeon Graphics (Integrated)\r\n• ซอฟต์แวร์ : Windows 11 Home / Office Home 2024 / Microsoft 365 Basic\r\n', '1759726835_5.jpg', 1, '2025-10-06 05:00:35'),
@@ -334,11 +347,11 @@ INSERT INTO `product` (`p_id`, `p_name`, `p_price`, `p_stock`, `p_description`, 
 (131, 'UPS (เครื่องสำรองไฟฟ้า) APC BR1600SI (1600 VA/960 WATT)', '16900.00', 32, '• 1600 VA / 960 Watts\r\n• 8 Outlets\r\n• LCD interface', '1759734580_17.jpg', 11, '2025-10-06 07:09:40'),
 (132, 'VGA (การ์ดแสดงผล) GIGABYTE GEFORCE RTX 5060 TI AERO OC 8G - 8GB GDDR7', '15700.00', 14, 'Gigabyte GeForce RTX 5060 Ti AERO OC 8G มาพร้อมสถาปัตยกรรม NVIDIA Blackwell และ DLSS 4 เพื่อภาพกราฟิกที่ลื่นไหลและสมจริง ใช้หน่วยความจำ GDDR7 ขนาด 8GB บนอินเทอร์เฟซ 128 บิต ระบบระบายความร้อน WINDFORCE พร้อมพัดลม Hawk และเจลนำความร้อนระดับเซิร์ฟเวอร์ช่วยควบคุมอุณหภูมิได้อย่างมีประสิทธิภาพ ไฟ RGB เพิ่มความโดดเด่น พร้อมระบบ Dual BIOS ให้เลือกใช้งานทั้งโหมดประสิทธิภาพหรือเงียบ และโครงสร้างที่เสริมความแข็งแรงเพื่อความทนทาน\r\n\r\n• กราฟิกส์เอนจิน : GeForce RTX 5060 Ti\r\n• หน่วยความจำ : 8GB GDDR7\r\n• คอนเน็กเตอร์สำหรับจอภาพ : 3 x DisplayPort, 1 x HDMI', '1759734617_14.jpg', 12, '2025-10-06 07:10:17'),
 (133, 'VGA (การ์ดแสดงผล) ASUS TUF GAMING GEFORCE RTX 5090 32GB GDDR7 OC EDITION', '105900.00', 3, 'ASUS TUF Gaming GeForce RTX 5090 มาพร้อมพลังจากสถาปัตยกรรม NVIDIA Blackwell เสริมด้วยระบบระบายความร้อนขั้นสูง และวัสดุเกรดทหารเพื่อความทนทานระดับพรีเมียม การออกแบบแบบ 3.6 สล็อต พร้อมท่อฮีตไปป์ 12 เส้นและแผ่นระบายความร้อนแบบเวเปอร์แชมเบอร์ ช่วยให้ถ่ายเทความร้อนได้อย่างยอดเยี่ยม พัดลม Axial-Tech เพิ่มลมได้มากขึ้นถึง 23% และแผ่นซับความร้อนแบบ Phase-Change ทำให้การใช้งานยาวนานขึ้น พร้อมโหมด BIOS สลับได้ระหว่างความเงียบหรือประสิทธิภาพ\r\n\r\n• กราฟิกส์เอนจิน : GeForce RTX 5090\r\n• หน่วยความจำ : 32GB GDDR7\r\n• คอนเน็กเตอร์สำหรับจอภาพ : 3 x DisplayPort, 2 x HDMI', '1759734647_15.jpg', 12, '2025-10-06 07:10:47'),
-(134, 'UPS (เครื่องสำรองไฟฟ้า) VERTIV LIEBERT GXT5 UPS 5000VA/5000W 230V (VTV-01201973)', '133960.00', 24, '5000VA/5000W', '1759734669_18.jpg', 11, '2025-10-06 07:11:09');
-INSERT INTO `product` (`p_id`, `p_name`, `p_price`, `p_stock`, `p_description`, `p_image`, `cat_id`, `created_at`) VALUES
+(134, 'UPS (เครื่องสำรองไฟฟ้า) VERTIV LIEBERT GXT5 UPS 5000VA/5000W 230V (VTV-01201973)', '133960.00', 24, '5000VA/5000W', '1759734669_18.jpg', 11, '2025-10-06 07:11:09'),
 (135, 'VGA (การ์ดแสดงผล) GALAX GEFORCE RTX 5080 EX GAMER 1-CLICK OC - 16GB GDDR7', '43500.00', 5, 'GALAX RTX 5080 EX Gamer ใช้พลังจากสถาปัตยกรรม NVIDIA Blackwell พร้อม DLSS 4 มอบกราฟิกระดับสูงและประสิทธิภาพที่เร็วเหนือชั้น รองรับ NVIDIA Studio สำหรับสายครีเอเตอร์ และ NIM microservices สำหรับการใช้งาน AI อย่างล้ำสมัย\r\n\r\n• กราฟิกส์เอนจิน : GeForce RTX 5080\r\n• หน่วยความจำ : 16GB GDDR7\r\n• คอนเน็กเตอร์สำหรับจอภาพ : 3 x DisplayPort, 1 x HDMI', '1759734677_16.jpg', 12, '2025-10-06 07:11:17'),
 (136, 'UPS (เครื่องสำรองไฟฟ้า) APC SMART SMC LCD 230V 1000VA/600W WITH SMART CONNECT (SMC1000IC)', '18100.00', 48, '• Output Capacity : 1000 VA / 600 Watt', '1759734735_19.jpg', 11, '2025-10-06 07:12:15'),
-(137, 'VGA (การ์ดแสดงผล) GIGABYTE RADEON RX 9070 GAMING OC 16G - 16GB GDDR6 (GV-R9070GAMING OC-16GD)', '22400.00', 20, '• ขับเคลื่อนด้วย Radeon RX 9070\r\n• มาพร้อมกับหน่วยความจำ 16GB GDDR6 อินเทอร์เฟซ 256bit\r\n• ระบบระบายความร้อน WINDFORCE\r\n• พัดลม Hawk\r\n• เจลนำความร้อนเกรดเซิร์ฟเวอร์\r\n• ไฟ RGB\r\n• Dual BIOS (Performance / Silent)\r\n• โครงสร้างเสริมความแข็งแรง', '1759734785_17.jpg', 12, '2025-10-06 07:13:05'),
+(137, 'VGA (การ์ดแสดงผล) GIGABYTE RADEON RX 9070 GAMING OC 16G - 16GB GDDR6 (GV-R9070GAMING OC-16GD)', '22400.00', 20, '• ขับเคลื่อนด้วย Radeon RX 9070\r\n• มาพร้อมกับหน่วยความจำ 16GB GDDR6 อินเทอร์เฟซ 256bit\r\n• ระบบระบายความร้อน WINDFORCE\r\n• พัดลม Hawk\r\n• เจลนำความร้อนเกรดเซิร์ฟเวอร์\r\n• ไฟ RGB\r\n• Dual BIOS (Performance / Silent)\r\n• โครงสร้างเสริมความแข็งแรง', '1759734785_17.jpg', 12, '2025-10-06 07:13:05');
+INSERT INTO `product` (`p_id`, `p_name`, `p_price`, `p_stock`, `p_description`, `p_image`, `cat_id`, `created_at`) VALUES
 (138, 'UPS (เครื่องสำรองไฟฟ้า) APC 2200VA/1320W 230V GAMING RGB PURE SINE WAVE - BLACK (BGM2200B-MSX)', '14990.00', 30, 'APC Back-UPS Pro ให้การป้องกันไฟฟ้าระดับพรีเมียมสำหรับเกมมิ่งคอนโซล PC เราเตอร์/โมเด็ม และอุปกรณ์เกม ขนาด 2200VA/1320W มี 6 ช่องเสียบ (4 ช่องสำรองไฟ+กันไฟกระชาก, 2 ช่องกันไฟกระชาก) รองรับไฟกระชากสูงสุด 1080 Joules มีระบบปรับแรงดันอัตโนมัติ (AVR) และมาพร้อมซอฟต์แวร์ PowerChute เพื่อจัดการพลังงานและปิดระบบอย่างปลอดภัย\r\n\r\nกำลังไฟสูงสุด : 2200VA/1320W', '1759734813_20.jpg', 11, '2025-10-06 07:13:33'),
 (139, 'VGA (การ์ดแสดงผล) ASROCK AMD RADEON RX 9070 XT TAICHI 16GB OC - 16GB GDDR6 (RX9070XT TC 16GO)', '30900.00', 18, '• AMD Radeon RX 9070 XT GPU\r\n• หน่วยความจำ 16GB GDDR6 256 บิต\r\n• 64 หน่วยคำนวณ AMD RDNA (พร้อมตัวเร่ง RT+AI)\r\n• รองรับ PCI Express 5.0\r\n• ตัวเชื่อมต่อพลังงาน 12V-2x6-pin\r\n• 3 x DisplayPort 2.1a / 1 x HDMI 2.1b', '1759734823_18.jpg', 12, '2025-10-06 07:13:43'),
 (140, 'VGA (การ์ดแสดงผล) SAPPHIRE PURE AMD RADEON RX 9070 XT GPU - 16GB GDDR6', '26900.00', 6, '• GPU : ความเร็วบูสต์ (Boost Clock) : สูงสุด 3010 MHz\r\n• GPU : ความเร็วในการเล่นเกม (Game Clock) : สูงสุด 2460 MHz\r\n• หน่วยความจำ (Memory) : 16GB/256 bit DDR6. 20 Gbps\r\n• ตัวประมวลผลสตรีม (Stream Processors) : 4096\r\n• สถาปัตยกรรม AMD RDNA 4\r\n• ตัวเร่งแสง (Ray Accelerator) : 64', '1759734884_19.jpg', 12, '2025-10-06 07:14:44'),
@@ -402,7 +415,8 @@ INSERT INTO `product` (`p_id`, `p_name`, `p_price`, `p_stock`, `p_description`, 
 (203, 'ACTION CAMERA (กล้อง) GOPRO HERO 12 BLACK CREATOR EDITION (CHDFB-121-AS)', '22900.00', 20, '● Creator Set\r\n- Light Mod ไฟเสริมเพิ่มความสว่างและความคมชัดให้กับภาพของคุณ\r\n- Volta ไม้จับกล้องพร้อมแบตเตอรี่ 4,900 mAh พร้อมขาตั้ง 3 ขาและรีโมทในตัว\r\n- Media Mod ช่วยให้กล้อง GoPro รับเสียงได้ดีขึ้น มีช่องพอร์ท Micro HDMI สำหรับต่อเข้ากับมอนิเตอร์\r\n● HDR (High Dynamic Range) Video + Photo for more vivid images\r\n● Longer runtimes, including 1.5 hours at 5.3K30 and over 2.5 hours at 1080p30²\r\n● Optional Max Lens Mod 2.0 lens accessory enables ultra wide angle, 177-degree field of view in 4K60\r\n● New Bluetooth audio support for AirPods + other Bluetooth audio devices for wireless sound recording and voice control\r\n● 5.3K60, 4K120 and 2.7K240 video resolutions\r\n● HyperSmooth 6.0 video stabilization with 360° Horizon Lock³\r\n● Large image sensor captures ultra wide 156° field of view in 8:7\r\n● 27 megapixel photos with 24.7 megapixel stills from video\r\n● Waterproof to 33ft + legendary GoPro ruggedness', '1759928231_7.jpg', 19, '2025-10-08 12:57:11'),
 (204, 'ACTION CAMERA (กล้องแอคชั่น) DJI OSMO ACTION 4 ADVENTURE COMBO', '13600.00', 20, '● แบตเตอรี่ทนความเย็นและใช้งานได้ยาวนาน\r\n● 4K/120fps & 155º FOV มุมกว้างพิเศษ\r\n● แม่เหล็กปล่อยเร็ว & รองรับการถ่ายภาพแนวตั้ง\r\n● ถ่ายรูปขอบฟ้า 360ºอย่างมั่นคง\r\n● ประสิทธิภาพการกันน้ำได้ถึง 18m', '1759928263_8.jpg', 19, '2025-10-08 12:57:43'),
 (205, 'ACTION CAMERA (กล้องแอคชั่น) DJI OSMO ACTION 3 ADVENTURE COMBO', '10290.00', 20, '● ความละเอียด 4K/120fps & Super-Wide FOV\r\n● ระบกันสั่น HorizonSteady\r\n● กันน้ำลึก 16 เมตร', '1759928313_9.jpg', 19, '2025-10-08 12:58:33'),
-(206, 'ACTION CAMERA (กล้อง) DJI POCKET 2 CREATOR COMBO', '13590.00', 20, '• Pocket-Sized\r\n• 3-Axis Stabilized Camera\r\n• ActiveTrack 3.0\r\n• AI Editor\r\n• High-Quality Images\r\n• DJI Matrix Stereo', '1759928349_10.jpg', 19, '2025-10-08 12:59:09');
+(206, 'ACTION CAMERA (กล้อง) DJI POCKET 2 CREATOR COMBO', '13590.00', 20, '• Pocket-Sized\r\n• 3-Axis Stabilized Camera\r\n• ActiveTrack 3.0\r\n• AI Editor\r\n• High-Quality Images\r\n• DJI Matrix Stereo', '1759928349_10.jpg', 19, '2025-10-08 12:59:09'),
+(207, 'MONITOR (จอมอนิเตอร์) DAHUA DHI-LM25-E231B - 24.5 IPS FHD 180Hz (3Y)', '70000.00', 50, 'i have', '1760773699_products71846_800.jpg', 4, '2025-10-18 07:48:19');
 
 --
 -- Indexes for dumped tables
@@ -463,31 +477,31 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `cat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `cat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `p_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=207;
+  MODIFY `p_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
 
 --
 -- Constraints for dumped tables

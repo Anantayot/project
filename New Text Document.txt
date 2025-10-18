@@ -1,0 +1,5 @@
+git config --global user.name "anantayot"
+git config --global user.email "67010974018@msu.ac.th"
+
+ssh root@212.80.215.29
+XDdT1oShX#!g
