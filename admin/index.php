@@ -170,7 +170,7 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
   <!-- 🔍 กล่องค้นหา -->
   <form method="get" class="search-bar d-flex justify-content-between align-items-center flex-wrap">
     <select name="cat[]" multiple class="form-select me-2" style="border:none;width:30%;height:100px;">
-      <option value="">-- ทุกหมวดหมู่ --</option>
+      <option value="">-- ประเภทสินค้า --</option>
       <?php foreach ($cats as $c): ?>
         <option value="<?= $c['cat_id'] ?>" 
           <?= (is_array($cat_id) && in_array($c['cat_id'], $cat_id)) ? 'selected' : '' ?>>
