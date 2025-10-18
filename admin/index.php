@@ -210,7 +210,7 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
   <?php else: ?>
 
     <!-- 🆕 สินค้าใหม่ล่าสุด -->
-    <h3 class="section-title">🆕 สินค้าใหม่ล่าสุด</h3>
+    <h3 class="section-title">สินค้าใหม่ล่าสุด</h3>
     <div class="swiper mySwiper">
       <div class="swiper-wrapper">
         <?php foreach ($newProducts as $p):
@@ -234,7 +234,7 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
     </div>
 
     <!-- 🔥 สินค้าขายดีที่สุด -->
-    <h3 class="section-title">🔥 สินค้าขายดีที่สุด</h3>
+    <h3 class="section-title">สินค้าขายดีที่สุด</h3>
     <div class="swiper mySwiper">
       <div class="swiper-wrapper">
         <?php foreach ($bestSellers as $p):
@@ -259,7 +259,7 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
     </div>
 
     <!-- 🎲 สินค้าแนะนำ -->
-    <h3 class="section-title">🎲 สินค้าแนะนำ</h3>
+    <h3 class="section-title">สินค้าแนะนำ</h3>
     <div class="swiper mySwiper">
       <div class="swiper-wrapper">
         <?php foreach ($randomProducts as $p):
