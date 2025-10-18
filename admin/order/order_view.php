@@ -94,19 +94,22 @@ $details->execute([$id]);
 $items = $details->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <style>
+/* 🎨 ปรับสี badge ใหม่ */
 .badge-status {
   color: #fff;
   font-weight: 600;
   border-radius: 8px;
   padding: 6px 12px;
+  font-size: 0.9rem;
 }
 .bg-waiting { background-color: #f0ad4e; }     /* เหลือง - รอดำเนินการ / รอตรวจสอบ */
 .bg-approve { background-color: #28a745; }     /* เขียว - อนุมัติ */
-.bg-reject { background-color: #dc3545; }      /* แดง - ปฏิเสธ / ยกเลิก */
-.bg-progress { background-color: #0dcaf0; }    /* ฟ้า - กำลังจัดเตรียม */
+.bg-reject { background-color: #D10024; }      /* แดงหลักของระบบ MyCommiss */
+.bg-progress { background-color: #0dcaf0; }    /* ฟ้า - กำลังจัดเตรียม / จัดส่งแล้ว */
 .bg-complete { background-color: #198754; }    /* เขียวเข้ม - สำเร็จ */
-.bg-default { background-color: #6c757d; }     /* เทา - ค่าอื่นๆ */
+.bg-default { background-color: #6c757d; }     /* เทา - อื่นๆ */
 </style>
+
 
 <h3 class="mb-4 text-center fw-bold text-white">
   <i class="bi bi-receipt"></i> รายละเอียดคำสั่งซื้อ #<?= htmlspecialchars($order['order_id']) ?>
@@ -153,26 +156,70 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
       </form>
 
       <!-- ✅ ตรวจสอบโดยแอดมิน -->
-      <?php if ($order['payment_method'] !== 'COD'): ?>
-      <p><b>ตรวจสอบโดยแอดมิน:</b>
-        <span class="badge bg-<?= ($order['admin_verified']=='อนุมัติ'?'success':($order['admin_verified']=='ปฏิเสธ'?'danger':($order['admin_verified']=='กำลังตรวจสอบ'?'info':'secondary'))) ?>">
-          <?= htmlspecialchars($order['admin_verified'] ?? 'รอตรวจสอบ') ?>
-        </span>
-      </p>
-      <?php endif; ?>
+<?php if ($order['payment_method'] !== 'COD'): ?>
+<p><b>ตรวจสอบโดยแอดมิน:</b>
+  <?php 
+    $adminStatus = $order['admin_verified'] ?? 'รอตรวจสอบ';
+    switch ($adminStatus) {
+      case 'อนุมัติ':
+        $adminColor = 'approve';
+        $icon = '✅';
+        break;
+      case 'ปฏิเสธ':
+        $adminColor = 'reject';
+        $icon = '❌';
+        break;
+      case 'กำลังตรวจสอบ':
+        $adminColor = 'progress';
+        $icon = '🔍';
+        break;
+      default:
+        $adminColor = 'waiting';
+        $icon = '⏳';
+    }
+  ?>
+  <span class="badge-status bg-<?= $adminColor ?>">
+    <?= $icon . ' ' . htmlspecialchars($adminStatus) ?>
+  </span>
+</p>
+<?php endif; ?>
 
-      <!-- ✅ สถานะคำสั่งซื้อ -->
-      <p><b>สถานะคำสั่งซื้อ:</b>
-        <?php 
-          $status = $order['order_status'] ?? 'รอดำเนินการ';
-          if ($status == 'สำเร็จ') $statusColor = 'success';
-          elseif ($status == 'กำลังจัดเตรียม') $statusColor = 'warning';
-          elseif ($status == 'จัดส่งแล้ว') $statusColor = 'info';
-          elseif ($status == 'ยกเลิก') $statusColor = 'danger';
-          else $statusColor = 'secondary';
-        ?>
-        <span class="badge bg-<?= $statusColor ?>"><?= htmlspecialchars($status) ?></span>
-      </p>
+
+<!-- ✅ สถานะคำสั่งซื้อ -->
+<p><b>สถานะคำสั่งซื้อ:</b>
+  <?php 
+    $status = $order['order_status'] ?? 'รอดำเนินการ';
+    switch ($status) {
+      case 'สำเร็จ':
+        $statusColor = 'complete';
+        $icon = '✅';
+        break;
+      case 'กำลังจัดเตรียม':
+        $statusColor = 'progress';
+        $icon = '📦';
+        break;
+      case 'จัดส่งแล้ว':
+        $statusColor = 'progress';
+        $icon = '🚚';
+        break;
+      case 'ยกเลิก':
+        $statusColor = 'reject';
+        $icon = '❌';
+        break;
+      case 'รอดำเนินการ':
+        $statusColor = 'waiting';
+        $icon = '⏳';
+        break;
+      default:
+        $statusColor = 'default';
+        $icon = '⚙️';
+    }
+  ?>
+  <span class="badge-status bg-<?= $statusColor ?>">
+    <?= $icon . ' ' . htmlspecialchars($status) ?>
+  </span>
+</p>
+
 
       <!-- ✅ ปุ่มเปลี่ยนสถานะคำสั่งซื้อ -->
       <form method="post" class="d-flex gap-2">
