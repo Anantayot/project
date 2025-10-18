@@ -7,7 +7,49 @@ $total_products   = $conn->query("SELECT COUNT(*) FROM product")->fetchColumn();
 $total_categories = $conn->query("SELECT COUNT(*) FROM category")->fetchColumn();
 $total_customers  = $conn->query("SELECT COUNT(*) FROM customers")->fetchColumn();
 $total_orders     = $conn->query("SELECT COUNT(*) FROM orders")->fetchColumn();
-$total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchColumn() ?? 0;
+$total_income     = $conn->query("SELECT SUM(total_price) FROM orders WHERE payment_status = 'ชำระเงินแล้ว'")->fetchColumn() ?? 0;
+
+// ✅ ดึงข้อมูลรายเดือน (ลูกค้าใหม่)
+$customer_stats = $conn->query("
+  SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS total
+  FROM customers
+  GROUP BY month
+  ORDER BY month ASC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// ✅ ดึงข้อมูลรายเดือน (รายได้เฉพาะชำระเงินแล้ว)
+$income_stats = $conn->query("
+  SELECT DATE_FORMAT(order_date, '%Y-%m') AS month, SUM(total_price) AS total
+  FROM orders
+  WHERE payment_status = 'ชำระเงินแล้ว'
+  GROUP BY month
+  ORDER BY month ASC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// ✅ รวมเดือนทั้งหมดจากทั้งลูกค้าและรายได้
+$months_all = array_unique(array_merge(
+  array_column($customer_stats, 'month'),
+  array_column($income_stats, 'month')
+));
+sort($months_all);
+
+// ✅ เตรียมข้อมูลสำหรับกราฟ
+$customers_per_month = [];
+$income_per_month = [];
+
+$customer_map = [];
+foreach ($customer_stats as $row) {
+  $customer_map[$row['month']] = (int)$row['total'];
+}
+$income_map = [];
+foreach ($income_stats as $row) {
+  $income_map[$row['month']] = (float)$row['total'];
+}
+
+foreach ($months_all as $m) {
+  $customers_per_month[] = $customer_map[$m] ?? 0;
+  $income_per_month[] = $income_map[$m] ?? 0;
+}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -17,6 +59,7 @@ $total_income     = $conn->query("SELECT SUM(total_price) FROM orders")->fetchCo
   <title>Dashboard - MyCommiss Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
 @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap');
@@ -39,7 +82,6 @@ body {
   z-index: 1000;
 }
 #sidebar.collapsed { left: -250px; }
-
 #sidebar .brand {
   font-weight: 700;
   font-size: 1.25rem;
@@ -49,7 +91,6 @@ body {
   color: #fff;
 }
 #sidebar .brand i { color: #00d25b; }
-
 #sidebar ul { list-style: none; padding: 0; margin: 25px 0; }
 #sidebar ul li a {
   display: flex; align-items: center;
@@ -80,27 +121,10 @@ body {
   transform: translateY(-2px);
 }
 
-/* ✅ Navbar (มือถือ) */
-.navbar {
-  background: #161b22;
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-.navbar .toggle-btn {
-  border: none;
-  background: none;
-  color: #fff;
-  font-size: 1.5rem;
-}
-
 /* ✅ Main Panel */
 .main-panel {
   margin-left: 250px;
   padding: 30px;
-  transition: all 0.3s ease;
   background: #0d1117;
   min-height: 100vh;
 }
@@ -112,17 +136,13 @@ body {
   margin-bottom: 1.5rem;
 }
 
-/* ✅ Card Style */
+/* ✅ Card */
 .card-custom {
   background: linear-gradient(145deg, #161b22, #0e1116);
   border: 1px solid #2c313a;
   border-radius: 15px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   transition: transform .3s, box-shadow .3s;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 .card-custom:hover {
   transform: translateY(-4px);
@@ -131,7 +151,15 @@ body {
 .card-custom h4 { color: #c9d1d9; font-weight: 600; }
 .card-custom h2 { color: #00d25b; font-size: 2rem; font-weight: bold; }
 
-/* ✅ รายได้รวม */
+/* ✅ กราฟ Container */
+.chart-container {
+  position: relative;
+  height: 320px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ✅ ไม่คลิกได้ */
 .not-clickable {
   cursor: default !important;
   pointer-events: none !important;
@@ -144,13 +172,13 @@ body {
 @media (max-width: 991px) {
   #sidebar { left: -250px; }
   #sidebar.show { left: 0; }
-  .navbar { display: flex; position: sticky; top: 0; z-index: 999; }
+  .navbar { display: flex; position: sticky; top: 0; z-index: 999; background: #161b22; }
   .main-panel { margin-left: 0; padding-top: 80px; }
 }
   </style>
 </head>
-
 <body>
+
   <!-- ✅ Navbar มือถือ -->
   <nav class="navbar d-lg-none">
     <button class="toggle-btn" id="menuToggle"><i class="bi bi-list"></i></button>
@@ -172,87 +200,152 @@ body {
 
   <!-- ✅ Main Content -->
   <div class="main-panel">
-    <div class="content-wrapper">
-      <h3 class="section-title"><i class="bi bi-speedometer2"></i> แผงควบคุมระบบหลังบ้าน</h3>
+    <h3 class="section-title"><i class="bi bi-speedometer2"></i> แผงควบคุมระบบหลังบ้าน</h3>
 
-      <!-- 🔹 แถวสรุปข้อมูล -->
-      <div class="row g-3">
-        <div class="col-md-3 col-sm-6">
-          <a href="product/products.php" class="text-decoration-none">
-            <div class="card card-custom text-center p-3">
-              <div class="card-body">
-                <i class="bi bi-box-seam display-5 text-primary"></i>
-                <h4 class="mt-3">สินค้า</h4>
-                <h2><?= $total_products ?></h2>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <div class="col-md-3 col-sm-6">
-          <a href="categories/categories.php" class="text-decoration-none">
-            <div class="card card-custom text-center p-3">
-              <div class="card-body">
-                <i class="bi bi-tags display-5 text-info"></i>
-                <h4 class="mt-3">ประเภทสินค้า</h4>
-                <h2><?= $total_categories ?></h2>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <div class="col-md-3 col-sm-6">
-          <a href="customer/customers.php" class="text-decoration-none">
-            <div class="card card-custom text-center p-3">
-              <div class="card-body">
-                <i class="bi bi-people display-5 text-success"></i>
-                <h4 class="mt-3">ลูกค้า</h4>
-                <h2><?= $total_customers ?></h2>
-              </div>
-            </div>
-          </a>
-        </div>
-
-        <div class="col-md-3 col-sm-6">
-          <a href="order/orders.php" class="text-decoration-none">
-            <div class="card card-custom text-center p-3">
-              <div class="card-body">
-                <i class="bi bi-bag-check display-5 text-warning"></i>
-                <h4 class="mt-3">คำสั่งซื้อ</h4>
-                <h2><?= $total_orders ?></h2>
-              </div>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <!-- 🔹 การ์ดรายได้รวม -->
-      <div class="row mt-4 justify-content-center">
-        <div class="col-md-10">
-          <div class="card card-custom text-center p-4 not-clickable">
-            <div class="card-body">
-              <i class="bi bi-cash-stack display-5 text-danger"></i>
-              <h4 class="mt-3 text-white">รายได้รวมทั้งหมด</h4>
-              <h2 class="text-success"><?= number_format($total_income, 2) ?> ฿</h2>
-            </div>
+    <!-- 🔹 การ์ดสรุป -->
+    <div class="row g-3">
+      <div class="col-md-3 col-sm-6">
+        <div class="card card-custom text-center p-3">
+          <div class="card-body">
+            <i class="bi bi-box-seam display-5 text-primary"></i>
+            <h4 class="mt-3">สินค้า</h4>
+            <h2><?= $total_products ?></h2>
           </div>
         </div>
       </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="card card-custom text-center p-3">
+          <div class="card-body">
+            <i class="bi bi-tags display-5 text-info"></i>
+            <h4 class="mt-3">ประเภทสินค้า</h4>
+            <h2><?= $total_categories ?></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="card card-custom text-center p-3">
+          <div class="card-body">
+            <i class="bi bi-people display-5 text-success"></i>
+            <h4 class="mt-3">ลูกค้า</h4>
+            <h2><?= $total_customers ?></h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="card card-custom text-center p-3">
+          <div class="card-body">
+            <i class="bi bi-bag-check display-5 text-warning"></i>
+            <h4 class="mt-3">คำสั่งซื้อ</h4>
+            <h2><?= $total_orders ?></h2>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- 🔹 รายได้รวม -->
+    <div class="row mt-4 justify-content-center">
+      <div class="col-md-10">
+        <div class="card card-custom text-center p-4 not-clickable">
+          <div class="card-body">
+            <i class="bi bi-cash-stack display-5 text-danger"></i>
+            <h4 class="mt-3 text-white">รายได้รวมทั้งหมด (เฉพาะชำระเงินแล้ว)</h4>
+            <h2 class="text-success"><?= number_format($total_income, 2) ?> ฿</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 กราฟ -->
+    <div class="row mt-5">
+      <div class="col-md-6">
+        <div class="card card-custom p-3">
+          <h5 class="text-center text-info mb-3"><i class="bi bi-person-lines-fill"></i> ลูกค้าใหม่รายเดือน</h5>
+          <div class="chart-container"><canvas id="customerChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card card-custom p-3">
+          <h5 class="text-center text-warning mb-3"><i class="bi bi-graph-up-arrow"></i> รายได้รวมรายเดือน (เฉพาะชำระเงินแล้ว)</h5>
+          <div class="chart-container"><canvas id="incomeChart"></canvas></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ✅ Script -->
+  <!-- ✅ Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+  // ✅ Sidebar toggle
   const sidebar = document.getElementById('sidebar');
   const toggleBtn = document.getElementById('menuToggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => sidebar.classList.toggle('show'));
-  }
-  document.addEventListener('click', (e) => {
-    if (window.innerWidth < 992 && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-      sidebar.classList.remove('show');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => sidebar.classList.toggle('show'));
+
+  // ✅ กราฟลูกค้าใหม่รายเดือน
+  new Chart(document.getElementById('customerChart'), {
+    type: 'bar',
+    data: {
+      labels: <?= json_encode($months_all) ?>,
+      datasets: [{
+        label: 'ลูกค้าใหม่',
+        data: <?= json_encode($customers_per_month) ?>,
+        backgroundColor: 'rgba(0,123,255,0.8)',
+        borderColor: '#007bff',
+        borderWidth: 2,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+        y: { ticks: { color: '#fff' }, grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.parsed.x.toLocaleString()} คน`
+          }
+        }
+      },
+      maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeOutQuart' }
+    }
+  });
+
+  // ✅ กราฟรายได้รายเดือน
+  new Chart(document.getElementById('incomeChart'), {
+    type: 'line',
+    data: {
+      labels: <?= json_encode($months_all) ?>,
+      datasets: [{
+        label: 'รายได้ (บาท)',
+        data: <?= json_encode($income_per_month) ?>,
+        borderColor: '#00d25b',
+        backgroundColor: 'rgba(0,210,91,0.2)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: '#00d25b',
+        pointBorderColor: '#fff'
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+        x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.parsed.y.toLocaleString()} ฿`
+          }
+        }
+      },
+      maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeOutQuart' }
     }
   });
   </script>
