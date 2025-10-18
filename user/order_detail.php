@@ -79,14 +79,60 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   <title>รายละเอียดคำสั่งซื้อ #<?= $order_id ?> | MyCommiss</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; }
-    .btn { border-radius: 8px; font-weight: 500; transition: all 0.2s ease-in-out; }
+    body { background-color: #fff; font-family: "Prompt", sans-serif; }
+
+    /* สีหลัก */
+    :root { --red-main: #D10024; }
+
+    .card-header {
+      background: var(--red-main) !important;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn {
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease-in-out;
+    }
     .btn:hover { transform: scale(1.05); }
-    .badge { font-size: 0.9rem; padding: 6px 10px; }
-    .card-header { background: #212529 !important; color: #fff; }
+
+    /* ปุ่มธีมแดง */
+    .btn-primary, .btn-outline-primary:hover {
+      background-color: var(--red-main);
+      border-color: var(--red-main);
+      color: #fff;
+    }
+    .btn-outline-primary {
+      border-color: var(--red-main);
+      color: var(--red-main);
+    }
+
+    /* ตารางสินค้า */
+    .table thead {
+      background-color: var(--red-main);
+      color: #fff;
+    }
+
+    /* badge */
+    .badge {
+      font-size: 0.9rem;
+      padding: 6px 10px;
+    }
+    .bg-warning { background-color: #ff9800 !important; color: #fff !important; }
+    .bg-secondary { background-color: var(--red-main) !important; color: #fff !important; }
+    .bg-success { background-color: #28a745 !important; color: #fff !important; }
+    .bg-danger { background-color: #c82333 !important; color: #fff !important; }
+
+    footer {
+      background: var(--red-main);
+      color: white;
+      padding: 15px;
+      margin-top: 40px;
+    }
   </style>
 </head>
-<body class="bg-light">
+<body>
 
 <?php include("navbar_user.php"); ?>
 
@@ -106,11 +152,11 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <div class="container mt-4 mb-5">
-  <h3 class="fw-bold text-center mb-4">📦 รายละเอียดคำสั่งซื้อ #<?= $order_id ?></h3>
+  <h3 class="fw-bold text-center mb-4" style="color:#D10024;">📦 รายละเอียดคำสั่งซื้อ #<?= $order_id ?></h3>
 
   <!-- 🔹 ข้อมูลคำสั่งซื้อ -->
   <div class="card mb-4 shadow-sm border-0">
-    <div class="card-header fw-semibold">ข้อมูลคำสั่งซื้อ</div>
+    <div class="card-header">ข้อมูลคำสั่งซื้อ</div>
     <div class="card-body">
       <div class="row">
         <div class="col-md-6">
@@ -136,7 +182,6 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
           <p><strong>วิธีชำระเงิน:</strong> <?= $methodText ?></p>
 
-          <!-- 🔄 ปุ่มเปลี่ยนวิธีการชำระเงิน -->
           <?php 
           if (
             $payment_status === 'รอดำเนินการ' &&
@@ -162,9 +207,8 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             <span class="badge bg-<?= $orderBadge ?>"><?= htmlspecialchars($order_status) ?></span>
           </p>
 
-          <!-- ✅ แสดงเฉพาะเมื่อไม่ใช่เก็บเงินปลายทาง -->
           <?php if ($order['payment_method'] !== 'COD'): ?>
-            <p><strong>สถานะตรวจสอบโดยแอดมิน:</strong>
+            <p><strong>ตรวจสอบโดยแอดมิน:</strong>
               <span class="badge bg-<?= $adminBadge ?>"><?= htmlspecialchars($admin_verified) ?></span>
             </p>
           <?php endif; ?>
@@ -178,7 +222,6 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           <?php endif; ?>
 
           <?php
-          // ✅ แสดงปุ่มแจ้งชำระเงินเฉพาะกรณีที่ยังไม่ตรวจสอบ และยังไม่ชำระ
           if (
             $order['payment_method'] === 'QR' &&
             $payment_status === 'รอดำเนินการ' &&
@@ -204,10 +247,10 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
   <!-- 🔹 รายการสินค้า -->
   <div class="card shadow-sm border-0">
-    <div class="card-header fw-semibold">รายการสินค้า</div>
+    <div class="card-header">รายการสินค้า</div>
     <div class="card-body table-responsive">
       <table class="table align-middle text-center">
-        <thead class="table-dark">
+        <thead>
           <tr>
             <th>ภาพสินค้า</th>
             <th>ชื่อสินค้า</th>
@@ -238,7 +281,6 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     </div>
   </div>
 
-  <!-- 🔹 ปุ่ม -->
   <div class="d-flex justify-content-between mt-4">
     <a href="orders.php" class="btn btn-secondary">⬅️ กลับไปหน้าคำสั่งซื้อ</a>
     <?php if ($order_status === 'รอดำเนินการ' && $payment_status !== 'ยกเลิก'): ?>
@@ -251,7 +293,7 @@ $details = $stmt2->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 
-<footer class="text-center py-3 mt-5 bg-dark text-white">
+<footer class="text-center">
   © <?= date('Y') ?> MyCommiss | รายละเอียดคำสั่งซื้อ
 </footer>
 
@@ -265,6 +307,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
 </body>
 </html>
