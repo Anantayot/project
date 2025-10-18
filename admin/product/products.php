@@ -8,7 +8,7 @@ ob_start();
 $sql = "SELECT p.*, c.cat_name 
         FROM product p
         LEFT JOIN category c ON p.cat_id = c.cat_id
-        ORDER BY p.p_id DESC";
+        ORDER BY p.p_id ASC";
 $products = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
