@@ -302,7 +302,7 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
         prevEl: swiperEl.querySelector('.swiper-button-prev'),
       },
       autoplay: {
-        delay: 7000, // ⏱ 7 วินาทีต่อสไลด์
+        delay: 3000, // ⏱ 7 วินาทีต่อสไลด์
         disableOnInteraction: false // ให้เลื่อนต่อแม้ผู้ใช้จะคลิกเอง
       },
       loop: true, // 🔁 สไลด์วนลูป
