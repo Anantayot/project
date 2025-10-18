@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <input class="form-check-input" type="checkbox" id="subscribe" name="subscribe" 
                  value="1" <?= $user['subscribe'] ? 'checked' : '' ?>>
           <label class="form-check-label" for="subscribe">
-            📩 สมัครรับข่าวสารและโปรโมชั่นจาก MyCommiss
+            สมัครรับข่าวสารและโปรโมชั่นจาก MyCommiss
           </label>
         </div>
 
