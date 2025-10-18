@@ -104,7 +104,7 @@ if (empty($search)) {
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .product-card img {
-      height: 190px;
+      height: 300px;
       object-fit: cover;
       width: 100%;
       border-radius: 8px;
