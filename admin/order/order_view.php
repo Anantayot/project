@@ -108,6 +108,21 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
 .bg-progress { background-color: #0dcaf0; }    /* ฟ้า - กำลังจัดเตรียม / จัดส่งแล้ว */
 .bg-complete { background-color: #198754; }    /* เขียวเข้ม - สำเร็จ */
 .bg-default { background-color: #6c757d; }     /* เทา - อื่นๆ */
+
+.badge-status {
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+.bg-waiting { background-color: #f0ad4e; }     /* เหลือง */
+.bg-reject { background-color: #6c757d; }      /* เทา - ยกเลิก */
+.bg-paid { background-color: #D10024; }        /* แดงหลัก MyCommiss สำหรับ "ชำระเงินแล้ว" */
+.bg-progress { background-color: #0dcaf0; }    /* ฟ้า */
+.bg-complete { background-color: #198754; }    /* เขียวเข้ม */
+.bg-default { background-color: #6c757d; }     /* เทา */
+
 </style>
 
 
