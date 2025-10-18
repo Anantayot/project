@@ -301,6 +301,11 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
         nextEl: swiperEl.querySelector('.swiper-button-next'),
         prevEl: swiperEl.querySelector('.swiper-button-prev'),
       },
+      autoplay: {
+        delay: 7000, // ⏱ 7 วินาทีต่อสไลด์
+        disableOnInteraction: false // ให้เลื่อนต่อแม้ผู้ใช้จะคลิกเอง
+      },
+      loop: true, // 🔁 สไลด์วนลูป
       breakpoints: {
         320: { slidesPerView: 2 },
         768: { slidesPerView: 3 },
@@ -310,6 +315,7 @@ if (empty($search) && (empty($cat_id) || in_array('', $cat_id))) {
     });
   });
 </script>
+
 
 </body>
 </html>
