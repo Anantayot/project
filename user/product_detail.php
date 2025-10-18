@@ -24,6 +24,14 @@ $imgPath = "../admin/uploads/" . $product['p_image'];
 if (!file_exists($imgPath) || empty($product['p_image'])) {
   $imgPath = "img/default.png";
 }
+
+// ✅ ดึงจำนวนสินค้าที่ขายไปแล้ว (รวมยอด order_details)
+$soldStmt = $conn->prepare("SELECT COALESCE(SUM(quantity), 0) AS sold_qty FROM order_details WHERE p_id = ?");
+$soldStmt->execute([$id]);
+$soldQty = $soldStmt->fetchColumn();
+
+// ✅ คำนวณจำนวนที่เหลือในสต็อก (ถ้ามีฟิลด์ p_stock)
+$remainQty = isset($product['p_stock']) ? max(0, $product['p_stock'] - $soldQty) : 'ไม่ระบุ';
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -37,40 +45,10 @@ if (!file_exists($imgPath) || empty($product['p_image'])) {
       font-family: "Prompt", sans-serif;
       color: #212529;
     }
-
-    h3, h4 {
-      color: #D10024;
-    }
-
-    .btn-primary {
-      background-color: #D10024;
-      border: none;
-    }
-    .btn-primary:hover {
-      background-color: #a5001b;
-    }
-
-    .btn-success {
-      background-color: #D10024;
-      border: none;
-    }
-    .btn-success:hover {
-      background-color: #a5001b;
-    }
-
-    .btn-secondary {
-      border-radius: 8px;
-    }
-
-    .card {
-      border: none;
-      border-radius: 12px;
-    }
-
-    .card-body {
-      background: #fff;
-    }
-
+    h3, h4 { color: #D10024; }
+    .btn-primary, .btn-success { background-color: #D10024; border: none; }
+    .btn-primary:hover, .btn-success:hover { background-color: #a5001b; }
+    .card { border: none; border-radius: 12px; }
     footer {
       background-color: #D10024;
       color: #fff;
@@ -78,10 +56,7 @@ if (!file_exists($imgPath) || empty($product['p_image'])) {
       padding: 15px;
       font-size: 0.9rem;
     }
-
-    .text-danger {
-      color: #D10024 !important;
-    }
+    .text-danger { color: #D10024 !important; }
   </style>
 </head>
 <body>
@@ -115,6 +90,10 @@ if (!file_exists($imgPath) || empty($product['p_image'])) {
         <p class="text-muted mb-1">หมวดหมู่: <?= htmlspecialchars($product['cat_name'] ?? '-') ?></p>
         <h4 class="fw-bold mb-3"><?= number_format($product['p_price'], 2) ?> บาท</h4>
         <p class="mb-4"><?= nl2br(htmlspecialchars($product['p_description'])) ?></p>
+
+        <!-- ✅ แสดงจำนวนขายและจำนวนคงเหลือ -->
+        <p><strong class="text-success">✅ ขายแล้ว:</strong> <?= $soldQty ?> ชิ้น</p>
+        <p><strong class="text-primary">📦 คงเหลือในสต็อก:</strong> <?= is_numeric($remainQty) ? $remainQty . ' ชิ้น' : $remainQty ?></p>
 
         <div class="mt-3">
           <?php if (isset($_SESSION['customer_id'])): ?>
@@ -156,6 +135,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
 </body>
 </html>
