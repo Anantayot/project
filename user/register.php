@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $confirm = trim($_POST['confirm']);
   $phone = trim($_POST['phone']);
   $address = trim($_POST['address']);
+  $subscribe = isset($_POST['subscribe']) ? 1 : 0; // ✅ รับค่าจาก checkbox
 
   // ✅ ตรวจสอบเบอร์โทรศัพท์ (ต้องเป็นตัวเลข 10 หลัก)
   if (!preg_match('/^[0-9]{10}$/', $phone)) {
@@ -38,15 +39,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   // ✅ บันทึกข้อมูลลงฐานข้อมูล
   $stmt = $conn->prepare("
-    INSERT INTO customers (name, email, password, phone, address)
-    VALUES (:name, :email, :password, :phone, :address)
+    INSERT INTO customers (name, email, password, phone, address, subscribe)
+    VALUES (:name, :email, :password, :phone, :address, :subscribe)
   ");
   $stmt->execute([
     ':name' => $name,
     ':email' => $email,
     ':password' => $hashed,
     ':phone' => $phone,
-    ':address' => $address
+    ':address' => $address,
+    ':subscribe' => $subscribe
   ]);
 
   // ✅ Toast สำเร็จ
@@ -184,6 +186,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="mb-3">
           <label class="form-label fw-semibold">ที่อยู่</label>
           <textarea name="address" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- ✅ ช่องติกรับข่าวสาร -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="subscribe" id="subscribe" value="1">
+          <label class="form-check-label" for="subscribe">
+            ต้องการรับข่าวสารและโปรโมชั่นจากร้านผ่านทางอีเมล
+          </label>
         </div>
 
         <div class="d-grid">
