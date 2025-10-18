@@ -35,7 +35,7 @@ if (!$order) {
    ======================================================= */
 function generatePromptPayPayload($promptPayID, $amount = 0.00) {
   $id = preg_replace('/[^0-9]/', '', $promptPayID);
-  if (strlen($id) == 10) { // ถ้าเป็นเบอร์โทร
+  if (strlen($id) == 10) {
     $id = '0066' . substr($id, 1);
   }
 
@@ -79,21 +79,10 @@ function crc16($data) {
    ✅ ยืนยันการชำระเงิน (อัปโหลดสลิป + อัปเดตสถานะ)
    ======================================================= */
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-  // ✅ path ที่ถูกต้อง: /var/www/html/project/admin/uploads/slips/
   $uploadDir = dirname(__DIR__) . "/admin/uploads/slips/";
 
-  // ถ้าไม่มีโฟลเดอร์ ให้สร้างใหม่
-  if (!is_dir($uploadDir)) {
-    if (!mkdir($uploadDir, 0777, true)) {
-      die("<p class='text-danger text-center mt-5'>❌ ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้: $uploadDir</p>");
-    }
-  }
-
-  // ตรวจสิทธิ์
-  if (!is_writable($uploadDir)) {
-    die("<p class='text-danger text-center mt-5'>❌ ไม่มีสิทธิ์เขียนไฟล์ใน: $uploadDir</p>");
-  }
+  if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+  if (!is_writable($uploadDir)) die("<p class='text-danger text-center mt-5'>❌ ไม่มีสิทธิ์เขียนไฟล์ใน: $uploadDir</p>");
 
   $fileName = "";
   if (!empty($_FILES['slip']['name'])) {
@@ -106,7 +95,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
   }
 
-  // ✅ อัปเดตสถานะเป็น “กำลังตรวจสอบ”
   $stmt = $conn->prepare("UPDATE orders 
                           SET payment_status = 'รอดำเนินการ',
                               admin_verified = 'กำลังตรวจสอบ',
@@ -133,49 +121,96 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <title>แจ้งชำระเงิน | MyCommiss</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    body { background-color: #fff; font-family: "Prompt", sans-serif; }
+    :root { --red: #D10024; }
+
+    .card-header {
+      background: var(--red);
+      color: #fff;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .btn-primary, .btn-outline-primary:hover {
+      background-color: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    .btn-outline-primary {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      border: none;
+    }
+
+    #qrcode {
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      background-color: var(--red);
+      color: #fff;
+      margin-top: 50px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    label {
+      font-weight: 500;
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
 <?php include("navbar_user.php"); ?>
 
 <div class="container mt-4">
   <div class="card shadow-lg border-0 mx-auto" style="max-width:600px;">
-    <div class="card-header bg-dark text-white text-center fw-bold">
-      💰 แจ้งชำระเงินคำสั่งซื้อ #<?= $order_id ?>
-    </div>
+    <div class="card-header">💰 แจ้งชำระเงินคำสั่งซื้อ #<?= $order_id ?></div>
     <div class="card-body text-center">
       <p><strong>วิธีชำระ:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
 
       <?php if ($order['payment_method'] === 'QR'): ?>
         <?php
-          $shopPromptPay = "0903262100"; // ✅ หมายเลขพร้อมเพย์ร้าน
+          $shopPromptPay = "0903262100"; // หมายเลขพร้อมเพย์ร้าน
           $payload = generatePromptPayPayload($shopPromptPay, $order['total_price']);
         ?>
         <div class="text-center my-4">
-          <h5>📱 สแกน QR พร้อมเพย์ เพื่อชำระเงิน</h5>
-          <div id="qrcode" class="border p-3 rounded d-inline-block bg-white"></div>
+          <h5 class="fw-bold" style="color:#D10024;">📱 สแกน QR พร้อมเพย์ เพื่อชำระเงิน</h5>
+          <div id="qrcode" class="d-inline-block"></div>
           <p class="mt-3 text-muted">
-            💵 ยอดชำระ <?= number_format($order['total_price'], 2) ?> บาท<br>
+            💵 ยอดชำระ <span class="fw-semibold text-danger"><?= number_format($order['total_price'], 2) ?></span> บาท<br>
             ☎️ พร้อมเพย์: <?= htmlspecialchars($shopPromptPay) ?>
           </p>
         </div>
 
         <script>
-          const qrContainer = document.getElementById("qrcode");
           const payload = "<?= $payload ?>";
-          new QRCode(qrContainer, { text: payload, width: 200, height: 200 });
+          new QRCode(document.getElementById("qrcode"), {
+            text: payload,
+            width: 200,
+            height: 200
+          });
         </script>
       <?php endif; ?>
 
-      <form method="post" enctype="multipart/form-data" class="mt-4">
-        <div class="mb-3 text-start">
-          <label for="slip" class="form-label">แนบสลิปการชำระเงิน (ถ้ามี)</label>
+      <form method="post" enctype="multipart/form-data" class="mt-4 text-start">
+        <div class="mb-3">
+          <label for="slip" class="form-label">📎 แนบสลิปการชำระเงิน (ถ้ามี)</label>
           <input type="file" name="slip" id="slip" class="form-control" accept="image/*">
           <small class="text-muted">* หากไม่มีสลิป สามารถกดยืนยันได้ ระบบจะรอตรวจสอบโดยแอดมิน</small>
         </div>
 
         <div class="d-grid gap-2 mt-4">
-          <button type="submit" class="btn btn-success">✅ ยืนยันการชำระเงิน</button>
+          <button type="submit" class="btn btn-primary">✅ ยืนยันการชำระเงิน</button>
           <a href="orders.php" class="btn btn-secondary">⬅️ กลับหน้าคำสั่งซื้อ</a>
           <a href="order_detail.php?id=<?= $order_id ?>" class="btn btn-outline-primary">🔍 ดูรายละเอียดคำสั่งซื้อ</a>
         </div>
@@ -184,7 +219,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   </div>
 </div>
 
-<footer class="text-center py-3 mt-5 bg-dark text-white">
+<footer>
   © <?= date('Y') ?> MyCommiss | แจ้งชำระเงิน
 </footer>
 
