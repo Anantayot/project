@@ -187,18 +187,23 @@ $items = $details->fetchAll(PDO::FETCH_ASSOC);
 <p><b>สถานะชำระเงิน:</b>
   <?php 
     $payStatus = $order['payment_status'] ?? 'รอดำเนินการ';
-    $payColor = match($payStatus) {
-      'ชำระเงินแล้ว' => 'approve',
-      'ยกเลิก' => 'reject',
-      'รอดำเนินการ' => 'waiting',
-      default => 'default'
-    };
-    $payIcon = match($payStatus) {
-      'ชำระเงินแล้ว' => '',
-      'ยกเลิก' => '',
-      'รอดำเนินการ' => '',
-      default => ''
-    };
+    switch ($payStatus) {
+      case 'ชำระเงินแล้ว':
+        $payColor = 'paid';
+        $payIcon = '';
+        break;
+      case 'ยกเลิก':
+        $payColor = 'reject';
+        $payIcon = '';
+        break;
+      case 'รอดำเนินการ':
+        $payColor = 'waiting';
+        $payIcon = '';
+        break;
+      default:
+        $payColor = 'default';
+        $payIcon = '';
+    }
   ?>
   <span class="badge-status bg-<?= $payColor ?>">
     <?= $payIcon . ' ' . htmlspecialchars($payStatus) ?>
