@@ -21,94 +21,98 @@ try {
   <i class="bi bi-bag-check"></i> จัดการคำสั่งซื้อ
 </h3>
 
-<div class="card shadow-lg border-0" 
+<div class="card shadow-lg border-0"
      style="background: linear-gradient(145deg, #161b22, #0e1116); border:1px solid #2c313a;">
   <div class="card-body">
 
-    <?php if(empty($orders)): ?>
+    <?php if (empty($orders)): ?>
       <div class="alert alert-warning text-center mb-0">ยังไม่มีคำสั่งซื้อในระบบ</div>
     <?php else: ?>
-    <div class="table-responsive">
-      <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0" 
-             style="border-radius:10px; overflow:hidden;">
-        <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
-          <tr>
-            <th>#</th>
-            <th>รหัสคำสั่งซื้อ</th>
-            <th>ชื่อลูกค้า</th>
-            <th>วันที่สั่งซื้อ</th>
-            <th>ราคารวม (฿)</th>
-            <th>สถานะคำสั่งซื้อ</th>
-            <th>ตรวจสอบโดยแอดมิน</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach($orders as $i => $o): ?>
-          <tr>
-            <td><?= $i + 1 ?></td>
-            <td class="fw-bold text-info">#<?= htmlspecialchars($o['order_id']) ?></td>
-            <td class="text-white"><?= htmlspecialchars($o['customer_name'] ?? 'ไม่ระบุ') ?></td>
-            <td><?= date("d/m/Y", strtotime($o['order_date'])) ?></td>
-            <td class="fw-semibold text-success"><?= number_format($o['total_price'], 2) ?></td>
+      <div class="table-responsive">
+        <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0"
+               style="border-radius:10px; overflow:hidden;">
+          <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
+            <tr>
+              <th>#</th>
+              <th>รหัสคำสั่งซื้อ</th>
+              <th>ชื่อลูกค้า</th>
+              <th>วันที่สั่งซื้อ</th>
+              <th>ราคารวม (฿)</th>
+              <th>สถานะคำสั่งซื้อ</th>
+              <th>ตรวจสอบโดยแอดมิน</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($orders as $i => $o): ?>
+              <tr>
+                <td><?= $i + 1 ?></td>
+                <td class="fw-bold text-info">#<?= htmlspecialchars($o['order_id']) ?></td>
+                <td class="text-white"><?= htmlspecialchars($o['customer_name'] ?? 'ไม่ระบุ') ?></td>
+                <td><?= date("d/m/Y", strtotime($o['order_date'])) ?></td>
+                <td class="fw-semibold text-success"><?= number_format($o['total_price'], 2) ?></td>
 
-            <!-- 🔹 สถานะคำสั่งซื้อ -->
-<td>
-  <?php
-    $status = $o['order_status'] ?? 'รอดำเนินการ';
-    if ($status == 'สำเร็จ') $badge = 'success'; // เขียว
-    elseif ($status == 'กำลังจัดเตรียม') $badge = 'warning text-dark'; // เหลือง
-    elseif ($status == 'จัดส่งแล้ว') $badge = 'info'; // ฟ้า
-    elseif ($status == 'ยกเลิก') $badge = 'danger'; // แดง
-    else $badge = 'secondary'; // เทา
-  ?>
-  <span class="badge bg-<?= $badge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($status) ?></span>
-</td>
+                <!-- 🔹 สถานะคำสั่งซื้อ -->
+                <td>
+                  <?php
+                    $status = $o['order_status'] ?? 'รอดำเนินการ';
+                    if ($status == 'สำเร็จ') $badge = 'success'; // เขียว
+                    elseif ($status == 'กำลังจัดเตรียม') $badge = 'warning text-dark'; // เหลือง
+                    elseif ($status == 'จัดส่งแล้ว') $badge = 'info'; // ฟ้า
+                    elseif ($status == 'ยกเลิก') $badge = 'danger'; // แดง
+                    else $badge = 'secondary'; // เทา
+                  ?>
+                  <span class="badge bg-<?= $badge ?> px-3 py-2 rounded-pill">
+                    <?= htmlspecialchars($status) ?>
+                  </span>
+                </td>
 
-<!-- 🔹 ตรวจสอบโดยแอดมิน -->
-<td>
-  <?php
-    $verify = $o['admin_verified'] ?? 'รอตรวจสอบ';
-    if ($verify == 'อนุมัติ') $vbadge = 'success'; // เขียว
-    elseif ($verify == 'ปฏิเสธ') $vbadge = 'danger'; // แดง MyCommiss
-    elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'purple text-white'; // ม่วงอมฟ้า
-    else $vbadge = 'secondary'; // เทา
-  ?>
-  <span class="badge bg-<?= $vbadge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($verify) ?></span>
-</td>
+                <!-- 🔹 ตรวจสอบโดยแอดมิน -->
+                <td>
+                  <?php
+                    $verify = $o['admin_verified'] ?? 'รอตรวจสอบ';
+                    if ($verify == 'อนุมัติ') $vbadge = 'success'; // เขียว
+                    elseif ($verify == 'ปฏิเสธ') $vbadge = 'danger'; // แดง MyCommiss
+                    elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'purple text-white'; // ม่วงอมฟ้า
+                    else $vbadge = 'secondary'; // เทา
+                  ?>
+                  <span class="badge bg-<?= $vbadge ?> px-3 py-2 rounded-pill">
+                    <?= htmlspecialchars($verify) ?>
+                  </span>
+                </td>
 
-<!-- 🎨 เพิ่ม CSS ม่วงอมฟ้า -->
-<style>
-.bg-purple {
-  background-color: #8e44ad !important;
-  color: #fff !important;
-}
-.bg-danger {
-  background-color: #D10024 !important; /* ใช้แดง MyCommiss */
-}
-.bg-warning {
-  background-color: #ffb300 !important; /* เหลืองส้มสดขึ้น */
-  color: #111 !important;
-}
-</style>
-
-
-            <!-- 🔹 ปุ่มจัดการ -->
-            <td>
-              <a href="order_view.php?id=<?= $o['order_id'] ?>" 
-                 class="btn btn-outline-light btn-sm"
-                 style="border-color:#00d25b; color:#00d25b;">
-                <i class="bi bi-eye"></i> ดู
-              </a>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
+                <!-- 🔹 ปุ่มจัดการ -->
+                <td>
+                  <a href="order_view.php?id=<?= $o['order_id'] ?>"
+                     class="btn btn-outline-light btn-sm"
+                     style="border-color:#00d25b; color:#00d25b;">
+                    <i class="bi bi-eye"></i> ดู
+                  </a>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
     <?php endif; ?>
+
   </div>
 </div>
+
+<!-- 🎨 เพิ่ม CSS สี badge -->
+<style>
+  .bg-purple {
+    background-color: #8e44ad !important; /* ม่วงอมฟ้า */
+    color: #fff !important;
+  }
+  .bg-danger {
+    background-color: #D10024 !important; /* แดง MyCommiss */
+  }
+  .bg-warning {
+    background-color: #ffb300 !important; /* เหลืองส้มสดขึ้น */
+    color: #111 !important;
+  }
+</style>
 
 <?php
 $pageContent = ob_get_clean();
