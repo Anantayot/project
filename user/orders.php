@@ -75,6 +75,15 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background-color: #f9a825;
     }
 
+    .btn-primary {
+      background-color: #D10024;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #a5001b;
+    }
+
     .badge {
       font-size: 0.9rem;
       padding: 6px 10px;
@@ -84,27 +93,18 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background-color: #ffe5e5 !important;
     }
 
-    footer {
-      background-color: #D10024;
-      color: #fff;
-      margin-top: 50px;
-      padding: 15px;
-      font-size: 0.9rem;
-    }
-
     .alert-info {
       background-color: #fff5f5;
       border: 1px solid #D10024;
       color: #D10024;
     }
 
-    .btn-primary {
+    footer {
       background-color: #D10024;
-      border: none;
-    }
-
-    .btn-primary:hover {
-      background-color: #a5001b;
+      color: #fff;
+      margin-top: 50px;
+      padding: 15px;
+      font-size: 0.9rem;
     }
   </style>
 </head>
@@ -186,7 +186,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
               default => htmlspecialchars($o['payment_method'])
             };
 
-            // ✅ ถ้ายกเลิก → แถวแดงอ่อน
             $rowClass = ($order_status === 'ยกเลิก') ? 'table-danger' : '';
           ?>
             <tr class="<?= $rowClass ?>">
