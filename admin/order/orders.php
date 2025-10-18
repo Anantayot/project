@@ -7,7 +7,7 @@ try {
     $sql = "SELECT o.order_id, o.order_date, o.total_price, o.order_status, o.admin_verified, c.name AS customer_name 
             FROM orders o 
             LEFT JOIN customers c ON o.customer_id = c.customer_id 
-            ORDER BY o.order_id DESC";
+            ORDER BY o.order_id ASC";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
