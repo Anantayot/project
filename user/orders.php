@@ -91,6 +91,29 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
       padding: 15px;
       font-size: 0.9rem;
     }
+    /* 🎨 ปรับสี badge ตามธีมแดง */
+.badge.bg-warning {
+  background-color: #ff9800 !important;  /* เปลี่ยนจากเหลืองเป็นส้มสด */
+  color: #fff !important;
+}
+
+.badge.bg-secondary {
+  background-color: #D10024 !important;  /* แดงหลัก MyCommiss */
+  color: #fff !important;
+}
+
+/* ชำระเงินแล้ว */
+.badge.bg-success {
+  background-color: #28a745 !important;  /* เขียวสด */
+  color: #fff !important;
+}
+
+/* ยกเลิก */
+.badge.bg-danger {
+  background-color: #c82333 !important;
+  color: #fff !important;
+}
+
   </style>
 </head>
 <body>
