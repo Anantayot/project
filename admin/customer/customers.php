@@ -38,13 +38,14 @@ ob_start();
             <th>อีเมล</th>
             <th>เบอร์โทร</th>
             <th>ที่อยู่</th>
+            <th>สมัครข่าวสาร</th>
             <th style="width:120px;">จัดการ</th>
           </tr>
         </thead>
         <tbody>
           <?php if(empty($customers)): ?>
             <tr>
-              <td colspan="6" class="text-center text-muted py-4">
+              <td colspan="7" class="text-center text-muted py-4">
                 <i class="bi bi-info-circle"></i> ยังไม่มีข้อมูลลูกค้าในระบบ
               </td>
             </tr>
@@ -56,6 +57,16 @@ ob_start();
                 <td><?= htmlspecialchars($c['email']) ?></td>
                 <td class="text-warning"><?= htmlspecialchars($c['phone']) ?></td>
                 <td class="text-light"><?= nl2br(htmlspecialchars($c['address'])) ?></td>
+
+                <!-- ✅ แสดงสถานะ Subscribe -->
+                <td>
+                  <?php if ($c['subscribe'] == 1): ?>
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> สมัครแล้ว</span>
+                  <?php else: ?>
+                    <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> ไม่ได้สมัคร</span>
+                  <?php endif; ?>
+                </td>
+
                 <td>
                   <a href="customer_edit.php?id=<?= $c['customer_id'] ?>" 
                      class="btn btn-warning btn-sm me-1" title="แก้ไข">
@@ -103,11 +114,10 @@ $(document).ready(function() {
     responsive: true,
     order: [[0, "asc"]],
     columnDefs: [
-      { orderable: false, targets: [5] } // ปิด sort ปุ่มจัดการ
+      { orderable: false, targets: [6] } // ปิด sort ปุ่มจัดการ
     ]
   });
 
-  // 🎨 ปรับสไตล์ช่องค้นหาและ dropdown
   $(".dataTables_filter input")
     .addClass("form-control form-control-sm ms-2")
     .css({
