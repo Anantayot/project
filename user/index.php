@@ -2,11 +2,15 @@
 session_start();
 include("connectdb.php");
 
-// รับคำค้นหาจากฟอร์ม
-$search = $_GET['search'] ?? '';
+// 🔹 ดึงหมวดหมู่ทั้งหมดมาแสดงใน dropdown
+$cats = $conn->query("SELECT * FROM category ORDER BY cat_name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// 🔹 ดึงข้อมูลสินค้า 3 ประเภท (แสดงเฉพาะเมื่อไม่มีการค้นหา)
-if (empty($search)) {
+// รับค่าค้นหา
+$search = $_GET['search'] ?? '';
+$cat_id = $_GET['cat'] ?? '';
+
+// 🔹 ดึงข้อมูลสินค้า 3 ประเภท (เมื่อไม่มีการค้นหา)
+if (empty($search) && empty($cat_id)) {
   $newProducts = $conn->query("
     SELECT p.*, c.cat_name FROM product p 
     LEFT JOIN category c ON p.cat_id = c.cat_id 
@@ -29,15 +33,28 @@ if (empty($search)) {
     ORDER BY RAND() LIMIT 10
   ")->fetchAll(PDO::FETCH_ASSOC);
 } else {
-  // 🔍 ดึงข้อมูลตามคำค้นหา
-  $stmt = $conn->prepare("
+  // 🔍 ดึงข้อมูลตามการค้นหา + หมวดหมู่
+  $sql = "
     SELECT p.*, c.cat_name 
     FROM product p
     LEFT JOIN category c ON p.cat_id = c.cat_id
-    WHERE p.p_name LIKE :kw OR c.cat_name LIKE :kw
-    ORDER BY p.p_id DESC
-  ");
-  $stmt->execute(['kw' => "%$search%"]);
+    WHERE 1
+  ";
+  $params = [];
+
+  if (!empty($search)) {
+    $sql .= " AND (p.p_name LIKE :kw OR c.cat_name LIKE :kw)";
+    $params['kw'] = "%$search%";
+  }
+
+  if (!empty($cat_id)) {
+    $sql .= " AND p.cat_id = :cat";
+    $params['cat'] = $cat_id;
+  }
+
+  $sql .= " ORDER BY p.p_id DESC";
+  $stmt = $conn->prepare($sql);
+  $stmt->execute($params);
   $searchResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
@@ -67,23 +84,31 @@ if (empty($search)) {
       background: #fff;
       border: 2px solid #D10024;
       border-radius: 50px;
-      padding: 10px 20px;
+      padding: 15px 25px;
       margin: 30px auto;
-      max-width: 600px;
+      max-width: 800px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .search-bar input {
+    .search-bar input, .search-bar select {
       border: none;
       outline: none;
-      width: 85%;
+      background: none;
       font-size: 1rem;
+    }
+    .search-bar select {
+      color: #333;
+      width: 25%;
+      cursor: pointer;
+    }
+    .search-bar input {
+      width: 55%;
     }
     .search-bar button {
       background: #D10024;
       border: none;
       color: #fff;
       border-radius: 50px;
-      padding: 8px 15px;
+      padding: 10px 18px;
     }
     .search-bar button:hover { background: #a5001b; }
 
@@ -109,8 +134,7 @@ if (empty($search)) {
       width: 100%;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
+    }
     .product-card .card-body { text-align: center; }
     .product-card .btn {
       background-color: #D10024;
@@ -140,14 +164,23 @@ if (empty($search)) {
 <div class="container mt-4">
 
   <!-- 🔍 กล่องค้นหา -->
-  <form method="get" class="search-bar d-flex justify-content-between align-items-center">
-    <input type="text" name="search" placeholder="🔍 ค้นหาสินค้า..." value="<?= htmlspecialchars($search) ?>">
+  <form method="get" class="search-bar d-flex justify-content-between align-items-center flex-wrap">
+    <select name="cat" class="form-select me-2" style="border:none;width:25%;">
+      <option value="">-- ทุกหมวดหมู่ --</option>
+      <?php foreach ($cats as $c): ?>
+        <option value="<?= $c['cat_id'] ?>" <?= $cat_id == $c['cat_id'] ? 'selected' : '' ?>>
+          <?= htmlspecialchars($c['cat_name']) ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
+
+    <input type="text" name="search" placeholder="🔍 ค้นหาสินค้า..." value="<?= htmlspecialchars($search) ?>" class="flex-grow-1 me-2">
     <button type="submit"><i class="bi bi-search"></i></button>
   </form>
 
-  <?php if (!empty($search)): ?>
+  <?php if (!empty($search) || !empty($cat_id)): ?>
     <!-- 🔍 ผลลัพธ์การค้นหา -->
-    <h3 class="section-title">ผลการค้นหา: “<?= htmlspecialchars($search) ?>”</h3>
+    <h3 class="section-title">ผลการค้นหา</h3>
     <div class="row row-cols-1 row-cols-md-4 g-4">
       <?php if (count($searchResults) > 0): ?>
         <?php foreach ($searchResults as $p): 
@@ -170,6 +203,7 @@ if (empty($search)) {
       <?php endif; ?>
     </div>
   <?php else: ?>
+
     <!-- 🆕 สินค้าใหม่ล่าสุด -->
     <h3 class="section-title">🆕 สินค้าใหม่ล่าสุด</h3>
     <div class="swiper mySwiper">
@@ -242,8 +276,8 @@ if (empty($search)) {
       <div class="swiper-button-next"></div>
       <div class="swiper-button-prev"></div>
     </div>
-  <?php endif; ?>
 
+  <?php endif; ?>
 </div>
 
 <footer class="text-center mt-5">
@@ -254,7 +288,6 @@ if (empty($search)) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
 <script>
-  // ✅ Swiper (เฉพาะเมื่อไม่มีการค้นหา)
   document.querySelectorAll('.mySwiper').forEach(swiperEl => {
     new Swiper(swiperEl, {
       slidesPerView: 5,
