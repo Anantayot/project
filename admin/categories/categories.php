@@ -4,7 +4,7 @@ include __DIR__ . "/../../admin/partials/connectdb.php";
 ob_start();
 
 // 🔹 ดึงข้อมูลประเภทสินค้า
-$stmt = $conn->query("SELECT * FROM category ORDER BY cat_id DESC");
+$stmt = $conn->query("SELECT * FROM category ORDER BY cat_id ASC");
 $cats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 

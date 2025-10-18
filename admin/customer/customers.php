@@ -3,7 +3,7 @@ $pageTitle = "จัดการลูกค้า";
 include __DIR__ . "/../partials/connectdb.php";
 
 // 🔹 ดึงข้อมูลลูกค้าทั้งหมด
-$customers = $conn->query("SELECT * FROM customers ORDER BY customer_id DESC")->fetchAll();
+$customers = $conn->query("SELECT * FROM customers ORDER BY customer_id ASC")->fetchAll();
 
 ob_start();
 ?>
