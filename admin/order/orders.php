@@ -53,31 +53,45 @@ try {
             <td class="fw-semibold text-success"><?= number_format($o['total_price'], 2) ?></td>
 
             <!-- 🔹 สถานะคำสั่งซื้อ -->
-            <td>
-              <?php
-                $status = $o['order_status'] ?? 'รอดำเนินการ';
-                if ($status == 'สำเร็จ') $badge = 'success';
-                elseif ($status == 'กำลังจัดเตรียม') $badge = 'warning text-dark';
-                elseif ($status == 'จัดส่งแล้ว') $badge = 'info';
-                elseif ($status == 'ยกเลิก') $badge = 'danger';
-                else $badge = 'secondary';
-              ?>
-              <span class="badge bg-<?= $badge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($status) ?></span>
-            </td>
+<td>
+  <?php
+    $status = $o['order_status'] ?? 'รอดำเนินการ';
+    if ($status == 'สำเร็จ') $badge = 'success'; // เขียว
+    elseif ($status == 'กำลังจัดเตรียม') $badge = 'warning text-dark'; // เหลือง
+    elseif ($status == 'จัดส่งแล้ว') $badge = 'info'; // ฟ้า
+    elseif ($status == 'ยกเลิก') $badge = 'danger'; // แดง
+    else $badge = 'secondary'; // เทา
+  ?>
+  <span class="badge bg-<?= $badge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($status) ?></span>
+</td>
 
-            <!-- 🔹 ตรวจสอบโดยแอดมิน -->
-            <td>
-              <?php
-                $verify = $o['admin_verified'] ?? 'รอตรวจสอบ';
-                if ($verify == 'อนุมัติ') $vbadge = 'success';
-                elseif ($verify == 'ปฏิเสธ') $vbadge = 'danger';
-                elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'info';
-                else $vbadge = 'secondary';
-              ?>
-              <span class="badge bg-<?= $vbadge ?> px-3 py-2 rounded-pill">
-                <?= htmlspecialchars($verify) ?>
-              </span>
-            </td>
+<!-- 🔹 ตรวจสอบโดยแอดมิน -->
+<td>
+  <?php
+    $verify = $o['admin_verified'] ?? 'รอตรวจสอบ';
+    if ($verify == 'อนุมัติ') $vbadge = 'success'; // เขียว
+    elseif ($verify == 'ปฏิเสธ') $vbadge = 'danger'; // แดง MyCommiss
+    elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'purple text-white'; // ม่วงอมฟ้า
+    else $vbadge = 'secondary'; // เทา
+  ?>
+  <span class="badge bg-<?= $vbadge ?> px-3 py-2 rounded-pill"><?= htmlspecialchars($verify) ?></span>
+</td>
+
+<!-- 🎨 เพิ่ม CSS ม่วงอมฟ้า -->
+<style>
+.bg-purple {
+  background-color: #8e44ad !important;
+  color: #fff !important;
+}
+.bg-danger {
+  background-color: #D10024 !important; /* ใช้แดง MyCommiss */
+}
+.bg-warning {
+  background-color: #ffb300 !important; /* เหลืองส้มสดขึ้น */
+  color: #111 !important;
+}
+</style>
+
 
             <!-- 🔹 ปุ่มจัดการ -->
             <td>
