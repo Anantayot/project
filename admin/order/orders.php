@@ -31,7 +31,7 @@ try {
     <div class="table-responsive">
       <table id="dataTable" class="table table-dark table-striped text-center align-middle mb-0" 
              style="border-radius:10px; overflow:hidden;">
-        <thead style="background:linear-gradient(90deg,#D10024,#a5001b); color:#fff; font-weight:600;">
+        <thead style="background:linear-gradient(90deg,#00d25b,#00b14a); color:#111; font-weight:600;">
           <tr>
             <th>#</th>
             <th>รหัสคำสั่งซื้อ</th>
@@ -71,7 +71,7 @@ try {
                 $verify = $o['admin_verified'] ?? 'รอตรวจสอบ';
                 if ($verify == 'อนุมัติ') $vbadge = 'success';
                 elseif ($verify == 'ปฏิเสธ') $vbadge = 'danger';
-                elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'purple text-white';
+                elseif ($verify == 'กำลังตรวจสอบ') $vbadge = 'info';
                 else $vbadge = 'secondary';
               ?>
               <span class="badge bg-<?= $vbadge ?> px-3 py-2 rounded-pill">
@@ -83,7 +83,7 @@ try {
             <td>
               <a href="order_view.php?id=<?= $o['order_id'] ?>" 
                  class="btn btn-outline-light btn-sm"
-                 style="border-color:#D10024; color:#D10024;">
+                 style="border-color:#00d25b; color:#00d25b;">
                 <i class="bi bi-eye"></i> ดู
               </a>
             </td>
@@ -95,14 +95,6 @@ try {
     <?php endif; ?>
   </div>
 </div>
-
-<!-- 🎨 เพิ่มสีม่วงกำลังตรวจสอบ -->
-<style>
-.bg-purple {
-  background-color: #8e44ad !important;
-  color: #fff !important;
-}
-</style>
 
 <?php
 $pageContent = ob_get_clean();
@@ -131,7 +123,7 @@ $(document).ready(function() {
     responsive: true,
     order: [[0, "asc"]],
     columnDefs: [
-      { orderable: false, targets: [7] }
+      { orderable: false, targets: [7] } // ปิด sort ที่ปุ่ม "จัดการ"
     ]
   });
 
